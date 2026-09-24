@@ -107,10 +107,15 @@ jobs:
       # install with no credential. setup-node has already written the
       # user-level npmrc it looks for, so this passes here for the same reason
       # the install itself does.
+      #
+      # DS_READ_TOKEN, when set, replaces GITHUB_TOKEN: a repository outside the
+      # package's organisation cannot be given the Actions-access grant, so it
+      # needs a classic token with read:packages instead. Unset, nothing changes.
+      # See docs/tech-debt/design-system-token-secret.md.
       - name: Install Node dependencies
         run: pnpm install --frozen-lockfile
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.DS_READ_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Restore .NET tools
         working-directory: services/api

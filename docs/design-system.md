@@ -90,7 +90,10 @@ CI needs none of this. `actions/setup-node` writes that same line to a
 user-level file, and the install step passes the repository's built-in
 `GITHUB_TOKEN` as `NODE_AUTH_TOKEN` — which works because the package grants
 Actions access to this repository. That grant is a manual step in the package's
-settings, once per consuming repository; there is no API for it.
+settings, once per consuming repository; there is no API for it. A repository
+outside the package's organisation cannot receive the grant, so it sets a
+`DS_READ_TOKEN` repository secret instead, which the install step prefers — see
+`tech-debt/design-system-token-secret.md`.
 
 `pnpm run image:web` passes `$NODE_AUTH_TOKEN` to the build as a BuildKit
 secret. It is never a build argument and never lands in a layer. On Windows that
