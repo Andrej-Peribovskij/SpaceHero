@@ -1,4 +1,4 @@
-namespace MyApp.BuildingBlocks.Identifiers;
+namespace SpaceHero.BuildingBlocks.Identifiers;
 
 /// <summary>
 /// Generates sortable, time-ordered identifiers. Inject this instead of calling

@@ -1,10 +1,10 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using MyApp.Modules.Example.Application;
+using SpaceHero.Modules.Example.Application;
 using Xunit;
 
-namespace MyApp.Api.IntegrationTests;
+namespace SpaceHero.Api.IntegrationTests;
 
 /// <summary>
 /// The full request chain for the widgets resource: routing, model binding, the capability

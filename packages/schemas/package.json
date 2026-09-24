@@ -1,5 +1,5 @@
 {
-  "name": "@my-app/schemas",
+  "name": "@space-hero/schemas",
   "version": "0.1.0",
   "private": true,
   "type": "module",

@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using MyApp.BuildingBlocks.Errors;
+using SpaceHero.BuildingBlocks.Errors;
 
-namespace MyApp.Api.Errors;
+namespace SpaceHero.Api.Errors;
 
 /// <summary>
 /// Maps deliberate <see cref="AppException"/> failures to RFC 7807 Problem Details with a

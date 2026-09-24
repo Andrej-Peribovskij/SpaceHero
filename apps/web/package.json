@@ -1,5 +1,5 @@
 {
-  "name": "@my-app/web",
+  "name": "@space-hero/web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -12,7 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@my-app/design-system": "npm:@ptv-mobility/design-system-uds@^0.6.1",
+    "@space-hero/design-system": "npm:@ptv-mobility/design-system-uds@^0.6.1",
     "@hookform/resolvers": "^5.2.2",
     "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-query-devtools": "^5.91.3",
@@ -25,7 +25,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@my-app/schemas": "workspace:*",
+    "@space-hero/schemas": "workspace:*",
     "@tailwindcss/vite": "^4.2.2",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.6.3",

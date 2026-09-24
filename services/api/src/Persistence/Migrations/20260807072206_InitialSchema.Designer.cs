@@ -4,12 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using MyApp.Persistence;
+using SpaceHero.Persistence;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace MyApp.Persistence.Migrations
+namespace SpaceHero.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260807072206_InitialSchema")]
@@ -25,7 +25,7 @@ namespace MyApp.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("MyApp.Modules.Example.Domain.Widget", b =>
+            modelBuilder.Entity("SpaceHero.Modules.Example.Domain.Widget", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")

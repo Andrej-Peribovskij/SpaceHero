@@ -1,9 +1,9 @@
-using MyApp.BuildingBlocks.Actors;
-using MyApp.BuildingBlocks.Identifiers;
-using MyApp.Modules.Example.Application;
-using MyApp.Modules.Example.Domain;
+using SpaceHero.BuildingBlocks.Actors;
+using SpaceHero.BuildingBlocks.Identifiers;
+using SpaceHero.Modules.Example.Application;
+using SpaceHero.Modules.Example.Domain;
 
-namespace MyApp.Api.UnitTests;
+namespace SpaceHero.Api.UnitTests;
 
 internal sealed class FakeActor : IActorContext
 {

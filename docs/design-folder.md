@@ -40,7 +40,7 @@ correct here, because versions must be deletable independently.
 
 Self-contained does **not** mean isolated. A version imports freely from:
 
-- the design system (`@my-app/design-system`, and its staging subpath) — `DS_PACKAGE_NAME` in
+- the design system (`@space-hero/design-system`, and its staging subpath) — `DS_PACKAGE_NAME` in
   the wrapper bindings
 - **application infrastructure** — the auth context, the version-navigation hooks, shared
   geometry and formatting utilities, the shared type package, the request transport

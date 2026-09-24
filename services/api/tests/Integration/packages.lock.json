@@ -504,46 +504,46 @@
           "xunit.extensibility.core": "[2.9.3]"
         }
       },
-      "myapp.api": {
+      "spacehero.api": {
         "type": "Project",
         "dependencies": {
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[10.0.12, )",
           "Microsoft.AspNetCore.OpenApi": "[10.0.12, )",
-          "MyApp.BuildingBlocks": "[1.0.0, )",
-          "MyApp.Modules.Example.Infrastructure": "[1.0.0, )",
-          "MyApp.Persistence": "[1.0.0, )"
+          "SpaceHero.BuildingBlocks": "[1.0.0, )",
+          "SpaceHero.Modules.Example.Infrastructure": "[1.0.0, )",
+          "SpaceHero.Persistence": "[1.0.0, )"
         }
       },
-      "myapp.buildingblocks": {
+      "spacehero.buildingblocks": {
         "type": "Project"
       },
-      "myapp.modules.example.application": {
+      "spacehero.modules.example.application": {
         "type": "Project",
         "dependencies": {
-          "MyApp.BuildingBlocks": "[1.0.0, )",
-          "MyApp.Modules.Example.Domain": "[1.0.0, )"
+          "SpaceHero.BuildingBlocks": "[1.0.0, )",
+          "SpaceHero.Modules.Example.Domain": "[1.0.0, )"
         }
       },
-      "myapp.modules.example.contracts": {
+      "spacehero.modules.example.contracts": {
         "type": "Project"
       },
-      "myapp.modules.example.domain": {
+      "spacehero.modules.example.domain": {
         "type": "Project",
         "dependencies": {
-          "MyApp.BuildingBlocks": "[1.0.0, )"
+          "SpaceHero.BuildingBlocks": "[1.0.0, )"
         }
       },
-      "myapp.modules.example.infrastructure": {
+      "spacehero.modules.example.infrastructure": {
         "type": "Project",
         "dependencies": {
           "Microsoft.EntityFrameworkCore": "[10.0.12, )",
-          "MyApp.Modules.Example.Application": "[1.0.0, )",
-          "MyApp.Modules.Example.Contracts": "[1.0.0, )",
-          "MyApp.Modules.Example.Domain": "[1.0.0, )",
-          "MyApp.Persistence": "[1.0.0, )"
+          "SpaceHero.Modules.Example.Application": "[1.0.0, )",
+          "SpaceHero.Modules.Example.Contracts": "[1.0.0, )",
+          "SpaceHero.Modules.Example.Domain": "[1.0.0, )",
+          "SpaceHero.Persistence": "[1.0.0, )"
         }
       },
-      "myapp.persistence": {
+      "spacehero.persistence": {
         "type": "Project",
         "dependencies": {
           "Microsoft.EntityFrameworkCore": "[10.0.12, )",

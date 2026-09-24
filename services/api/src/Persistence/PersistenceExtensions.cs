@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MyApp.Persistence;
+namespace SpaceHero.Persistence;
 
 /// <summary>Registers the service-owned <see cref="AppDbContext"/> against PostgreSQL.</summary>
 public static class PersistenceExtensions

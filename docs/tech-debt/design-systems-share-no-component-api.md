@@ -5,7 +5,7 @@
 
 ## What
 
-`pnpm run init` offers a choice of design system, and `@my-app/design-system`
+`pnpm run init` offers a choice of design system, and `@space-hero/design-system`
 is an alias precisely so that choice is one line. Both packages export
 `Button`. Their `Button` props do not overlap:
 

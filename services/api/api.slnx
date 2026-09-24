@@ -1,18 +1,18 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/Host/MyApp.Api.csproj" />
-    <Project Path="src/BuildingBlocks/MyApp.BuildingBlocks.csproj" />
-    <Project Path="src/Persistence/MyApp.Persistence.csproj" />
+    <Project Path="src/Host/SpaceHero.Api.csproj" />
+    <Project Path="src/BuildingBlocks/SpaceHero.BuildingBlocks.csproj" />
+    <Project Path="src/Persistence/SpaceHero.Persistence.csproj" />
   </Folder>
   <Folder Name="/src/Modules/Example/">
-    <Project Path="src/Modules/Example/Domain/MyApp.Modules.Example.Domain.csproj" />
-    <Project Path="src/Modules/Example/Application/MyApp.Modules.Example.Application.csproj" />
-    <Project Path="src/Modules/Example/Contracts/MyApp.Modules.Example.Contracts.csproj" />
-    <Project Path="src/Modules/Example/Infrastructure/MyApp.Modules.Example.Infrastructure.csproj" />
+    <Project Path="src/Modules/Example/Domain/SpaceHero.Modules.Example.Domain.csproj" />
+    <Project Path="src/Modules/Example/Application/SpaceHero.Modules.Example.Application.csproj" />
+    <Project Path="src/Modules/Example/Contracts/SpaceHero.Modules.Example.Contracts.csproj" />
+    <Project Path="src/Modules/Example/Infrastructure/SpaceHero.Modules.Example.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/Unit/MyApp.Api.UnitTests.csproj" />
-    <Project Path="tests/Architecture/MyApp.Api.ArchitectureTests.csproj" />
-    <Project Path="tests/Integration/MyApp.Api.IntegrationTests.csproj" />
+    <Project Path="tests/Unit/SpaceHero.Api.UnitTests.csproj" />
+    <Project Path="tests/Architecture/SpaceHero.Api.ArchitectureTests.csproj" />
+    <Project Path="tests/Integration/SpaceHero.Api.IntegrationTests.csproj" />
   </Folder>
 </Solution>

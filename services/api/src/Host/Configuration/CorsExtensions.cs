@@ -1,4 +1,4 @@
-namespace MyApp.Api.Configuration;
+namespace SpaceHero.Api.Configuration;
 
 /// <summary>Registers the default CORS policy from the <c>Cors</c> configuration section.</summary>
 internal static class CorsExtensions

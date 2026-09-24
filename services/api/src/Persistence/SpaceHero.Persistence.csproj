@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>MyApp.Persistence</RootNamespace>
-    <AssemblyName>MyApp.Persistence</AssemblyName>
+    <RootNamespace>SpaceHero.Persistence</RootNamespace>
+    <AssemblyName>SpaceHero.Persistence</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

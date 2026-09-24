@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>SpaceHero.Api.ArchitectureTests</RootNamespace>
+    <AssemblyName>SpaceHero.Api.ArchitectureTests</AssemblyName>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Modules\Example\Domain\SpaceHero.Modules.Example.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Example\Application\SpaceHero.Modules.Example.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Example\Contracts\SpaceHero.Modules.Example.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Example\Infrastructure\SpaceHero.Modules.Example.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+</Project>

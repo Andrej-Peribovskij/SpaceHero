@@ -93,20 +93,20 @@
           "xunit.extensibility.core": "[2.9.3]"
         }
       },
-      "myapp.buildingblocks": {
+      "spacehero.buildingblocks": {
         "type": "Project"
       },
-      "myapp.modules.example.application": {
+      "spacehero.modules.example.application": {
         "type": "Project",
         "dependencies": {
-          "MyApp.BuildingBlocks": "[1.0.0, )",
-          "MyApp.Modules.Example.Domain": "[1.0.0, )"
+          "SpaceHero.BuildingBlocks": "[1.0.0, )",
+          "SpaceHero.Modules.Example.Domain": "[1.0.0, )"
         }
       },
-      "myapp.modules.example.domain": {
+      "spacehero.modules.example.domain": {
         "type": "Project",
         "dependencies": {
-          "MyApp.BuildingBlocks": "[1.0.0, )"
+          "SpaceHero.BuildingBlocks": "[1.0.0, )"
         }
       }
     }

@@ -26,7 +26,7 @@ every path below is relative to it.
 | `APP_REPO` | `.` |
 | `DS_REPO` | `../design-system-uds` |
 | `FRONTEND_PACKAGE` | `apps/web` |
-| `DS_PACKAGE_NAME` | `@my-app/design-system` |
+| `DS_PACKAGE_NAME` | `@space-hero/design-system` |
 
 ## Inputs
 

@@ -1,4 +1,4 @@
-namespace MyApp.Api.Configuration;
+namespace SpaceHero.Api.Configuration;
 
 /// <summary>Cross-origin settings bound from the <c>Cors</c> configuration section.</summary>
 internal sealed class CorsOptions

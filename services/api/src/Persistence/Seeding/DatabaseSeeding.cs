@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MyApp.Persistence.Seeding;
+namespace SpaceHero.Persistence.Seeding;
 
 /// <summary>Runs every registered <see cref="ISeeder"/> once, in registration order.</summary>
 public static class DatabaseSeeding

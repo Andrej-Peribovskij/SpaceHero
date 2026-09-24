@@ -1,4 +1,4 @@
-namespace MyApp.BuildingBlocks.Errors;
+namespace SpaceHero.BuildingBlocks.Errors;
 
 /// <summary>
 /// The transport-neutral category of a domain or application failure. The HTTP

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using MyApp.Persistence;
+using SpaceHero.Persistence;
 
-namespace MyApp.Modules.Example.Infrastructure.Persistence;
+namespace SpaceHero.Modules.Example.Infrastructure.Persistence;
 
 /// <summary>Registers the Example module's entity configurations into the shared model.</summary>
 internal sealed class ExampleModelContributor : IModelContributor

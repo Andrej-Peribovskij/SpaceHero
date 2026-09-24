@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using MyApp.Modules.Example.Application;
-using MyApp.Modules.Example.Domain;
+using SpaceHero.Modules.Example.Application;
+using SpaceHero.Modules.Example.Domain;
 
-namespace MyApp.Modules.Example.Infrastructure.Http;
+namespace SpaceHero.Modules.Example.Infrastructure.Http;
 
 /// <summary>
 /// Resource-oriented HTTP surface for widgets. Routes describe the resource, not a UI

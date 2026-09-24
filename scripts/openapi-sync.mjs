@@ -18,9 +18,9 @@ const services = [
     name: "api",
     // Self-contained .NET service directory; dotnet runs here so global.json applies.
     dir: "services/api",
-    project: "src/Host/MyApp.Api.csproj",
+    project: "src/Host/SpaceHero.Api.csproj",
     // getdocument names the file after the assembly.
-    documentFile: "MyApp.Api.json",
+    documentFile: "SpaceHero.Api.json",
     snapshot: "packages/schemas/openapi/api-v1.json",
   },
 ];

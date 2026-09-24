@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using MyApp.BuildingBlocks.Identifiers;
-using MyApp.Modules.Example.Domain;
-using MyApp.Persistence;
-using MyApp.Persistence.Seeding;
+using SpaceHero.BuildingBlocks.Identifiers;
+using SpaceHero.Modules.Example.Domain;
+using SpaceHero.Persistence;
+using SpaceHero.Persistence.Seeding;
 
-namespace MyApp.Modules.Example.Infrastructure.Persistence;
+namespace SpaceHero.Modules.Example.Infrastructure.Persistence;
 
 /// <summary>Idempotent development seed: one sample widget when the table is empty.</summary>
 internal sealed class WidgetSeeder(IIdGenerator idGenerator, TimeProvider timeProvider) : ISeeder

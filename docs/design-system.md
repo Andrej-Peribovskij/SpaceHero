@@ -9,7 +9,7 @@ For app-level frontend rules, see `frontend.apps.md`.
 
 - The design system is **not in this repository**. It is an npm package with its
   own repository, release cadence, tokens, Storybook and visual baselines.
-- `apps/web` depends on it under a stable local alias, `@my-app/design-system`,
+- `apps/web` depends on it under a stable local alias, `@space-hero/design-system`,
   so swapping which design system a project uses is one line in
   `apps/web/package.json`.
 - It is served by **GitHub Packages**, which authenticates reads as well as
@@ -37,14 +37,14 @@ For app-level frontend rules, see `frontend.apps.md`.
 | Package | `@ptv-mobility/design-system-uds` |
 | Repository | [PTV-Mobility/design-system-uds](https://github.com/PTV-Mobility/design-system-uds) |
 | Registry | `https://npm.pkg.github.com` |
-| Alias in this repo | `@my-app/design-system` |
+| Alias in this repo | `@space-hero/design-system` |
 
-The alias is the point. Application code imports `@my-app/design-system` and
+The alias is the point. Application code imports `@space-hero/design-system` and
 never the package name, so the dependency line is the single place that records
 *which* design system this project uses and *which version* it is pinned to:
 
 ```json
-"@my-app/design-system": "npm:@ptv-mobility/design-system-uds@^0.6.1"
+"@space-hero/design-system": "npm:@ptv-mobility/design-system-uds@^0.6.1"
 ```
 
 Switching to a different design system — `@ptv-mobility/design-system-base`, or
@@ -155,10 +155,10 @@ Import from the alias, never from a path inside the package:
 
 ```tsx
 // Correct
-import { Button, Card, DataTable } from "@my-app/design-system";
+import { Button, Card, DataTable } from "@space-hero/design-system";
 
 // Wrong — the file layout is not the contract
-import { Button } from "@my-app/design-system/dist/components/Button";
+import { Button } from "@space-hero/design-system/dist/components/Button";
 ```
 
 `apps/web/src/styles/globals.css` imports the design system's built stylesheet,
@@ -177,7 +177,7 @@ surprise in the browser.
 The design system is a different repository with different reviewers, so
 extending it is no longer something a feature branch does in passing.
 
-1. Check the package's staging export first — `@my-app/design-system/staging`
+1. Check the package's staging export first — `@space-hero/design-system/staging`
    holds components that exist but have not been promoted.
 2. If it genuinely is not there, open the conversation with the design system's
    owners. A component that several products need belongs there, not in one app.

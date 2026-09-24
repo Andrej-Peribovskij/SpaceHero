@@ -1,10 +1,10 @@
 using System.Reflection;
-using MyApp.Modules.Example.Application;
-using MyApp.Modules.Example.Contracts;
-using MyApp.Modules.Example.Domain;
+using SpaceHero.Modules.Example.Application;
+using SpaceHero.Modules.Example.Contracts;
+using SpaceHero.Modules.Example.Domain;
 using Xunit;
 
-namespace MyApp.Api.ArchitectureTests;
+namespace SpaceHero.Api.ArchitectureTests;
 
 /// <summary>
 /// Enforces the layering at the assembly level: Domain, Application, and Contracts must

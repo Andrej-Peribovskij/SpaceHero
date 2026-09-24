@@ -19,7 +19,7 @@ Promoting the staging components into the shipped design system is prompt 05, al
 | `APP_REPO` | `.` |
 | `DS_REPO` | `../design-system-uds` |
 | `FRONTEND_PACKAGE` | `apps/web` |
-| `DS_PACKAGE_NAME` | `@my-app/design-system` |
+| `DS_PACKAGE_NAME` | `@space-hero/design-system` |
 
 ## Inputs
 

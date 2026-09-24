@@ -1,4 +1,4 @@
-namespace MyApp.Api.Authentication;
+namespace SpaceHero.Api.Authentication;
 
 /// <summary>
 /// Capabilities that describe what an actor may do with the deployment itself, rather than

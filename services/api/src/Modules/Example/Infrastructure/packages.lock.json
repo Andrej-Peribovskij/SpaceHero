@@ -35,26 +35,26 @@
         "resolved": "10.0.3",
         "contentHash": "7nb5YzXuvWWJxB0J8DiyL3we+X4FOctZrt0fIBnucOIaIevFEEwGQVZKtiu9olXdlNAK1eNgqSral6r/jlhI4w=="
       },
-      "myapp.buildingblocks": {
+      "spacehero.buildingblocks": {
         "type": "Project"
       },
-      "myapp.modules.example.application": {
+      "spacehero.modules.example.application": {
         "type": "Project",
         "dependencies": {
-          "MyApp.BuildingBlocks": "[1.0.0, )",
-          "MyApp.Modules.Example.Domain": "[1.0.0, )"
+          "SpaceHero.BuildingBlocks": "[1.0.0, )",
+          "SpaceHero.Modules.Example.Domain": "[1.0.0, )"
         }
       },
-      "myapp.modules.example.contracts": {
+      "spacehero.modules.example.contracts": {
         "type": "Project"
       },
-      "myapp.modules.example.domain": {
+      "spacehero.modules.example.domain": {
         "type": "Project",
         "dependencies": {
-          "MyApp.BuildingBlocks": "[1.0.0, )"
+          "SpaceHero.BuildingBlocks": "[1.0.0, )"
         }
       },
-      "myapp.persistence": {
+      "spacehero.persistence": {
         "type": "Project",
         "dependencies": {
           "Microsoft.EntityFrameworkCore": "[10.0.12, )",

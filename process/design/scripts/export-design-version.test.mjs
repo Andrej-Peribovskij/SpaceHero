@@ -87,15 +87,15 @@ describe("parseImports", () => {
     it("reads named, default and bare imports", () => {
         const src = `
             import "./staging.css";
-            import { Card, Input as In } from "@my-app/design-system";
-            import { InsightCard } from "@my-app/design-system/staging/v4.1.0";
+            import { Card, Input as In } from "@space-hero/design-system";
+            import { InsightCard } from "@space-hero/design-system/staging/v4.1.0";
             import type { Foo } from "./types";
             import React from "react";
         `;
         const imps = parseImports(src);
-        const ds = imps.find((i) => i.spec === "@my-app/design-system");
+        const ds = imps.find((i) => i.spec === "@space-hero/design-system");
         assert.deepEqual(ds.names.sort(), ["Card", "Input"]);
-        const st = imps.find((i) => i.spec === "@my-app/design-system/staging/v4.1.0");
+        const st = imps.find((i) => i.spec === "@space-hero/design-system/staging/v4.1.0");
         assert.deepEqual(st.names, ["InsightCard"]);
         const t = imps.find((i) => i.spec === "./types");
         assert.equal(t.isTypeOnly, true);
@@ -212,7 +212,7 @@ describe("liveRenderSpecsUsed", () => {
         assert.deepEqual(liveRenderSpecsUsed(`import mapboxgl from "mapbox-gl";`), ["mapbox-gl"]);
     });
     it("returns empty for a file with no such import", () => {
-        assert.deepEqual(liveRenderSpecsUsed(`import { Card } from "@my-app/design-system";`), []);
+        assert.deepEqual(liveRenderSpecsUsed(`import { Card } from "@space-hero/design-system";`), []);
     });
 });
 

@@ -30,7 +30,7 @@ Code, `/design:design-NN-*` followed by the same prose does the same thing.
 
 The **bindings** (which repositories, packages, commands and URLs this maps to) live in the
 wrapper; you don't repeat them. Here they are `APP_REPO=.`, `DS_REPO=../design-system-uds`,
-`FRONTEND_PACKAGE=apps/web`, `DS_PACKAGE_NAME=@my-app/design-system` — the full list, and what
+`FRONTEND_PACKAGE=apps/web`, `DS_PACKAGE_NAME=@space-hero/design-system` — the full list, and what
 each one answers, is in
 [`design-commands/README.md`](../../design-commands/README.md#the-bindings-and-what-each-one-answers).
 
@@ -258,7 +258,7 @@ the public app renders. Treat every step as load-bearing.
 > Run `design-commands/design-05-promote-ds.md`.
 > Promote the components staged for `v4.1.0` (`src/staging/v4.1.0/` in `../design-system-uds`) into the shipped
 > design system: the `InsightCard` header variant and the error-state `Stepper`.
-> Bump `@my-app/design-system` accordingly, keep the two-repo/two-commit rule, and show me the
+> Bump `@space-hero/design-system` accordingly, keep the two-repo/two-commit rule, and show me the
 > visual-baseline diff for the shipped Storybook stories before anything is published. Stop before
 > publishing so I can approve.
 

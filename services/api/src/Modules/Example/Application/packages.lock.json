@@ -2,13 +2,13 @@
   "version": 2,
   "dependencies": {
     "net10.0": {
-      "myapp.buildingblocks": {
+      "spacehero.buildingblocks": {
         "type": "Project"
       },
-      "myapp.modules.example.domain": {
+      "spacehero.modules.example.domain": {
         "type": "Project",
         "dependencies": {
-          "MyApp.BuildingBlocks": "[1.0.0, )"
+          "SpaceHero.BuildingBlocks": "[1.0.0, )"
         }
       }
     }

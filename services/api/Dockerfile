@@ -11,7 +11,7 @@ COPY src/ ./src/
 RUN dotnet restore api.slnx
 
 # Publish the host as a framework-dependent app.
-RUN dotnet publish src/Host/MyApp.Api.csproj -c Release -o /app --no-restore
+RUN dotnet publish src/Host/SpaceHero.Api.csproj -c Release -o /app --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:${DOTNET_VERSION} AS runtime
 WORKDIR /app
@@ -22,4 +22,4 @@ USER $APP_UID
 ENV ASPNETCORE_HTTP_PORTS=8080
 EXPOSE 8080
 
-ENTRYPOINT ["dotnet", "MyApp.Api.dll"]
+ENTRYPOINT ["dotnet", "SpaceHero.Api.dll"]

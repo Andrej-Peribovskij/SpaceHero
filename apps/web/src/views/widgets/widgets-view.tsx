@@ -1,4 +1,4 @@
-import { Button } from "@my-app/design-system";
+import { Button } from "@space-hero/design-system";
 
 import { useWidgets } from "./use-widgets";
 
@@ -14,7 +14,7 @@ import { useWidgets } from "./use-widgets";
  * renders.
  *
  * It passes no `variant`, deliberately. `pnpm run init` can point
- * `@my-app/design-system` at any design system this organisation publishes, and
+ * `@space-hero/design-system` at any design system this organisation publishes, and
  * their Button vocabularies do not overlap at all — uds is
  * `primary | secondary | tertiary`, base is `default | outline | ghost |
  * destructive`. There is no literal that compiles against both, so the only

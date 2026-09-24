@@ -1,4 +1,4 @@
-namespace MyApp.Modules.Example.Contracts;
+namespace SpaceHero.Modules.Example.Contracts;
 
 /// <summary>
 /// The Example module's public query port. Other modules call this instead of reaching

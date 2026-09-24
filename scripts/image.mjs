@@ -12,9 +12,9 @@ const targets = {
   // The web image builds from the repo root (needs the root manifests + workspaces).
   // It installs the design system from GitHub Packages, so its build needs a
   // registry token — passed as a BuildKit secret, never as a build argument.
-  web: { context: ".", dockerfile: "apps/web/Dockerfile", tag: "my-app-web", needsRegistryToken: true },
+  web: { context: ".", dockerfile: "apps/web/Dockerfile", tag: "space-hero-web", needsRegistryToken: true },
   // The API image builds from its self-contained service directory.
-  api: { context: "services/api", dockerfile: "services/api/Dockerfile", tag: "my-app-api" },
+  api: { context: "services/api", dockerfile: "services/api/Dockerfile", tag: "space-hero-api" },
 };
 
 const [, , name] = process.argv;

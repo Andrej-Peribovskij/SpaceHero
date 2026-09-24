@@ -1,4 +1,4 @@
-namespace MyApp.BuildingBlocks.Errors;
+namespace SpaceHero.BuildingBlocks.Errors;
 
 /// <summary>
 /// A deliberate, expected failure raised by Domain or Application code. It carries a

@@ -1,6 +1,6 @@
 using Npgsql;
 
-namespace MyApp.Persistence;
+namespace SpaceHero.Persistence;
 
 /// <summary>
 /// Converts a <c>postgres(ql)://user:pass@host:port/db</c> URL — the form used by the

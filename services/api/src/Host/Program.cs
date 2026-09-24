@@ -1,15 +1,15 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using MyApp.Api.Authentication;
-using MyApp.Api.Configuration;
-using MyApp.Api.Endpoints;
-using MyApp.Api.Errors;
-using MyApp.Api.Middleware;
-using MyApp.Api.OpenApi;
-using MyApp.Api.Persistence;
-using MyApp.BuildingBlocks.Identifiers;
-using MyApp.Modules.Example.Infrastructure;
-using MyApp.Persistence;
-using MyApp.Persistence.Seeding;
+using SpaceHero.Api.Authentication;
+using SpaceHero.Api.Configuration;
+using SpaceHero.Api.Endpoints;
+using SpaceHero.Api.Errors;
+using SpaceHero.Api.Middleware;
+using SpaceHero.Api.OpenApi;
+using SpaceHero.Api.Persistence;
+using SpaceHero.BuildingBlocks.Identifiers;
+using SpaceHero.Modules.Example.Infrastructure;
+using SpaceHero.Persistence;
+using SpaceHero.Persistence.Seeding;
 
 var builder = WebApplication.CreateBuilder(args);
 

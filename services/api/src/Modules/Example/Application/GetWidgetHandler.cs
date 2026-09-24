@@ -1,8 +1,8 @@
-using MyApp.BuildingBlocks.Actors;
-using MyApp.BuildingBlocks.Errors;
-using MyApp.Modules.Example.Domain;
+using SpaceHero.BuildingBlocks.Actors;
+using SpaceHero.BuildingBlocks.Errors;
+using SpaceHero.Modules.Example.Domain;
 
-namespace MyApp.Modules.Example.Application;
+namespace SpaceHero.Modules.Example.Application;
 
 /// <summary>
 /// Reads a single widget. Requires a read capability, then enforces owner scope: an actor

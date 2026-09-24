@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>MyApp.Api.IntegrationTests</RootNamespace>
-    <AssemblyName>MyApp.Api.IntegrationTests</AssemblyName>
+    <RootNamespace>SpaceHero.Api.IntegrationTests</RootNamespace>
+    <AssemblyName>SpaceHero.Api.IntegrationTests</AssemblyName>
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Host\MyApp.Api.csproj" />
+    <ProjectReference Include="..\..\src\Host\SpaceHero.Api.csproj" />
   </ItemGroup>
 
   <ItemGroup>

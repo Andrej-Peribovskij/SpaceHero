@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using MyApp.Modules.Example.Application;
-using MyApp.Modules.Example.Contracts;
-using MyApp.Modules.Example.Domain;
-using MyApp.Persistence;
+using SpaceHero.Modules.Example.Application;
+using SpaceHero.Modules.Example.Contracts;
+using SpaceHero.Modules.Example.Domain;
+using SpaceHero.Persistence;
 
-namespace MyApp.Modules.Example.Infrastructure.Persistence;
+namespace SpaceHero.Modules.Example.Infrastructure.Persistence;
 
 /// <summary>
 /// EF Core implementation of the Example persistence port and the public catalog. The

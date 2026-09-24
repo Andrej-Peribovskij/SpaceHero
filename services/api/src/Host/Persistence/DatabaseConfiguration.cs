@@ -1,4 +1,4 @@
-namespace MyApp.Api.Persistence;
+namespace SpaceHero.Api.Persistence;
 
 /// <summary>Resolves the database connection string for the service.</summary>
 internal static class DatabaseConfiguration

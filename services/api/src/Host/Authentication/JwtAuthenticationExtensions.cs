@@ -1,10 +1,10 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using MyApp.Api.Configuration;
-using MyApp.BuildingBlocks.Actors;
+using SpaceHero.Api.Configuration;
+using SpaceHero.BuildingBlocks.Actors;
 
-namespace MyApp.Api.Authentication;
+namespace SpaceHero.Api.Authentication;
 
 /// <summary>
 /// Registers standard JWT bearer authentication at the HTTP boundary and exposes the

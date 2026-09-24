@@ -1,8 +1,8 @@
-using MyApp.BuildingBlocks.Errors;
-using MyApp.Modules.Example.Domain;
+using SpaceHero.BuildingBlocks.Errors;
+using SpaceHero.Modules.Example.Domain;
 using Xunit;
 
-namespace MyApp.Api.UnitTests;
+namespace SpaceHero.Api.UnitTests;
 
 public class WidgetNameTests
 {

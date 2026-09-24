@@ -1,4 +1,4 @@
-namespace MyApp.Api.Configuration;
+namespace SpaceHero.Api.Configuration;
 
 /// <summary>
 /// Configuration the frontend is allowed to read before anyone signs in, bound from the

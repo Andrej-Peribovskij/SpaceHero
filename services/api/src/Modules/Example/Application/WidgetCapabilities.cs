@@ -1,4 +1,4 @@
-namespace MyApp.Modules.Example.Application;
+namespace SpaceHero.Modules.Example.Application;
 
 /// <summary>
 /// Coarse capabilities the edge grants an actor. They describe what the actor may do,

@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>MyApp.Modules.Example.Domain</RootNamespace>
-    <AssemblyName>MyApp.Modules.Example.Domain</AssemblyName>
+    <RootNamespace>SpaceHero.Modules.Example.Domain</RootNamespace>
+    <AssemblyName>SpaceHero.Modules.Example.Domain</AssemblyName>
   </PropertyGroup>
 
   <!--
@@ -10,7 +10,7 @@
     reference ASP.NET, EF Core, or any other module; an architecture test enforces this.
   -->
   <ItemGroup>
-    <ProjectReference Include="..\..\..\BuildingBlocks\MyApp.BuildingBlocks.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\SpaceHero.BuildingBlocks.csproj" />
   </ItemGroup>
 
 </Project>

@@ -51,7 +51,7 @@ it from inside WSL, where the same command works:
 wsl -d podman-machine-default
 cd /mnt/c/<path to the repo>
 printf '%s' "$NODE_AUTH_TOKEN" > /tmp/na.tok
-podman build -f apps/web/Dockerfile --secret id=node_auth_token,src=/tmp/na.tok -t my-app-web .
+podman build -f apps/web/Dockerfile --secret id=node_auth_token,src=/tmp/na.tok -t space-hero-web .
 rm -f /tmp/na.tok
 ```
 

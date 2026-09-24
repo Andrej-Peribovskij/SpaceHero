@@ -1,7 +1,7 @@
 using System.Security.Claims;
-using MyApp.BuildingBlocks.Actors;
+using SpaceHero.BuildingBlocks.Actors;
 
-namespace MyApp.Api.Authentication;
+namespace SpaceHero.Api.Authentication;
 
 /// <summary>
 /// Translates the current request's validated bearer-token claims into the

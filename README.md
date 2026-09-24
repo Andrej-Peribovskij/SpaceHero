@@ -167,7 +167,7 @@ four things is true: already initialised, `CI` is set, standard input is not a
 terminal, or `SCAFFOLD_SKIP_INIT=1`.
 
 The rebrand itself is still `pnpm run rename <PascalName>` and still does one
-job — rewriting `MyApp`/`my-app` across every text file and renaming the
+job — rewriting `SpaceHero`/`space-hero` across every text file and renaming the
 `.csproj` files. `init` calls it.
 
 ## Adding a Service or App
