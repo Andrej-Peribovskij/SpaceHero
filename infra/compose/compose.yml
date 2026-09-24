@@ -35,7 +35,7 @@ services:
     build:
       context: ../../services/api
       dockerfile: Dockerfile
-    image: my-app-api
+    image: space-hero-api
     depends_on:
       postgres:
         condition: service_healthy

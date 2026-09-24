@@ -30,7 +30,7 @@ The command wrapper that invoked this prompt carries a bindings block. Read it b
 | `APP_REPO` | `.` |
 | `DS_REPO` | `../design-system-uds` |
 | `FRONTEND_PACKAGE` | `apps/web` |
-| `DS_PACKAGE_NAME` | `@my-app/design-system` |
+| `DS_PACKAGE_NAME` | `@space-hero/design-system` |
 
 ## Inputs
 

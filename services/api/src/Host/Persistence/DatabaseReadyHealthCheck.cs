@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using MyApp.Persistence;
+using SpaceHero.Persistence;
 
-namespace MyApp.Api.Persistence;
+namespace SpaceHero.Api.Persistence;
 
 /// <summary>Readiness probe: reports healthy only when the database is reachable.</summary>
 internal sealed class DatabaseReadyHealthCheck(AppDbContext dbContext) : IHealthCheck

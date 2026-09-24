@@ -1,6 +1,6 @@
-using MyApp.BuildingBlocks.Actors;
+using SpaceHero.BuildingBlocks.Actors;
 
-namespace MyApp.Api.Endpoints;
+namespace SpaceHero.Api.Endpoints;
 
 /// <summary>Who the caller is, as far as this deployment is concerned.</summary>
 /// <param name="Authenticated">False for an anonymous caller. Not an error — see below.</param>

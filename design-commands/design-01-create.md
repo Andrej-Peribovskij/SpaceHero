@@ -24,7 +24,7 @@ Project bindings:
   of this tree — the design system is consumed as a published package. Only a run that stages or
   promotes a component needs the checkout at all.)
 - FRONTEND_PACKAGE: apps/web
-- DS_PACKAGE_NAME: "@my-app/design-system"
+- DS_PACKAGE_NAME: "@space-hero/design-system"
   (the alias apps/web imports, and prompt 04's --ds-package: the exporter recognises a
   design-system import by this name, and the package's own name is not it. apps/web/package.json
   maps it to npm:@ptv-mobility/design-system-uds — see docs/design-system.md, including the
@@ -33,7 +33,7 @@ Project bindings:
 - ASSETS_DIR: design-commands/assets
 - DS_REPO_PATH: ../design-system-uds
   (prompt 04's --design-system: the design system's SOURCE tree, holding package.json and src/.
-  Never node_modules/@my-app/design-system — that ships dist/ and structurally cannot serve it.
+  Never node_modules/@space-hero/design-system — that ships dist/ and structurally cannot serve it.
   Relative to this checkout; from a linked git worktree the exporter retries it against the main
   checkout. Only prompt 04 §4 runs without it, and then says what it could not include.)
 - FULL_STACK_CMD: pnpm run dev

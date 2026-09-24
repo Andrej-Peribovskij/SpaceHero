@@ -1,6 +1,6 @@
-using MyApp.Api.Configuration;
+using SpaceHero.Api.Configuration;
 
-namespace MyApp.Api.Endpoints;
+namespace SpaceHero.Api.Endpoints;
 
 /// <summary>What an unauthenticated browser may know about this deployment.</summary>
 /// <param name="PublicUiVersion">

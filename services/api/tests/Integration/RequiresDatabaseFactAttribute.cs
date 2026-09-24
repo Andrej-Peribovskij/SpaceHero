@@ -1,6 +1,6 @@
 using Xunit;
 
-namespace MyApp.Api.IntegrationTests;
+namespace SpaceHero.Api.IntegrationTests;
 
 /// <summary>
 /// A fact that needs a real PostgreSQL, and says so instead of failing when there is none.

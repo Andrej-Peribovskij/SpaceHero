@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>MyApp.Modules.Example.Contracts</RootNamespace>
-    <AssemblyName>MyApp.Modules.Example.Contracts</AssemblyName>
+    <RootNamespace>SpaceHero.Modules.Example.Contracts</RootNamespace>
+    <AssemblyName>SpaceHero.Modules.Example.Contracts</AssemblyName>
   </PropertyGroup>
 
   <!--

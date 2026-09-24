@@ -746,7 +746,7 @@ describe("runDesignExport — the design mode still works, and reads the design 
 describe("runProductionExport — this repository's apps/web", () => {
     const web = path.join(repoRoot, "apps", "web");
     const dsRepo = resolveDsRepoPath("../design-system-uds", { cwd: repoRoot }).root;
-    const installed = existsSync(path.join(web, "node_modules", "@my-app", "design-system", "package.json"));
+    const installed = existsSync(path.join(web, "node_modules", "@space-hero", "design-system", "package.json"));
     const skip = dsRepo || installed ? false : "no design-system source tree and no install";
 
     it("exports v1.0.0: WidgetsView and what it reaches, and says it carries no mock data", { skip }, () => {
@@ -754,7 +754,7 @@ describe("runProductionExport — this repository's apps/web", () => {
         try {
             const r = runProductionExport({
                 mode: "production", version: "v1.0.0", frontend: "apps/web", designSystem: "../design-system-uds",
-                dsPackage: "@my-app/design-system", out, assets: "design-commands/assets", fixtures: null, shell: [],
+                dsPackage: "@space-hero/design-system", out, assets: "design-commands/assets", fixtures: null, shell: [],
             }, { log: silent, cwd: repoRoot });
             const z = zipTree(r.zipPath);
             assert.ok(z["src/views/widgets/widgets-view.tsx"]);

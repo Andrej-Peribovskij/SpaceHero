@@ -1,4 +1,4 @@
-namespace MyApp.Api.OpenApi;
+namespace SpaceHero.Api.OpenApi;
 
 /// <summary>
 /// Registers the OpenAPI document that is both served at runtime (<c>/openapi/v1.json</c>)
@@ -14,7 +14,7 @@ internal static class OpenApiExtensions
         services.AddOpenApi(DocumentName, options =>
             options.AddDocumentTransformer((document, _, _) =>
             {
-                document.Info.Title = "MyApp API";
+                document.Info.Title = "SpaceHero API";
                 document.Info.Version = "1.0.0";
                 return Task.CompletedTask;
             }));

@@ -1,4 +1,4 @@
-namespace MyApp.BuildingBlocks.Identifiers;
+namespace SpaceHero.BuildingBlocks.Identifiers;
 
 /// <summary>Produces UUID v7 identifiers (time-ordered) using the native runtime generator.</summary>
 public sealed class IdGenerator : IIdGenerator

@@ -2,7 +2,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace MyApp.Persistence;
+namespace SpaceHero.Persistence;
 
 /// <summary>
 /// Shared relational conventions. Table names carry a module prefix and are set explicitly

@@ -43,7 +43,7 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.7.1(@standard-schema/spec@1.1.0)(react-hook-form@7.85.0(react@19.3.0))(zod@4.4.3)
-      '@my-app/design-system':
+      '@space-hero/design-system':
         specifier: npm:@ptv-mobility/design-system-uds@^0.6.1
         version: '@ptv-mobility/design-system-uds@0.6.2(react-dom@19.3.0(react@19.3.0))(react@19.3.0)'
       '@tanstack/react-query':
@@ -74,7 +74,7 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@my-app/schemas':
+      '@space-hero/schemas':
         specifier: workspace:*
         version: link:../../packages/schemas
       '@tailwindcss/vite':

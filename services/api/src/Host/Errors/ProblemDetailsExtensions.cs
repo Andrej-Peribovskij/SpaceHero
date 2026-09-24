@@ -1,4 +1,4 @@
-namespace MyApp.Api.Errors;
+namespace SpaceHero.Api.Errors;
 
 /// <summary>Registers Problem Details generation and the app-owned exception handler.</summary>
 internal static class ProblemDetailsExtensions

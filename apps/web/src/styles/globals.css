@@ -10,4 +10,4 @@
  * styles, and the Tailwind layers those need. Import it, never the internals:
  * the tokens are the contract, the files behind them are not.
  */
-@import "@my-app/design-system/index.css";
+@import "@space-hero/design-system/index.css";

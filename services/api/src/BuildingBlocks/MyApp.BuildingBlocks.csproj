@@ -1,8 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <RootNamespace>MyApp.BuildingBlocks</RootNamespace>
-    <AssemblyName>MyApp.BuildingBlocks</AssemblyName>
-  </PropertyGroup>
-
-</Project>

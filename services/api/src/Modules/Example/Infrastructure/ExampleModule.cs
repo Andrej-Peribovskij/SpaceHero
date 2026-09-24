@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using MyApp.Modules.Example.Application;
-using MyApp.Modules.Example.Contracts;
-using MyApp.Modules.Example.Infrastructure.Http;
-using MyApp.Modules.Example.Infrastructure.Persistence;
-using MyApp.Persistence;
-using MyApp.Persistence.Seeding;
+using SpaceHero.Modules.Example.Application;
+using SpaceHero.Modules.Example.Contracts;
+using SpaceHero.Modules.Example.Infrastructure.Http;
+using SpaceHero.Modules.Example.Infrastructure.Persistence;
+using SpaceHero.Persistence;
+using SpaceHero.Persistence.Seeding;
 
-namespace MyApp.Modules.Example.Infrastructure;
+namespace SpaceHero.Modules.Example.Infrastructure;
 
 /// <summary>
 /// Composition surface for the Example module. The service host calls

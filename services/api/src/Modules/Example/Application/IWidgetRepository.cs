@@ -1,6 +1,6 @@
-using MyApp.Modules.Example.Domain;
+using SpaceHero.Modules.Example.Domain;
 
-namespace MyApp.Modules.Example.Application;
+namespace SpaceHero.Modules.Example.Application;
 
 /// <summary>
 /// Persistence port for the <see cref="Widget"/> aggregate. Application depends on this

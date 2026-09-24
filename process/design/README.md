@@ -87,7 +87,7 @@ is byte-identical to the previous one — so the public app is provably unaffect
 versions can consume the new components immediately.
 
 The design system is a **separate repository**, consumed here as a published package
-(`@my-app/design-system` → `@ptv-mobility/design-system-uds`). Staging and promotion happen in
+(`@space-hero/design-system` → `@ptv-mobility/design-system-uds`). Staging and promotion happen in
 that repository, against a checkout of it; see
 [`docs/design-staging.md`](../../docs/design-staging.md) for the layout and
 [`docs/design-system.md`](../../docs/design-system.md) for how this repository consumes it,

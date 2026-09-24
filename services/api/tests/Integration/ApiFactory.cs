@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 
-namespace MyApp.Api.IntegrationTests;
+namespace SpaceHero.Api.IntegrationTests;
 
 /// <summary>
 /// Hosts the API in-process. Runs in the Development environment so the dev JWT secret

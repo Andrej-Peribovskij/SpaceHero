@@ -1,4 +1,4 @@
-namespace MyApp.Modules.Example.Infrastructure.Http;
+namespace SpaceHero.Modules.Example.Infrastructure.Http;
 
 /// <summary>Request body for creating a widget.</summary>
 public sealed record CreateWidgetRequest(string Name);

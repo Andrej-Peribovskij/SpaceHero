@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace MyApp.Persistence.Migrations
+namespace SpaceHero.Persistence.Migrations
 {
     /// <inheritdoc />
     public partial class InitialSchema : Migration

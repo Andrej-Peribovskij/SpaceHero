@@ -57,8 +57,8 @@ A design version imports shipped primitives from the package root and anything n
 from the **pinned** staging subpath:
 
 ```ts
-import { Card, Input } from "@my-app/design-system";
-import { TimelineRail } from "@my-app/design-system/staging/v4.0.0";
+import { Card, Input } from "@space-hero/design-system";
+import { TimelineRail } from "@space-hero/design-system/staging/v4.0.0";
 ```
 
 **Application code never imports the unpinned `./staging`.** It follows "newest", so a design

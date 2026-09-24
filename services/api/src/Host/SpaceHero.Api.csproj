@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <RootNamespace>MyApp.Api</RootNamespace>
-    <AssemblyName>MyApp.Api</AssemblyName>
+    <RootNamespace>SpaceHero.Api</RootNamespace>
+    <AssemblyName>SpaceHero.Api</AssemblyName>
     <!-- The host is the composition root; it is intentionally the app entrypoint. -->
     <OutputType>Exe</OutputType>
     <!--
@@ -14,9 +14,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BuildingBlocks\MyApp.BuildingBlocks.csproj" />
-    <ProjectReference Include="..\Persistence\MyApp.Persistence.csproj" />
-    <ProjectReference Include="..\Modules\Example\Infrastructure\MyApp.Modules.Example.Infrastructure.csproj" />
+    <ProjectReference Include="..\BuildingBlocks\SpaceHero.BuildingBlocks.csproj" />
+    <ProjectReference Include="..\Persistence\SpaceHero.Persistence.csproj" />
+    <ProjectReference Include="..\Modules\Example\Infrastructure\SpaceHero.Modules.Example.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

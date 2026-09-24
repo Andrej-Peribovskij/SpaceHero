@@ -1,6 +1,6 @@
-using MyApp.BuildingBlocks.Identifiers;
+using SpaceHero.BuildingBlocks.Identifiers;
 
-namespace MyApp.Api.Middleware;
+namespace SpaceHero.Api.Middleware;
 
 /// <summary>
 /// Ensures every request carries a correlation id. It reuses an inbound

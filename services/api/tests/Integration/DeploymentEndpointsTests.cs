@@ -3,11 +3,11 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using MyApp.Api.Authentication;
-using MyApp.Api.Endpoints;
+using SpaceHero.Api.Authentication;
+using SpaceHero.Api.Endpoints;
 using Xunit;
 
-namespace MyApp.Api.IntegrationTests;
+namespace SpaceHero.Api.IntegrationTests;
 
 /// <summary>
 /// The two deployment-level endpoints the UI version registry depends on. Neither touches

@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>SpaceHero.BuildingBlocks</RootNamespace>
+    <AssemblyName>SpaceHero.BuildingBlocks</AssemblyName>
+  </PropertyGroup>
+
+</Project>

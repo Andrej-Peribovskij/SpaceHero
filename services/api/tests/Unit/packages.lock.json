@@ -99,14 +99,14 @@
       "myapp.modules.example.application": {
         "type": "Project",
         "dependencies": {
-          "MyApp.BuildingBlocks": "[1.0.0, )",
-          "MyApp.Modules.Example.Domain": "[1.0.0, )"
+          "SpaceHero.BuildingBlocks": "[1.0.0, )",
+          "SpaceHero.Modules.Example.Domain": "[1.0.0, )"
         }
       },
       "myapp.modules.example.domain": {
         "type": "Project",
         "dependencies": {
-          "MyApp.BuildingBlocks": "[1.0.0, )"
+          "SpaceHero.BuildingBlocks": "[1.0.0, )"
         }
       }
     }

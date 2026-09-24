@@ -78,7 +78,7 @@ solution under `services/*`. There are no .NET files at the repo root.
 - OpenAPI snapshot: `packages/schemas/openapi/api-v1.json` — generated, the
   cross-language contract of record (never hand-edited)
 - Generated TS clients: `packages/schemas`; UI primitives: the published design
-  system, imported as `@my-app/design-system` (see `docs/design-system.md`)
+  system, imported as `@space-hero/design-system` (see `docs/design-system.md`)
 - Local stacks: Podman via `infra/compose/compose*.yml`, one Compose project per
   stack (`COMPOSE_COMMAND` overrides the engine)
 - `Modules/Example` is the reference module: copy its shape, delete it once a

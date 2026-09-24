@@ -13,7 +13,7 @@ Purpose: define the durable implementation rules for applications in `apps/`
   testable in isolation.
 - Frontend API calls use canonical backend resource paths.
 - Shared HTTP utilities own response parsing and typed transport errors.
-- **Always consume components, icons, and tokens from `@my-app/design-system`.**
+- **Always consume components, icons, and tokens from `@space-hero/design-system`.**
   Never hand-roll primitives or hardcode design values. If something is missing,
   raise it with the design system's owners or record tech debt — the package is
   a different repository and cannot be extended from a feature branch here.
@@ -24,34 +24,34 @@ Purpose: define the durable implementation rules for applications in `apps/`
 
 This is the **primary rule** for `apps/` code:
 
-- **Use `@my-app/design-system` components** for every UI primitive (buttons,
+- **Use `@space-hero/design-system` components** for every UI primitive (buttons,
   inputs, dialogs, tags, icons, form controls, etc.). Do not re-implement a
   primitive at the app level when one exists in the package.
 - **Use design tokens** from the package — reference semantic tokens via the
   `bg-[var(--color-...)]` Tailwind arbitrary value syntax, or the utilities
   generated from `@theme`. Never hardcode hex colors, pixel sizes, ad-hoc
   spacing, or non-token font values in app code.
-- **When a required component or token is missing from `@my-app/design-system`:**
-  1. Check the staging export, `@my-app/design-system/staging` — it holds
+- **When a required component or token is missing from `@space-hero/design-system`:**
+  1. Check the staging export, `@space-hero/design-system/staging` — it holds
      components that exist but have not been promoted yet.
   2. Otherwise raise it with the design system's owners. Extending it is a pull
      request against its own repository, on its own release cadence.
   3. If the product cannot wait, build it locally **and** create a tech debt
      record in `docs/tech-debt/` naming what should replace it.
 
-### Importing from `@my-app/design-system`
+### Importing from `@space-hero/design-system`
 
-`@my-app/design-system` is an alias for whichever design system package this
+`@space-hero/design-system` is an alias for whichever design system package this
 project uses; `apps/web/package.json` records which one and at which version.
 Import from the alias and from its public entry points, never from a path inside
 the package:
 
 ```tsx
 // Correct
-import { Button, Card, DataTable } from "@my-app/design-system";
+import { Button, Card, DataTable } from "@space-hero/design-system";
 
 // Wrong — the file layout is not the contract
-import { Button } from "@my-app/design-system/dist/components/Button";
+import { Button } from "@space-hero/design-system/dist/components/Button";
 ```
 
 ## Structure and Ownership

@@ -1,9 +1,9 @@
-using MyApp.BuildingBlocks.Actors;
-using MyApp.BuildingBlocks.Errors;
-using MyApp.BuildingBlocks.Identifiers;
-using MyApp.Modules.Example.Domain;
+using SpaceHero.BuildingBlocks.Actors;
+using SpaceHero.BuildingBlocks.Errors;
+using SpaceHero.BuildingBlocks.Identifiers;
+using SpaceHero.Modules.Example.Domain;
 
-namespace MyApp.Modules.Example.Application;
+namespace SpaceHero.Modules.Example.Application;
 
 /// <summary>
 /// The one authorized write use case: create a widget owned by the current actor.

@@ -1,4 +1,4 @@
-namespace MyApp.BuildingBlocks.Actors;
+namespace SpaceHero.BuildingBlocks.Actors;
 
 /// <summary>
 /// The framework-neutral view of the caller for the current operation. The HTTP

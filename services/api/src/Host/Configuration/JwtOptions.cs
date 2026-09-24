@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace MyApp.Api.Configuration;
+namespace SpaceHero.Api.Configuration;
 
 /// <summary>Bearer-token validation settings bound from the <c>Jwt</c> configuration section.</summary>
 internal sealed class JwtOptions

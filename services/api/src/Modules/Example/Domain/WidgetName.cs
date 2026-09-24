@@ -1,6 +1,6 @@
-using MyApp.BuildingBlocks.Errors;
+using SpaceHero.BuildingBlocks.Errors;
 
-namespace MyApp.Modules.Example.Domain;
+namespace SpaceHero.Modules.Example.Domain;
 
 /// <summary>
 /// A validated widget name. Constructing one guarantees the invariant (non-empty,

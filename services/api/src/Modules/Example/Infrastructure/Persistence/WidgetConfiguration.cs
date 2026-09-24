@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using MyApp.Modules.Example.Domain;
+using SpaceHero.Modules.Example.Domain;
 
-namespace MyApp.Modules.Example.Infrastructure.Persistence;
+namespace SpaceHero.Modules.Example.Infrastructure.Persistence;
 
 /// <summary>
 /// EF Core mapping for <see cref="Widget"/>. The table carries the module prefix

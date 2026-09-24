@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Xunit;
 
-namespace MyApp.Api.IntegrationTests;
+namespace SpaceHero.Api.IntegrationTests;
 
 /// <summary>
 /// Endpoint coverage that does not require a database: liveness, the contract document,

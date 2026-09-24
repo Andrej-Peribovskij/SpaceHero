@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace MyApp.Persistence;
+namespace SpaceHero.Persistence;
 
 /// <summary>
 /// The single service-owned database context and migration stream. It holds no

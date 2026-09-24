@@ -1,4 +1,4 @@
-namespace MyApp.Persistence.Seeding;
+namespace SpaceHero.Persistence.Seeding;
 
 /// <summary>
 /// A module-provided, development-only data seed. Seeders are explicit and repeatable

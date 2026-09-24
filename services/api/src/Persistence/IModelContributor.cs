@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace MyApp.Persistence;
+namespace SpaceHero.Persistence;
 
 /// <summary>
 /// Contributes a module's entity configurations to the shared <see cref="AppDbContext"/>

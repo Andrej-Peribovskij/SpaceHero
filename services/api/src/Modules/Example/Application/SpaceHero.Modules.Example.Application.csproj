@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>SpaceHero.Modules.Example.Application</RootNamespace>
+    <AssemblyName>SpaceHero.Modules.Example.Application</AssemblyName>
+  </PropertyGroup>
+
+  <!-- Application orchestrates Domain over the shared kernel. No framework, no EF. -->
+  <ItemGroup>
+    <ProjectReference Include="..\Domain\SpaceHero.Modules.Example.Domain.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\SpaceHero.BuildingBlocks.csproj" />
+  </ItemGroup>
+
+</Project>

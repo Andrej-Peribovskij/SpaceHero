@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import type { components } from "@my-app/schemas/api-v1";
+import type { components } from "@space-hero/schemas/api-v1";
 import { apiJson } from "../../infra/http/client";
 
 /**

@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>SpaceHero.Modules.Example.Infrastructure</RootNamespace>
+    <AssemblyName>SpaceHero.Modules.Example.Infrastructure</AssemblyName>
+  </PropertyGroup>
+
+  <!-- Infrastructure is the only layer that touches ASP.NET and EF Core. -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Application\SpaceHero.Modules.Example.Application.csproj" />
+    <ProjectReference Include="..\Contracts\SpaceHero.Modules.Example.Contracts.csproj" />
+    <ProjectReference Include="..\Domain\SpaceHero.Modules.Example.Domain.csproj" />
+    <ProjectReference Include="..\..\..\Persistence\SpaceHero.Persistence.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+  </ItemGroup>
+
+</Project>

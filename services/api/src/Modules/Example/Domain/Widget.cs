@@ -1,4 +1,4 @@
-namespace MyApp.Modules.Example.Domain;
+namespace SpaceHero.Modules.Example.Domain;
 
 /// <summary>
 /// The reference aggregate: a widget owned by the actor that created it. Timestamps are

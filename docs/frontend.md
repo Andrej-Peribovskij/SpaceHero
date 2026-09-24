@@ -12,7 +12,7 @@ Purpose: define the durable frontend implementation rules for `apps/web`.
 - Frontend API calls use canonical backend resource paths.
 - Shared HTTP utilities own response parsing and typed transport errors.
 - UI primitives and design tokens come from a published design system,
-  installed under the alias `@my-app/design-system`. It is not in this
+  installed under the alias `@space-hero/design-system`. It is not in this
   repository — see `design-system.md`.
 - No new npm dependency without explicit review and an Apache 2.0-compatible
   permissive license. See `dependencies.md`.
