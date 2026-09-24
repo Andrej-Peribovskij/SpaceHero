@@ -16,8 +16,8 @@ namespace SpaceHero.Api.IntegrationTests;
 internal static class TestTokens
 {
     private const string Secret = "dev-only-secret-change-me-in-production-0123456789";
-    private const string Issuer = "myapp";
-    private const string Audience = "myapp";
+    private const string Issuer = "spacehero";
+    private const string Audience = "spacehero";
 
     public static string For(string subject, params string[] capabilities)
     {

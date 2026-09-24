@@ -189,26 +189,26 @@
           "xunit.extensibility.core": "[2.9.3]"
         }
       },
-      "myapp.buildingblocks": {
+      "spacehero.buildingblocks": {
         "type": "Project"
       },
-      "myapp.modules.example.application": {
+      "spacehero.modules.example.application": {
         "type": "Project",
         "dependencies": {
           "SpaceHero.BuildingBlocks": "[1.0.0, )",
           "SpaceHero.Modules.Example.Domain": "[1.0.0, )"
         }
       },
-      "myapp.modules.example.contracts": {
+      "spacehero.modules.example.contracts": {
         "type": "Project"
       },
-      "myapp.modules.example.domain": {
+      "spacehero.modules.example.domain": {
         "type": "Project",
         "dependencies": {
           "SpaceHero.BuildingBlocks": "[1.0.0, )"
         }
       },
-      "myapp.modules.example.infrastructure": {
+      "spacehero.modules.example.infrastructure": {
         "type": "Project",
         "dependencies": {
           "Microsoft.EntityFrameworkCore": "[10.0.12, )",
@@ -218,7 +218,7 @@
           "SpaceHero.Persistence": "[1.0.0, )"
         }
       },
-      "myapp.persistence": {
+      "spacehero.persistence": {
         "type": "Project",
         "dependencies": {
           "Microsoft.EntityFrameworkCore": "[10.0.12, )",
