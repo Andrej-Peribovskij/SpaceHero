@@ -61,7 +61,13 @@ and expands no environment variable in one, because that file is committed and a
 credential has to live in a **user-level** file. The repository's own `.npmrc`
 carries only the scope-to-registry routing.
 
-1. Create a personal access token with the `read:packages` scope.
+1. Create a **classic** personal access token with the `read:packages` scope.
+   GitHub Packages' npm registry does not accept fine-grained tokens
+   (`github_pat_…`): the token is sent and the install fails with a **403**,
+   not a 401, so it looks like missing access rather than the wrong kind of
+   token. A classic token starts with `ghp_`. If the organisation enforces
+   SAML SSO, also authorise the token for it (**Configure SSO** beside the
+   token), or that too answers 403.
 2. Add one line to your own `~/.npmrc` (not this repository's), **on a line of
    its own**:
 
