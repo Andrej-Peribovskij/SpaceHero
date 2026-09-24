@@ -1,0 +1,13 @@
+# Normalize line endings so scripts and sources are LF in the working tree on every
+# platform (prevents CRLF from breaking Node, dotnet, and shell tooling on Windows).
+* text=auto eol=lf
+
+# Never normalize binary assets.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary

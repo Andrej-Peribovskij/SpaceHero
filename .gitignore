@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+
+# .NET build output
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+coverage/
+.playwright-cli/
+test-results/
+playwright-report/
+
+# Tool caches
+.cache/
+.docker-cache/
+.eslintcache
+.vite/
+
+# Generated at container startup — not committed
+apps/web/public/config.json
+
+# Local environment files
+.env
+.env.*
+*.local
+!.env.example
+!.env.*.example
+!**/.env.test
+!**/.env.build
+
+# Local file uploads (dev only)
+uploads/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor directories and files
+.vscode/
+.idea/
+.DS_Store
+
+# Claude Code context (local agent state)
+.context/

@@ -1,0 +1,186 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  # The design system is a GitHub Packages dependency, and GitHub Packages
+  # authenticates reads as well as writes. This is what lets the built-in
+  # GITHUB_TOKEN install it — together with the package's Actions-access grant
+  # to this repository, which is a manual, UI-only step per consuming repository.
+  packages: read
+
+# Linux only. GitHub's Windows runners can only run Windows containers, so no
+# compose-backed suite can run there — see docs/tech-debt/no-windows-ci-coverage.md.
+jobs:
+  # What this pull request touched. The gate below is .NET, pnpm, a PostgreSQL
+  # service, two compose-backed suites and a browser — the right gate for a code
+  # change and the wrong one for a paragraph, and this repository now carries a
+  # lot of paragraphs. scripts/ci-changed.mjs errs towards running everything:
+  # an unrecognised path counts as code, and so does an empty change set.
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.classify.outputs.code }}
+      docs: ${{ steps.classify.outputs.docs }}
+    steps:
+      # The full history, because the classifier diffs against the merge base.
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Classify the changed paths
+        id: classify
+        run: node scripts/ci-changed.mjs origin/${{ github.base_ref }}
+
+  # Cheap, and the only gate a documentation change otherwise gets. The docs
+  # here cross-reference heavily and a rename breaks those links in silence.
+  docs:
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Check every relative Markdown link resolves
+        run: node scripts/check-links.mjs
+
+  checks:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: app
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U app -d app"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://app:app@localhost:5432/app
+      # Podman is the standard container engine (ADR-0002). The runner ships
+      # podman and Docker Compose v2 (the provider podman delegates to), so the
+      # compose-backed suites below run on podman like a developer's machine.
+      COMPOSE_COMMAND: podman compose
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up .NET from global.json
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: services/api/global.json
+
+      # Reads the pinned version from the "packageManager" field. Must run
+      # before setup-node, which needs pnpm on PATH to resolve its cache.
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      # registry-url writes `//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}`
+      # to a user-level npmrc and points NPM_CONFIG_USERCONFIG at it. It has to be
+      # user-level: pnpm ignores an auth setting that comes from a committed
+      # project .npmrc, so the repository's own .npmrc carries only the routing.
+      - name: Set up Node from .nvmrc
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          registry-url: https://npm.pkg.github.com
+          scope: '@ptv-mobility'
+
+      # scripts/check-registry-token.mjs runs from .pnpmfile.cjs and refuses an
+      # install with no credential. setup-node has already written the
+      # user-level npmrc it looks for, so this passes here for the same reason
+      # the install itself does.
+      - name: Install Node dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Restore .NET tools
+        working-directory: services/api
+        run: dotnet tool restore
+
+      - name: Build (backend + frontend)
+        run: pnpm run build
+
+      - name: Lint (dotnet format + ESLint)
+        run: pnpm run lint
+
+      # Its own step, and not an optional one. `lint` used to BE the type check —
+      # apps/web's lint script was `tsc -p tsconfig.json --noEmit`. It is ESLint
+      # now, which cannot see a type, so without this line the pull-request gate
+      # would go on passing while type-checking nothing.
+      - name: Typecheck (tsc --noEmit per package)
+        run: pnpm run typecheck
+
+      # No DATABASE_URL here: the database-backed backend tests skip in this step
+      # and run in the integration step below against their own PostgreSQL, so
+      # nothing is covered twice and proved once.
+      - name: Test (unit + architecture + frontend)
+        run: pnpm run test
+        env:
+          DATABASE_URL: ""
+
+      - name: Apply migrations to a clean database
+        run: pnpm run db:migrate
+
+      - name: Seed a clean database
+        run: pnpm run db:seed
+
+      # podman compose delegates to the Docker Compose v2 provider, which talks
+      # to the rootless Podman API socket. The runner ships the socket unit but
+      # leaves it stopped, so start it before any compose-backed suite runs.
+      - name: Start the Podman socket
+        run: |
+          systemctl --user enable --now podman.socket
+          systemctl --user --no-pager status podman.socket
+
+      # Its own PostgreSQL on 5433 through podman compose, migrated and then
+      # exercised through the wired application.
+      - name: Integration tests (real PostgreSQL)
+        run: pnpm run test:integration
+
+      # Cached on the Playwright version, because the browser is a ~150MB
+      # download and it only changes when that version does.
+      - name: Cache Playwright browsers
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      # Its own PostgreSQL on 5434, its own API on 3100 and web server on 5273 —
+      # nothing shared with the integration step. The one suite that runs a real
+      # browser against a real API, which is the only place a CORS header or a
+      # missing stylesheet can fail.
+      - name: E2E tests (browser + API + database)
+        run: pnpm run test:e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: tests/e2e/playwright-report/
+          retention-days: 7
+
+      - name: Check the OpenAPI snapshot is up to date
+        run: pnpm run openapi:check

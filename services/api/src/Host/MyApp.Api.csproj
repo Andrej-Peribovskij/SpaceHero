@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <RootNamespace>MyApp.Api</RootNamespace>
+    <AssemblyName>MyApp.Api</AssemblyName>
+    <!-- The host is the composition root; it is intentionally the app entrypoint. -->
+    <OutputType>Exe</OutputType>
+    <!--
+      Do not emit the OpenAPI snapshot on every build: generation starts the host (so it
+      needs valid config) and writes outside the project. The `openapi:sync` script drives
+      it explicitly in the Development environment via the GenerateOpenApiDocuments target.
+    -->
+    <OpenApiGenerateDocumentsOnBuild>false</OpenApiGenerateDocumentsOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BuildingBlocks\MyApp.BuildingBlocks.csproj" />
+    <ProjectReference Include="..\Persistence\MyApp.Persistence.csproj" />
+    <ProjectReference Include="..\Modules\Example\Infrastructure\MyApp.Modules.Example.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <!-- Required by the EF Core tools; the host is the migrations startup project. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Server">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,27 @@
+#!/bin/sh
+# Refuse a direct push to the default branch.
+#
+# The design-to-code process asks for a branch policy that blocks pushes
+# straight to main. On the current GitHub plan that is unavailable for a
+# private repository, so this is the local stand-in: it costs nothing, it
+# catches the common slip, and it disappears the moment a project moves to
+# hosting where the rule can be enforced for real.
+#
+# It is a courtesy, not a control. To override, deliberately:
+#
+#     git push --no-verify
+#
+# Reads the same stdin contract as any pre-push hook: one line per ref being
+# pushed, "<local ref> <local sha> <remote ref> <remote sha>".
+
+protected="refs/heads/main"
+
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+    if [ "$remote_ref" = "$protected" ]; then
+        echo "pre-push: refusing to push straight to ${protected#refs/heads/}." >&2
+        echo "          Open a pull request, or pass --no-verify if you mean it." >&2
+        exit 1
+    fi
+done
+
+exit 0

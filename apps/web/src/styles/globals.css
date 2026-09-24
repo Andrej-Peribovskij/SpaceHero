@@ -1,0 +1,13 @@
+/*
+ * Tailwind generates utilities from this app's own source. It has to be here:
+ * the design system's stylesheet is built from the design system's sources and
+ * knows nothing about the classes this app writes.
+ */
+@import "tailwindcss";
+
+/*
+ * The design system ships one built stylesheet — its tokens, its component
+ * styles, and the Tailwind layers those need. Import it, never the internals:
+ * the tokens are the contract, the files behind them are not.
+ */
+@import "@my-app/design-system/index.css";

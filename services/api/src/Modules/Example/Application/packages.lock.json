@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "dependencies": {
+    "net10.0": {
+      "myapp.buildingblocks": {
+        "type": "Project"
+      },
+      "myapp.modules.example.domain": {
+        "type": "Project",
+        "dependencies": {
+          "MyApp.BuildingBlocks": "[1.0.0, )"
+        }
+      }
+    }
+  }
+}

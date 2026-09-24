@@ -1,0 +1,43 @@
+packages:
+  - packages/*
+  - apps/*
+  # The E2E suite is a workspace package so that `pnpm run lint` type-checks it
+  # like everything else. Its `test` script is deliberately a no-op — E2E needs
+  # a database and two servers, so it runs through `pnpm run test:e2e`.
+  - tests/*
+  # The backend is a self-contained .NET service under services/api and is not
+  # an npm workspace (Node only orchestrates it via scripts/backend.mjs), so
+  # nothing under services/ is a pnpm package.
+
+# Dependency lifecycle scripts are blocked unless listed here. Each entry was
+# reviewed against the script it actually runs — add nothing without doing the
+# same.
+allowBuilds:
+  # Resolves the platform-specific binary that Vite and Vitest execute.
+  esbuild: true
+  # Copies the service worker into `msw.workerDirectory` when a workspace
+  # configures one. A no-op today; kept so browser mocking keeps working.
+  msw: true
+  # Prints a shell-completion tip. No build artifact.
+  '@fission-ai/openspec': false
+  # Analytics beacon. No build artifact.
+  '@scarf/scarf': false
+  # Prints an Open Collective funding banner. No build artifact.
+  core-js: false
+
+# pnpm holds back freshly published versions by default, which is a supply-chain
+# guard aimed at a compromised upstream: a malicious release has to survive a
+# waiting period before anything installs it. The design systems are published
+# by this organisation from repositories with the same reviewers as this one, so
+# the guard buys nothing here and costs a lockfile edit on every release. Listed
+# by name rather than by version so a bump needs no change to this file.
+#
+# Both are listed even though a project depends on one. The alternative —
+# rewriting this list when `pnpm run init` switches design systems — leaves the
+# lockfile naming a package the policy no longer excludes, and pnpm verifies the
+# lockfile it has before resolving the one it is about to write. So switching
+# failed on the old dependency, which is a confusing way to learn that this file
+# is a list of names rather than a statement about this project's dependencies.
+minimumReleaseAgeExclude:
+  - '@ptv-mobility/design-system-uds'
+  - '@ptv-mobility/design-system-base'

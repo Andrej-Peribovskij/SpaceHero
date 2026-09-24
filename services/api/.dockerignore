@@ -1,0 +1,8 @@
+# Keep local build output and tooling out of the image build context.
+**/bin/
+**/obj/
+.config/
+.env
+.env.*
+!.env.example
+*.user

@@ -1,0 +1,69 @@
+# Compose derives the project name from this file's parent directory unless it
+# is set here, which would make every stack the project `compose`. `down`
+# removes everything carrying the project label rather than only the services
+# named in `-f`, so sharing one project is how `pnpm run test:integration` tears
+# down the running `pnpm run dev` stack.
+name: app
+
+services:
+  postgres:
+    # Fully qualified for the benefit of rootless podman on Linux, where the
+    # Fedora and RHEL defaults search several registries in order
+    # (`registry.fedoraproject.org` first) under `short-name-mode = enforcing`.
+    # There a short name resolves to whichever registry answers first, and an
+    # ambiguous one prompts on a TTY or fails without one.
+    image: docker.io/library/postgres:16-alpine
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+
+  # Backend service. Only started for a full-stack run (pnpm run stack:up); the
+  # dev database alone comes up via pnpm run db:up.
+  api:
+    build:
+      context: ../../services/api
+      dockerfile: Dockerfile
+    image: my-app-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      DATABASE_URL: postgresql://app:app@postgres:5432/app
+      Jwt__Secret: ${JWT_SECRET:-dev-only-secret-change-me-in-production-0123456789}
+      Cors__AllowedOrigins__0: http://localhost:5173
+      # Which version real users see. Runtime, never build-time: a deployment that
+      # cannot reach the package registry cannot rebuild itself, so a value baked into
+      # the bundle could never be changed in place. Moving it is this line plus an API
+      # restart, which is what makes prompt 06's flip one-line reversible.
+      PUBLIC_UI_VERSION: ${PUBLIC_UI_VERSION:-v1.0.0}
+    ports:
+      - "3000:8080"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/health/ready || exit 1"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+
+networks:
+  # Deliberately not pinned with `name:`. A fixed global name collides across
+  # two checkouts the same way `container_name:` did; the project prefix keeps
+  # them apart.
+  app-network:
+
+volumes:
+  postgres-data:

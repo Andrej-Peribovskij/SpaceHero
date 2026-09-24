@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>MyApp.Modules.Example.Application</RootNamespace>
+    <AssemblyName>MyApp.Modules.Example.Application</AssemblyName>
+  </PropertyGroup>
+
+  <!-- Application orchestrates Domain over the shared kernel. No framework, no EF. -->
+  <ItemGroup>
+    <ProjectReference Include="..\Domain\MyApp.Modules.Example.Domain.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\MyApp.BuildingBlocks.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,17 @@
+{
+  "name": "@my-app/e2e",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "echo \"e2e build not required\"",
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "echo \"e2e runs through 'pnpm run test:e2e' — it needs a database and two servers\""
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}

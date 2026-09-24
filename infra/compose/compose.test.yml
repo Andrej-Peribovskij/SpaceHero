@@ -1,0 +1,18 @@
+# Its own project, so `down` here cannot reach the dev or E2E stack. Without
+# it Compose names every stack after this file's parent directory, `compose`.
+name: app-test
+
+services:
+  postgres-test:
+    image: docker.io/library/postgres:16-alpine
+    environment:
+      POSTGRES_DB: app_test
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app_test"]
+      interval: 2s
+      timeout: 5s
+      retries: 10

@@ -1,0 +1,38 @@
+schema: spec-driven
+context: |
+  Full-stack web platform monorepo.
+  Read docs/architecture.md for system scope, module map, and boundaries.
+  Read docs/backend.md for backend implementation rules.
+  Read docs/frontend.apps.md for app-level frontend rules and docs/design-system.md for how the design system is consumed.
+  Read docs/testing.md for testing policy and minimum scenarios.
+  Read docs/glossary.md for canonical terminology.
+  Read docs/delivery.md for branching, commits, and PR conventions.
+rules:
+  proposal:
+    - Work on a feature branch before proposing a change. See docs/delivery.md#branching for the naming pattern and uncommitted-changes policy.
+    - Keep proposals concise; state the problem, the change, and why now.
+    - Length budget — target ≤ 40 lines. Sections — Why, What Changes, Capabilities, Impact. No restating tasks; no implementation detail that belongs in design.md.
+    - List affected areas broadly — which backend modules, frontend views, APIs, or data models change.
+    - Flag security or performance implications early if they exist.
+    - Note if the change introduces new domain terms, accepted shortcuts (tech debt), deferred capabilities (product debt), or architectural decisions (ADR).
+  specs:
+    - Use normative language (SHALL, MUST) and explicit Given-When-Then scenarios.
+    - Include both success and failure scenarios for each capability.
+    - Refer to domain concepts using glossary terms from docs/glossary.md.
+    - Length budget — target ≤ 80 lines per spec.md. One scenario per requirement (success + the most likely failure). No prose restating the requirement.
+    - Add a `Code:` line near the top of each spec pointing at the primary backend module path(s) and frontend view path(s) the spec governs, to give agents one-hop traceability.
+  design:
+    - Add a design doc only when the change involves architectural tradeoffs, cross-module coordination, security, performance, or non-obvious implementation choices.
+    - Note accepted tradeoffs and risks explicitly so they can feed docs/tech-debt/product-debt records.
+  tasks:
+    - Keep task groups small, ordered by dependency, and individually verifiable.
+    - Group tasks by vertical slice (deliverable / PR-sized unit), not by layer. A slice should be independently mergeable and leave the codebase in a working state.
+    - Length budget — target ≤ 30 task lines per slice. If a change needs more, split into multiple slices rather than one long list.
+    - Quality gates (`pnpm run build`, `pnpm run lint`, `pnpm run test`) appear once per slice — do not repeat the same gate as a separate bullet in every sub-section.
+    - Include test tasks covering the scenarios from the specs.
+    - Include a final verification group (build, lint, test).
+    - When a change introduces new domain terms, include a task to update docs/glossary.md.
+    - When a change accepts a known shortcut, include a task to add a docs/tech-debt/ record.
+    - When a change resolves tech debt, include a task to move the record to docs/tech-debt/archive/YYYY-MM-DD-<slug>.md.
+    - When a change defers user-facing functionality, include a task to add a docs/product-debt/ record.
+    - When a change resolves product debt, include a task to move the record to docs/product-debt/archive/YYYY-MM-DD-<slug>.md.

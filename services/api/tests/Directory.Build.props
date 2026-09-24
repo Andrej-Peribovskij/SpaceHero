@@ -1,0 +1,11 @@
+<Project>
+
+  <!-- Inherit the service-wide build rules, then relax test-only conventions. -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup>
+    <!-- Underscore-separated test method names are idiomatic and more readable. -->
+    <NoWarn>$(NoWarn);CA1707</NoWarn>
+  </PropertyGroup>
+
+</Project>

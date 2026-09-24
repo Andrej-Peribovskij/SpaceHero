@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>MyApp.Modules.Example.Contracts</RootNamespace>
+    <AssemblyName>MyApp.Modules.Example.Contracts</AssemblyName>
+  </PropertyGroup>
+
+  <!--
+    Contracts is the module's only cross-module surface (the public/* analog): the
+    stable types and ports other modules may depend on. It references nothing.
+  -->
+
+</Project>

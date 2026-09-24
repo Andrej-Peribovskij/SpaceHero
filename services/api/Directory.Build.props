@@ -1,0 +1,54 @@
+<Project>
+
+  <!--
+    Shared build rules for every .NET project in the repository.
+    Backend services live under services/*; this file governs all of them.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+
+    <!-- Boundaries and quality are enforced by the build, not by convention. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!--
+      EnableGenerateDocumentationFile: not a code problem, a nudge. .editorconfig sets IDE0005
+      (unnecessary usings) to `warning`, and the compiler answers that it cannot run IDE0005 unless
+      GenerateDocumentationFile is true, as an error, because warnings are errors here. Enabling doc
+      generation to satisfy it writes an XML file per project into the publish output for
+      applications nothing references as a library, and surfaces every undocumented public member
+      and broken `see cref` at once. `dotnet format` runs IDE0005 without any of that, and the lint
+      gate runs `dotnet format` in verify mode, so the rule is still enforced on every change, by
+      the lint gate rather than by the compiler.
+    -->
+    <NoWarn>$(NoWarn);EnableGenerateDocumentationFile</NoWarn>
+
+    <!-- Central package management + reproducible restores. -->
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <!--
+      Vulnerability audit, stated rather than inherited. All three are SDK defaults on current
+      .NET, and docs/dependencies.md cites them as the automated half of the dependency policy,
+      which is what lets first-party platform packages skip a manual licence review. A policy
+      resting on an unstated default is a policy that changes when the default does. `all` audits
+      transitive packages too, which is where an advisory usually arrives; with warnings as errors
+      above, NU1901 through NU1904 fail the build.
+
+      That is deliberate, and it means an advisory published against a package nobody here
+      chose can break every build overnight. The sanctioned unblock is one NuGetAuditSuppress
+      entry for that single advisory, commented with the package, the advisory URL and what
+      removes it, not a lower NuGetAuditLevel and not a wider WarningsNotAsErrors. See
+      docs/dependencies.md, rule 6.
+    -->
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <NuGetAuditLevel>low</NuGetAuditLevel>
+
+    <IsPackable>false</IsPackable>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+</Project>

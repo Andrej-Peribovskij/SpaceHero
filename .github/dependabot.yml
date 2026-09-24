@@ -1,0 +1,137 @@
+version: 2
+
+# The scheduled question "is there a newer one", asked by a robot so nobody has
+# to remember to ask it. It is deliberately not the *other* question — "should
+# this project move" — which is a person's, and which the design system's
+# CHANGELOG is what answers.
+#
+# The design system is on GitHub Packages, so npm updates need a credential.
+# Dependabot cannot use the built-in GITHUB_TOKEN for this: it runs with its own
+# secret store, and the token below is a Dependabot secret set in the repository
+# or organisation settings (Settings → Secrets and variables → Dependabot), a
+# personal access token with `read:packages`.
+#
+# That secret is a precondition for the whole npm entry, not a nicety for part
+# of it. An earlier version of this comment claimed the npm ecosystem still ran
+# for everything on the public registry and only left @ptv-mobility unchecked.
+# It does not. Measured on 2026-09-22, with no Dependabot secret set on this
+# repository: twenty-one workspace packages were behind (`pnpm outdated`),
+# several of them inside the groups below; the npm ecosystem had opened nothing
+# at all; and nuget and github-actions — the two entries with no `registries:`
+# block — had six pull requests open between them.
+#
+# So until somebody provisions DEPENDABOT_PACKAGES_TOKEN, this repository gets
+# no npm updates of any kind, public ones included. That is a tracked gap:
+# docs/tech-debt/no-dependabot-npm-updates.md.
+
+registries:
+  github-packages:
+    type: npm-registry
+    url: https://npm.pkg.github.com
+    token: ${{ secrets.DEPENDABOT_PACKAGES_TOKEN }}
+
+updates:
+  # Node — the workspace root covers every package in pnpm-workspace.yaml.
+  - package-ecosystem: npm
+    directory: /
+    registries:
+      - github-packages
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    open-pull-requests-limit: 5
+    groups:
+      # One pull request for the things that only ever move together. A separate
+      # PR per @types package is noise nobody reads, which is how a dependency
+      # bot stops being read at all.
+      design-system:
+        patterns:
+          - "@ptv-mobility/*"
+      react:
+        patterns:
+          - react
+          - react-dom
+          - "@types/react"
+          - "@types/react-dom"
+      testing:
+        patterns:
+          - vitest
+          - "@vitest/*"
+          - "@testing-library/*"
+          - "@playwright/*"
+          - jsdom
+          - msw
+      build-tooling:
+        patterns:
+          - vite
+          - "@vitejs/*"
+          - typescript
+          - tailwindcss
+          - "@tailwindcss/*"
+    commit-message:
+      prefix: "chore(deps)"
+
+  # .NET. The backend is not an npm workspace, so it is its own entry.
+  - package-ecosystem: nuget
+    directory: /services/api
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    open-pull-requests-limit: 5
+    groups:
+      # The platform packages move as a release train; one at a time would be
+      # both wrong and unreadable. docs/dependencies.md pre-approves this class.
+      #
+      # No pattern here carries a dot before the `*`, and that is the whole
+      # lesson of the first version of this file. `Microsoft.EntityFrameworkCore.*`
+      # matches `Microsoft.EntityFrameworkCore.Design` but not the bare
+      # `Microsoft.EntityFrameworkCore`, so the one package the train exists for
+      # arrived in a pull request of its own, and the five ungrouped pull
+      # requests that resulted used up `open-pull-requests-limit` — which is why
+      # xunit.runner.visualstudio 4.0.0 was never proposed at all. A prefix with
+      # no dot matches the bare name and the dotted children both.
+      dotnet-platform:
+        patterns:
+          - "Microsoft.AspNetCore*"
+          - "Microsoft.EntityFrameworkCore*"
+          - "Microsoft.Extensions*"
+          - "Microsoft.OpenApi*"
+          - "Npgsql.EntityFrameworkCore*"
+          - "System.*"
+          # The EF Core tool in .config/dotnet-tools.json. Its version has to be
+          # the EF Core version, so it can never be a pull request of its own.
+          - "dotnet-ef"
+      # The test stack is on its own cadence and reaches no runtime assembly.
+      dotnet-testing:
+        patterns:
+          - "Microsoft.NET.Test.Sdk"
+          - "xunit*"
+      #
+      # Microsoft.IdentityModel.* is in no group on purpose. It is not on the
+      # .NET release train — 8.x against the platform's 10.x — and its version
+      # here is not chosen but derived: it is whatever the JwtBearer validation
+      # stack already resolves, so that signing and validation share one
+      # assembly set. Accepting a bump means checking what the current
+      # Microsoft.AspNetCore.Authentication.JwtBearer actually depends on, so it
+      # is a pull request of its own by design, not by accident. The pin and its
+      # reasoning are in services/api/Directory.Packages.props.
+    commit-message:
+      prefix: "chore(deps)"
+
+  # The workflows themselves. A pinned action that stops being maintained is
+  # the kind of thing nobody notices until it breaks.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    groups:
+      actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "chore(ci)"

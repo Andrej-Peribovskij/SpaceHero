@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>MyApp.Modules.Example.Domain</RootNamespace>
+    <AssemblyName>MyApp.Modules.Example.Domain</AssemblyName>
+  </PropertyGroup>
+
+  <!--
+    Domain references only the framework-neutral shared kernel. It must never
+    reference ASP.NET, EF Core, or any other module; an architecture test enforces this.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\MyApp.BuildingBlocks.csproj" />
+  </ItemGroup>
+
+</Project>

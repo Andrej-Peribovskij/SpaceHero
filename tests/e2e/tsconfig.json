@@ -1,0 +1,16 @@
+{
+  // Type-checked by `pnpm run typecheck` like every other package — `lint` is
+  // ESLint and sees no types. Nothing is emitted here: Playwright compiles
+  // these files itself when it runs them.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Playwright resolves imports the way a bundler does, so relative imports
+    // here are extensionless. `Node16` would demand `.js` on every one of them
+    // and describe a module graph that is not the one Playwright loads.
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["**/*.ts"]
+}

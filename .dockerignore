@@ -1,0 +1,48 @@
+# Version control
+.git/
+.gitignore
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Build artifacts.
+# Note the `**/` on every recursive pattern: .dockerignore is not .gitignore, so
+# a bare `dist/` matches only the context root and would let `apps/web/dist/`
+# through. The .NET patterns below always had it; these did not, which let a
+# developer's own node_modules overwrite the image's and broke `image:web` on
+# any machine that had run `pnpm install` first.
+**/dist/
+**/coverage/
+**/test-results/
+**/playwright-report/
+
+# .NET build output
+**/bin/
+**/obj/
+
+# Tool caches
+**/.cache/
+.docker-cache/
+.eslintcache
+**/.vite/
+**/node_modules/
+
+# Non-build directories
+docs/
+openspec/
+process/
+design-commands/
+tools/
+tests/
+.github/
+.claude/
+.context/
+
+# Local artifacts
+*.log
+.DS_Store
+.vscode/
+.idea/

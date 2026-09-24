@@ -1,0 +1,18 @@
+# Its own project and its own port, so a browser run never shares a database
+# with `pnpm run dev` or with the integration suite.
+name: app-e2e
+
+services:
+  postgres-e2e:
+    image: docker.io/library/postgres:16-alpine
+    environment:
+      POSTGRES_DB: app_e2e
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app_e2e"]
+      interval: 2s
+      timeout: 5s
+      retries: 10

@@ -1,0 +1,21 @@
+{
+  "name": "@my-app/schemas",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "types": "./src/api-v1.d.ts",
+  "exports": {
+    "./api-v1": {
+      "types": "./src/api-v1.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "openapi-typescript openapi/api-v1.json -o src/api-v1.d.ts",
+    "lint": "echo \"schemas lint not required\"",
+    "test": "echo \"schemas test not required\""
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.13.0",
+    "typescript": "^5.7.2"
+  }
+}

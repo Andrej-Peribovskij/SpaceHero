@@ -1,0 +1,81 @@
+<Project>
+
+  <!--
+    Central NuGet version management. Every PackageVersion here is pinned and
+    license-reviewed per docs/dependencies.md. Projects reference packages with
+    <PackageReference Include="..." /> (no Version attribute).
+  -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <!-- Let this file also pin transitive dependencies (e.g. for security patches). -->
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Authentication: validate JWT bearer tokens at the HTTP boundary. MIT. -->
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.12" />
+    <!--
+      Sign access tokens (JsonWebTokenHandler). MIT. Test-only today: the integration
+      suite mints a bearer token for the capability-gated endpoints. An identity module
+      that issues real tokens would reference it from Infrastructure too. Pinned to the
+      version the JwtBearer validation stack already resolves, so signing and validation
+      share one Microsoft.IdentityModel assembly set with no version unification.
+
+      The pin follows; it does not lead. Microsoft.AspNetCore.Authentication.JwtBearer
+      10.0.12 depends on Microsoft.IdentityModel.Protocols.OpenIdConnect 8.19.2, so 8.19.2
+      is what the validation half resolves. Measured on 2026-09-22: raising this one entry
+      to 8.23.0 on its own took Tokens, Logging and Abstractions to 8.23.0 and left
+      Protocols and Protocols.OpenIdConnect at 8.19.2 — precisely the split set the pin
+      exists to prevent. It moves when JwtBearer's floor moves and not before, which is
+      why .github/dependabot.yml keeps Microsoft.IdentityModel.* out of every group: the
+      bump needs somebody to read JwtBearer's dependencies first.
+    -->
+    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.19.2" />
+
+    <!-- OpenAPI: runtime document + build-time snapshot generation. MIT. -->
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.12" />
+    <!--
+      Transitive pin: Microsoft.OpenApi 2.0.0 (pulled by AspNetCore.OpenApi) carries a
+      high-severity advisory (GHSA-v5pm-xwqc-g5wc). Hold the latest patched 2.x, which
+      stays ABI-compatible with the ASP.NET Core OpenAPI integration. 3.x is out of range
+      and not a candidate: AspNetCore.OpenApi 10.0.12 asks for [2.12.0, 3.0.0).
+
+      That lower bound is the other half of this pin, and it bites. Holding 2.11.0 held
+      Microsoft.AspNetCore.OpenApi and Microsoft.Extensions.ApiDescription.Server at
+      10.0.10 while the rest of the platform moved to 10.0.12 — which is why the grouped
+      Dependabot pull request carried four packages and not six. A pin on a transitive
+      package is a constraint on its parents too; raise it in the same change.
+    -->
+    <PackageVersion Include="Microsoft.OpenApi" Version="2.12.2" />
+
+    <!--
+      Persistence: EF Core with the Npgsql PostgreSQL provider. MIT / PostgreSQL.
+      Npgsql 10.0.3 asks for Microsoft.EntityFrameworkCore and .Relational in
+      [10.0.4, 11.0.0), so EF Core rides the 10.0.x patch train inside that range and one
+      Relational assembly still resolves under the provider. Npgsql is the ceiling: when
+      it takes a major, EF Core waits for it. dotnet-ef in .config/dotnet-tools.json is
+      the same version by necessity and moves in the same pull request.
+    -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+
+    <!-- Testing: xUnit + the .NET test SDK. Apache-2.0 / MIT. -->
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
+    <!--
+      FakeTimeProvider: the platform's own test double for TimeProvider, which is what this
+      template injects instead of a hand-rolled IClock. Advances on demand and virtualises timers,
+      so anything built on PeriodicTimer is testable without waiting in real time. MIT, Microsoft,
+      on the .NET 10 release train, no native asset: the pre-approved tier in
+      docs/dependencies.md, so no licence review. Test-only; never reaches the runtime image.
+    -->
+    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.10.0" />
+
+    <!-- Integration tests host the app in-process. MIT. -->
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.12" />
+  </ItemGroup>
+
+</Project>
