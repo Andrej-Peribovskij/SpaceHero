@@ -30,7 +30,7 @@
       why .github/dependabot.yml keeps Microsoft.IdentityModel.* out of every group: the
       bump needs somebody to read JwtBearer's dependencies first.
     -->
-    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.19.2" />
+    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.23.0" />
 
     <!-- OpenAPI: runtime document + build-time snapshot generation. MIT. -->
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
