@@ -11,7 +11,7 @@ Chapter outlines live beside it: [Chapter 1](chapter-01.md).
 - The present is **158 A.D. — After Diaspora** — the year 2705 of the old
   calendar.
 - The Sun is brightening far faster than predicted. Under the rule of the
-  corporations and following the plan of **the A.I.**, humanity built a
+  corporations and following the plan of the A.I. **Solar**, humanity built a
   corridor of stations outward and colonized the moons of Jupiter. The mass
   exodus — the Diaspora — began in 2547.
 - Earth is not fully abandoned: some people chose to stay. Civilization is
@@ -62,11 +62,11 @@ The universe is never a joke; its inhabitants frequently are.
 |--------------|----------|-------|
 | 2138 | 409 B.D. | **The anomaly is identified.** The Sun's behaviour departs from every model: it is brightening, much faster than calculations expected. |
 | 2251 | 296 B.D. | **The corporations unify the world** under their rule. |
-| 2256 | 291 B.D. | **The A.I. produces the plan** for evacuating humanity. Colonization starts soon after. |
+| 2256 | 291 B.D. | **The A.I. Solar produces the plan** for evacuating humanity. Colonization starts soon after. |
 | 2312 | 235 B.D. | **Externa is founded on Deimos**, one of the first commercial hubs outside Internal Space. Colonization of the Martian surface follows. |
 | 2389 | 158 B.D. | **Steady Foot**, the first deep-space stationary station, is built on a Lagrange point on the inner side of the asteroid belt. Externa begins to be called **Externa Prima**. |
 | 2427 | 120 B.D. | **Steady Hand**, the first space station outside the belt. |
-| c. 2487–2497 | c. 60–50 B.D. | **First colonization attempts on Ganymede.** |
+| c. 2487–2497 | c. 60–50 B.D. | **First colonization attempts on Ganymede** — by androids, sent before any human. |
 | 2492 | 55 B.D. | Using the corridor of stations, the first manned mission lands on Callisto and founds **Alba**. |
 | 2502 | 45 B.D. | **New Hope**, the first colony on Europa. |
 | 2514 | 33 B.D. | **Sola**, the first colony on Io. |
@@ -116,8 +116,10 @@ them, decided in real time.
   worth it for two reasons: energy harvested from Io's electrical link to
   Jupiter, and mining.
 - **Ganymede** — closed to mass human colonization. Attempts began as early as
-  c. 60–50 B.D.; after many attempts and expeditions the government precluded
-  it, and the decision became public in 31 B.D. The real reason is unknown.
+  c. 60–50 B.D. — and for some reason, androids were sent there before humans,
+  even before the first manned landing on Callisto. After many attempts and
+  expeditions the government precluded it, and the decision became public in
+  31 B.D. The real reason is unknown.
   *(proposal)* Scientifically, Ganymede is the best candidate after Callisto —
   it is the only moon with its own magnetic field — so the official verdict does
   not add up. Whatever stopped the colonists may be tied to the invaders.
@@ -125,13 +127,21 @@ them, decided in real time.
 ## Powers
 
 **The government.** Since 2251 the world — and so everything humanity has
-built since — has been ruled by the corporations.
+built since — has been ruled by the corporations, the zaibatsu. They act like a
+cartel, and some say there is really only **One corporation**: speaking of many
+is simply more reassuring for the civilians.
 
-**The A.I.** The system that produced the evacuation plan in 2256. It still
-exists, on Earth, owned by the corporations, and is the major AI system in the
-known universe. Minor AI systems run in stations, colonies, and cities.
-*(proposal)* The minor systems compute the Corridor's routes, so whoever
-controls them controls where every ship goes.
+**Solar**, the A.I. The system that produced the evacuation plan in 2256. Its
+name remembers the collective effort of all the zaibatsu together to find a
+solution to the solar issue. It still exists, on Earth, owned by the zaibatsu
+collectively, and is the major AI system in the known universe. Minor AI
+systems run in stations, colonies, and cities. *(proposal)* The minor systems
+compute the Corridor's routes, so whoever controls them controls where every
+ship goes.
+
+**Androids.** Sent to Ganymede before humans, for reasons not publicly known.
+*(proposal)* Their place in 158 A.D. society — common workers, rare relics, or
+something regulated since Ganymede — is open.
 
 **Absolute Connections.** A big space corporation — a zaibatsu — with offices in
 Externa Prima. Joe's contract obliges him to report there for his next mission.
@@ -184,10 +194,9 @@ inside.
   is trying to kill Joe *before* he reaches the office? *(proposal)* Other
   infected hosts acting without coordination — the parasite is not one mind —
   or a direct attempt, with Danny's mission as the fallback.
-- **Ganymede:** the early attempts (c. 60–50 B.D.) overlap the first manned
-  landing in the Jupiter system, on Callisto in 55 B.D. Were the earliest
-  Ganymede attempts robotic, or did someone land there first — off the record?
-- **The A.I.:** does it have a name? Is it owned by the corporations
-  collectively, or by one of them — Absolute Connections?
+- **Ganymede:** why were androids sent before humans, and what happened to
+  them?
+- **Sola and Solar:** is the Io colony named after the A.I. *(proposal: yes —
+  founded in its honour)*, or is the echo a coincidence to avoid?
 - The class of the Phaselus.
 - What the suicide mission is.
