@@ -19,6 +19,12 @@ design versions — the seven prompts, their templates and the exporter.
 - `dependencies.md`: third-party licensing policy — required reading before
   adding any package, font, image, or model
 
+## Game Content
+
+- `story/README.md`: the story bible — setting, timeline, characters, tone. Game
+  content is held to it
+- `story/chapter-01.md`: Chapter 1 beats and the game mode each one uses
+
 ## The Design Layer
 
 The conventions the design → code process is held to. The process itself —
