@@ -8,13 +8,17 @@ Chapter outlines live beside it: [Chapter 1](chapter-01.md).
 
 ## Quick Scan
 
-- The present is the year **158 A.D. — After Diaspora**.
-- The Sun brightened far faster than predicted. The habitable zone moved
-  outward, and humanity moved with it: from Earth to the major moons of Jupiter.
-- Earth is not fully abandoned. Civilization is spread across the space between
-  Earth and Jupiter.
+- The present is **158 A.D. — After Diaspora** — the year 2705 of the old
+  calendar.
+- The Sun is brightening far faster than predicted. Under the rule of the
+  corporations and following the plan of **the A.I.**, humanity built a
+  corridor of stations outward and colonized the moons of Jupiter. The mass
+  exodus — the Diaspora — began in 2547.
+- Earth is not fully abandoned: some people chose to stay. Civilization is
+  spread across the space between Earth and Jupiter.
 - Mars is the waypoint of the Diaspora. Its oldest hub, **Externa Prima**, is a
-  city on Deimos.
+  city on Deimos almost four centuries old.
+- Ganymede is closed to colonization, for reasons never made public.
 - The protagonist is **Joe Sick**: very young, the best pilot in the solar
   system, and so lazy that he only ever gets small jobs. He is also the only
   one who can beat the coming alien invaders — which is why they want him dead.
@@ -31,35 +35,52 @@ canon.
 The universe is never a joke; its inhabitants frequently are.
 
 - **Serious:** the stakes, the history, and the danger are played straight. The
-  Brightening displaced billions; the Earth holdouts are really suffering; the
+  Brightening uprooted humanity; those who stayed on Earth really struggle; the
   attacks on Joe are really lethal.
 - **Nonsense and humor are welcome** and come from people and institutions:
   bureaucracy, corporate slogans, signage, machines with opinions, and Joe's
-  talent for finding the least effortful way through any problem.
-- **Old Earth, misremembered** *(proposal)*: after 158 years, 21st-century
+  talent for finding the least effortful way through any problem. The world
+  takes itself seriously enough to call a slice of one solar system "the known
+  universe".
+- **Old Earth, misremembered** *(proposal)*: after seven centuries, 21st-century
   culture survives as garbled relics — sayings, brands, and customs whose
   original meaning is lost. A rich source of jokes that stays inside the world.
 - **Avoid:** winking at the player and present-day pop-culture references.
 
 ## Calendar
 
-- **A.D.** means **After Diaspora**, reusing the old abbreviation.
-- **Year 0** is when people began migrating from Earth to populate the major
-  moons of Jupiter.
+- **A.D.** means **After Diaspora** and **B.D.** means **Before Diaspora**,
+  reusing and mirroring the old abbreviation.
+- **0 A.D.** is the year 2547 of the old calendar: the start of the Diaspora,
+  the mass exodus of humanity from Earth. It is not the start of colonization,
+  which began almost three centuries earlier.
+- Conversion: A.D. year = old year − 2547; B.D. year = 2547 − old year.
 
 ## Timeline
 
-| When | Event |
-|------|-------|
-| Before 0 A.D. | **The Brightening.** The Sun's output rises much faster than calculations expected. Earth becomes progressively hostile. |
-| 0 A.D. | **The Diaspora begins.** The first migrations leave Earth for the major moons of Jupiter. |
-| Early A.D. | **Externa** is founded on Deimos — one of the first commercial hubs outside Internal Space, and the natural stop on the route to Jupiter. |
-| Later | More stations are founded outside the Internal Belt; Externa becomes **Externa Prima**. |
-| 158 A.D. | The present. Chapter 1. |
+| Old calendar | Diaspora | Event |
+|--------------|----------|-------|
+| 2138 | 409 B.D. | **The anomaly is identified.** The Sun's behaviour departs from every model: it is brightening, much faster than calculations expected. |
+| 2251 | 296 B.D. | **The corporations unify the world** under their rule. |
+| 2256 | 291 B.D. | **The A.I. produces the plan** for evacuating humanity. Colonization starts soon after. |
+| 2312 | 235 B.D. | **Externa is founded on Deimos**, one of the first commercial hubs outside Internal Space. Colonization of the Martian surface follows. |
+| 2389 | 158 B.D. | **Steady Foot**, the first deep-space stationary station, is built on a Lagrange point on the inner side of the asteroid belt. Externa begins to be called **Externa Prima**. |
+| 2427 | 120 B.D. | **Steady Hand**, the first space station outside the belt. |
+| c. 2487–2497 | c. 60–50 B.D. | **First colonization attempts on Ganymede.** |
+| 2492 | 55 B.D. | Using the corridor of stations, the first manned mission lands on Callisto and founds **Alba**. |
+| 2502 | 45 B.D. | **New Hope**, the first colony on Europa. |
+| 2514 | 33 B.D. | **Sola**, the first colony on Io. |
+| 2516 | 31 B.D. | **The Ganymede decision becomes public.** After many attempts and expeditions, the government had decided to preclude Ganymede from mass human colonization. It is officially declared not suitable. |
+| 2547 | 0 A.D. | **The Diaspora begins.** |
+| 2705 | 158 A.D. | The present. Chapter 1. |
+
+Steady Foot was built 158 years before the Diaspora; the game opens 158 years
+after it.
 
 ## The Solar System
 
-**Earth.** Not completely abandoned: some people still struggle there.
+**Earth.** Not completely abandoned. Many people remain simply because they do
+not want to leave, and they struggle there.
 
 **Internal Space**, also called the **Internal Belt**. Earth and the space
 gravitating around it — the old core of civilization. The two names are
@@ -69,21 +90,48 @@ interchangeable.
 magnetic field, so surface life stays sheltered. Its value is position: it is
 the waypoint between Earth and Jupiter. Joe lives on the surface.
 
-- **Deimos** hosts **Externa Prima**: low gravity, cheap docking, just outside
-  Mars's stationary orbit. What began as a commercial hub is now a big city.
-- **Phobos** *(proposal)*: the abandoned Phobos yards, emptied before the moon's
-  slow fall toward Mars.
+- **Deimos** hosts **Externa Prima**, founded in 2312: low gravity, cheap
+  docking, just outside Mars's stationary orbit. What began as a commercial hub
+  is now a big city.
+- **Phobos** has never been officially colonized, but it is animated, so to
+  speak, by unofficial routes.
 
-**The space between** Earth and Jupiter holds a spread-out civilization of
-stations and outposts.
+**The Corridor** *(proposal: the name)*. Stationary stations on Lagrange points
+between Mars and Jupiter. Steady Foot and Steady Hand came first; many others
+followed. Today the shortest path between any two points traverses a subset of
+them, decided in real time.
+
+- *(proposal)* Steady Foot sits at a Sun–Mars L4/L5 point, among the Mars
+  trojans; Steady Hand at a Sun–Jupiter L4/L5 point, among the Jupiter trojans.
+- *(proposal)* The stations move with their planets, so the Corridor's
+  geometry keeps changing — which is why routes must be computed in real time.
 
 **Jupiter** — the destination of the Diaspora.
 
-- **Callisto** *(proposal)*: the main colony, because it orbits outside
-  Jupiter's deadly radiation belts.
-- **Io and Europa** *(proposal)*: dangerous frontier for later chapters.
+- **Callisto** — **Alba**, founded 2492, the first colony in the Jupiter system.
+  *(proposal)* It orbits outside Jupiter's deadly radiation belts, which is why
+  it came first.
+- **Europa** — **New Hope**, founded 2502.
+- **Io** — **Sola**, founded 2514. The most hostile of the colonized moons,
+  worth it for two reasons: energy harvested from Io's electrical link to
+  Jupiter, and mining.
+- **Ganymede** — closed to mass human colonization. Attempts began as early as
+  c. 60–50 B.D.; after many attempts and expeditions the government precluded
+  it, and the decision became public in 31 B.D. The real reason is unknown.
+  *(proposal)* Scientifically, Ganymede is the best candidate after Callisto —
+  it is the only moon with its own magnetic field — so the official verdict does
+  not add up. Whatever stopped the colonists may be tied to the invaders.
 
-## Organizations
+## Powers
+
+**The government.** Since 2251 the world — and so everything humanity has
+built since — has been ruled by the corporations.
+
+**The A.I.** The system that produced the evacuation plan in 2256. It still
+exists, on Earth, owned by the corporations, and is the major AI system in the
+known universe. Minor AI systems run in stations, colonies, and cities.
+*(proposal)* The minor systems compute the Corridor's routes, so whoever
+controls them controls where every ship goes.
 
 **Absolute Connections.** A big space corporation — a zaibatsu — with offices in
 Externa Prima. Joe's contract obliges him to report there for his next mission.
@@ -136,6 +184,10 @@ inside.
   is trying to kill Joe *before* he reaches the office? *(proposal)* Other
   infected hosts acting without coordination — the parasite is not one mind —
   or a direct attempt, with Danny's mission as the fallback.
-- Year 0 in the old calendar, and how long the Brightening took.
+- **Ganymede:** the early attempts (c. 60–50 B.D.) overlap the first manned
+  landing in the Jupiter system, on Callisto in 55 B.D. Were the earliest
+  Ganymede attempts robotic, or did someone land there first — off the record?
+- **The A.I.:** does it have a name? Is it owned by the corporations
+  collectively, or by one of them — Absolute Connections?
 - The class of the Phaselus.
 - What the suicide mission is.
