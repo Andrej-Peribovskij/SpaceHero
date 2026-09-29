@@ -99,7 +99,8 @@ Actions access to this repository. That grant is a manual step in the package's
 settings, once per consuming repository; there is no API for it. A repository
 outside the package's organisation cannot receive the grant, so it sets a
 `DS_READ_TOKEN` repository secret instead, which the install step prefers — see
-`tech-debt/design-system-token-secret.md`.
+`tech-debt/design-system-token-secret.md`. Set it as a Dependabot secret too:
+runs Dependabot triggers cannot read Actions secrets.
 
 `pnpm run image:web` passes `$NODE_AUTH_TOKEN` to the build as a BuildKit
 secret. It is never a build argument and never lands in a layer. On Windows that
