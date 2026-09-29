@@ -27,20 +27,22 @@ Beats 0, 1 and 6 follow canon; beats 2–5 are *(proposal)*.
 
 | # | Beat | Mode | Summary |
 |---|------|------|---------|
-| 0 | Intro | Narrated sequence | The history of the Brightening and the Diaspora, ending on Mars in 158 A.D. |
+| 0 | Intro | Narrated sequence | An Absolute Connections contractor orientation video: the history of the Brightening and the Diaspora as the corporations tell it, ending on Mars in 158 A.D. Joe sleeps through it. Script: [Beat 0](chapter-01-intro.md). |
 | 1 | Lazy days | Adventure | Joe on the Mars surface. The job is due; he is not ready. Tutorial scene. First sign that someone has been asking about him. |
 | 2 | Ascent | Action | Launch toward Deimos. Something follows him up. First shooter encounter — short, and Joe is outgunned but a better pilot. |
 | 3 | The docks | Adventure | Arrival at Externa Prima. Customs holds his papers; a dock worker warns him; information in the bar costs money. |
 | 4 | Crossing the city | Strategy | Choose the route to the Absolute Connections offices: public transit (fast, exposed), maintenance tunnels (slow, need a key or a favor), or the outer hull on a work sled (risky, unexpected). Credits and time are limited. |
 | 5 | The attack | Action | The pursuers strike along the chosen route. Their technology is not quite human. |
-| 6 | Absolute Connections | Adventure | Joe reaches the offices. High agent **Danny Mellow** — secretly infected by an alien parasite — assigns him his next mission: a suicide mission dressed up as a routine job. Hook for Chapter 2. |
+| 6 | Absolute Connections | Adventure | Joe reaches the offices, where the orientation's motif plays again. High agent **Danny Mellow** — secretly infected by an alien parasite — assigns him his next mission: a suicide mission dressed up as a routine job. Hook for Chapter 2. |
 
 ## Clues
 
 Joe is the target because he is the only one who can beat the invaders. Joe
 does not learn this in Chapter 1; the player may start to suspect it.
-*(proposal)* Clues planted along the way:
+Clues planted along the way, all *(proposal)* except beat 0:
 
+- Beat 0: the orientation video glitches, and its music drops out, on the one
+  line about Ganymede.
 - Beat 1: whoever was asking about Joe knew his flight record, not just his
   name — odd interest in a courier who only does little jobs.
 - Beat 5: the attackers' not-quite-human technology, and their fixation on Joe
