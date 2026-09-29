@@ -24,6 +24,8 @@ design versions — the seven prompts, their templates and the exporter.
 - `story/README.md`: the story bible — setting, timeline, characters, tone. Game
   content is held to it
 - `story/chapter-01.md`: Chapter 1 beats and the game mode each one uses
+- `story/chapter-01-intro.md`: the script of Chapter 1's intro — the
+  corporate orientation video
 
 ## The Design Layer
 
