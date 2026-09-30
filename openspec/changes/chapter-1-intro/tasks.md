@@ -36,18 +36,22 @@ Story note (the ending):
 
 - [x] 1.24 Card 10 becomes a captionless snore, and card 11 the Module 2 ident (*What's the Drill*), whole, with **PRESS ANY KEY TO CONTINUE ORIENTATION**; the story script, spec, glossary and product-debt record follow
 
-## 2. Slice 2: pixel art and the Ganymede glitch
+## 2. Slice 2: animated pixel art and the Ganymede glitch
 
-- [ ] 2.1 Add `views/intro/art/palette.ts`: one shared palette, 16 colours or fewer, written as hex, with a comment pointing at design §4
-- [ ] 2.2 Add a grid parser that validates each grid: 96×54, only palette characters, and a clear error naming the card and row
-- [ ] 2.3 Unit-test the parser: a valid grid; a wrong row width; an unknown character
-- [ ] 2.4 Add the pixel canvas component: smoothing off, integer scale, `image-rendering: pixelated`, and a text alternative from the script's image line
-- [ ] 2.5 Draw cards 0–11 as grids in `views/intro/art/cards/`, following the script's Image column. Silhouettes first, one card per file
-- [ ] 2.6 Add a test that every card's grid parses and that there is exactly one grid per script card
-- [ ] 2.7 Glitch: exactly two painted frames of deterministic corruption (row shifts and palette swap) on the glitch event, skipped under reduced motion (design §6)
-- [ ] 2.8 Glitch tests: two corrupted frames then normal; no corruption under reduced motion; card 7 keeps its normal timing
-- [ ] 2.9 Replace the slice 1 placeholders with the canvas
-- [ ] 2.10 Gate: `pnpm run verify` and `pnpm run test:e2e` pass
+- [x] 2.1 Add `views/intro/art/palette.ts`: one shared palette of 16 colours or fewer, written as hex, plus the twinkle cycles (design §3, §4)
+- [x] 2.2 Add the grid parser: 96×54 backgrounds, square sprites (`_` transparent) and flipbooks of same-size frames, only palette or cycle characters, with an error naming the art and row
+- [x] 2.3 Unit-test the parser: a valid grid; a wrong row count; a wrong row width; an unknown character; flipbook frames and a mismatched frame
+- [x] 2.4 Add the pure renderer: background, palette cycling, sprites rotated by stepped nearest-neighbour rotation, flipbooks, and a still frame at time 0
+- [x] 2.5 Unit-test the renderer: a cycle changes colour over time; a sprite is unrotated at time 0 and turned a quarter at a quarter turn; transparent sprite pixels show the background; a flipbook steps, wraps and runs backwards
+- [ ] 2.6 Add the pixel canvas: repaints at 12 fps, smoothing off, `image-rendering: pixelated`, holds still under reduced motion, and keeps the script's image line as its text alternative
+- [ ] 2.7 Draw card 0, reused by card 11: twinkling stars, the four-colour square turning clockwise, and the white dial turning anticlockwise as a 16-frame flipbook (1.25×, 64 steps)
+- [ ] 2.8 Draw cards 1–10 as art in `views/intro/art/cards/`, following the script's Image column. Silhouettes first, one card per file
+- [ ] 2.9 Add a test that every card's art parses and that every script card has art
+- [ ] 2.10 Glitch: exactly two painted frames of deterministic corruption (row shifts and palette swap) on the glitch event, skipped under reduced motion (design §6)
+- [ ] 2.11 Glitch tests: two corrupted frames then normal; no corruption under reduced motion; card 7 keeps its normal timing
+- [ ] 2.12 Replace the slice 1 placeholders with the canvas
+- [ ] 2.13 Review follow-ups from PR #8: set React state only when the rendered projection changes; precompute card timings once; one "whole caption" rule in `visibleChars`
+- [ ] 2.14 Gate: `pnpm run verify` and `pnpm run test:e2e` pass
 
 ## 3. Slice 3: the orientation music
 

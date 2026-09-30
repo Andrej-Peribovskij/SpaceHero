@@ -34,14 +34,48 @@ reuse of the motif outside the intro.
    a browser. The alternative, CSS animations with `animationend` handlers,
    hides the timing in stylesheets and cannot be tested in jsdom.
 
-3. **Pixel art as character grids.** Each card is 96×54 pixels (16:9), written
-   as rows of single characters that index one shared palette of 16 colours or
-   fewer. It is painted to a `<canvas>` with smoothing off and shown at an
-   integer scale with `image-rendering: pixelated`. A diff of a card shows
-   which pixels changed. Alternatives:
-   - PNGs: binary, and cannot be reviewed.
-   - SVG `<rect>` per pixel: about 5,000 DOM nodes per card.
-   - Procedural drawing: compact, but cannot be edited pixel by pixel.
+3. **Animated pixel art, kept as character grids.** Each card is 96×54 pixels
+   (16:9). Its art is data, written as rows of single characters that index one
+   shared palette of 16 colours or fewer, so a diff of a card shows which pixels
+   changed. The cards move, because this is a video game and not a slideshow.
+   Movement comes from three techniques that 8-bit hardware used, and each keeps
+   the art as data:
+   - **Background:** a 96×54 grid.
+   - **Palette cycling:** some characters name a *cycle*, a sequence of palette
+     colours stepped over time, instead of a single colour. Stars twinkle this
+     way: no pixel moves, their colour changes. Six cycles run out of phase with
+     each other, so the stars don't blink in unison.
+   - **Rotating sprites:** small square grids, with `_` for a transparent
+     pixel, turned about a centre at a set speed and direction. The angle is
+     rounded to a fixed number of steps per turn, and the rotation is
+     nearest-neighbour: each screen pixel looks up the sprite pixel that lands
+     on it, so rotated sprites keep hard pixel edges. This suits chunky shapes
+     such as the square's brackets.
+   - **Flipbooks:** a list of pre-drawn frames, one per angle step, shown in
+     turn. A thin shape breaks up under pixel-by-pixel rotation: the dial's
+     2-pixel ring became a pinwheel in the first build. So it is drawn at every
+     angle instead, as 8-bit games did, since their hardware could not rotate at
+     all. The dial repeats every quarter turn, so 16 frames cover its 64 steps.
+     The frames were generated from the exact geometry of the approved
+     prototype, and they are stored as pixel data like everything else.
+
+   A pure renderer turns (art, time) into the 96×54 frame, so it can be tested
+   without a browser. The canvas repaints at 12 frames a second, the cadence of
+   old hardware, while the caption types at full rate. It is shown with
+   `image-rendering: pixelated` at the width of the frame. At widths that are
+   not a multiple of 96, pixel widths are uneven; that is accepted, rather than
+   measuring the container to force an integer scale. Under
+   `prefers-reduced-motion` the renderer paints time 0 once, so the picture
+   holds still.
+
+   Card 0's logo was chosen by prototype (2026-09-30). It is a square of four
+   coloured corner brackets, turning clockwise, around a white dial with four
+   notches, turning anticlockwise. Speed is 1.25× the prototype's (square one
+   turn per 4.8 s, dial one per 3.2 s), with 64 steps per turn. Alternatives
+   considered:
+   - Frame-by-frame grids: a rotation needs dozens of frames per card.
+   - PNG sprite sheets: binary, and cannot be reviewed.
+   - Drawing shapes in code: compact, but cannot be edited pixel by pixel.
 
 4. **Palette colours are artwork, not design values.** The ban on hardcoded
    hex in `docs/frontend.apps.md` protects UI consistency. A picture's pixels
