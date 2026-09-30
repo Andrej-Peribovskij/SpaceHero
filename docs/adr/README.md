@@ -29,9 +29,10 @@ What becomes easier or harder because of this decision?
 
 ## Index
 
-The four below are the decisions this template arrives with. They are load-bearing
+The first four are the decisions this template arrives with. They are load-bearing
 — the scripts, the project layout, and the architecture tests all assume them —
-so supersede them deliberately rather than drifting away from them.
+so supersede them deliberately rather than drifting away from them. Later ones
+are this project's own.
 
 | ADR | Title | Status |
 |-----|-------|--------|
@@ -39,3 +40,4 @@ so supersede them deliberately rather than drifting away from them.
 | [0002](ADR-0002-podman-is-the-container-engine.md) | Podman is the standard container engine | Accepted |
 | [0003](ADR-0003-resource-routes-and-capabilities.md) | Resource-oriented routes and capability-based authorization | Accepted |
 | [0004](ADR-0004-modular-monolith-in-dotnet.md) | A modular monolith in .NET, one project per layer | Accepted |
+| [0005](ADR-0005-hand-built-screens-without-a-designer.md) | Without a designer export, screens are built by hand in the production version | Accepted |

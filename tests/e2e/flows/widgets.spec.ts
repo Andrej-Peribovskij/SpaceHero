@@ -3,10 +3,11 @@ import { expect, test } from "@playwright/test";
 /**
  * The seeded widget, rendered in a real browser by the real app, fetched from the
  * real API, read out of a real PostgreSQL. Every layer in one assertion — which
- * is what makes this worth the servers it starts.
+ * is what makes this worth the servers it starts. Served at `/widgets`: `/` is the
+ * game's intro.
  */
 test("shows the seeded widget", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/widgets");
 
   await expect(page.getByRole("heading", { name: "Widgets" })).toBeVisible();
   await expect(page.getByText("Sample widget")).toBeVisible();

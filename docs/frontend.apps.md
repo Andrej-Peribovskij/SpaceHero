@@ -31,6 +31,10 @@ This is the **primary rule** for `apps/` code:
   `bg-[var(--color-...)]` Tailwind arbitrary value syntax, or the utilities
   generated from `@theme`. Never hardcode hex colors, pixel sizes, ad-hoc
   spacing, or non-token font values in app code.
+  **Artwork is not a design value.** A pixel-art palette, like the pixels of an
+  image file, is content, and may be written as hex beside the art that uses it
+  (for example `views/intro/art/`). Everything around the picture — frame,
+  captions, controls, background — still uses tokens.
 - **When a required component or token is missing from `@space-hero/design-system`:**
   1. Check the staging export, `@space-hero/design-system/staging` — it holds
      components that exist but have not been promoted yet.

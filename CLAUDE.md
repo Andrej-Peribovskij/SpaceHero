@@ -10,7 +10,8 @@ Purpose: first-stop operating guide for agents working in this repository.
 - Use the design process for **UI versions** — a design-tool export becoming a
   running `design/vX.Y.Z`, wiring it, promoting it. Never do that work by hand:
   run the matching `/design:design-0N-*` command, which includes the wrapper in
-  `design-commands/`. See "The Design Layer".
+  `design-commands/`. See "The Design Layer". A screen with no design-tool
+  export is product-value work instead: ADR-0005.
 - `docs/` owns durable technical guidance.
 - Backend layering is `Infrastructure -> Application -> Domain`, one project per
   layer; Domain and Application reference no framework. Cross-module access goes
@@ -181,6 +182,12 @@ technologist wires it to real backends, promotes its components into the design
 system, and flips which version the public sees. The public app is never the
 thing being edited.
 
+**The one exception: no export.** This project has no designer. A screen with
+no design-tool export is built by hand, under OpenSpec, in the current
+production version's routes (@docs/adr/ADR-0005-hand-built-screens-without-a-designer.md).
+The registry rules below still hold. The design layer takes over again once an
+export exists.
+
 **Do not perform any of that by hand.** Each step is a prompt with gates that
 exist because skipping them is how a design iteration reaches production. Invoke
 the slash command, which runs the wrapper carrying this repository's bindings:
@@ -271,7 +278,7 @@ session, keep using the same session name for related browser work.
 
 - `docs/architecture.md`: system scope, module map, integration philosophy
 - `docs/tooling.md`: container engine, line endings, why the scripts are Node
-- `docs/adr/`: the four decisions this repository's layout assumes
+- `docs/adr/`: the decisions this repository's layout assumes
 - `docs/backend.md`: backend implementation rules, including the **C# conventions**
 - `docs/frontend.apps.md`: frontend implementation rules for the `apps` folder
 - `docs/design-system.md`: consuming the published design system and the registry token it needs

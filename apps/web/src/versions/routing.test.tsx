@@ -21,14 +21,6 @@ beforeEach(() => {
   server.use(
     http.get("/config.json", () => HttpResponse.json({ apiUrl: API_URL })),
     http.get("/api/v1/public-config", () => HttpResponse.json({ publicUiVersion: "v1.0.0" })),
-    // One widget, not none: WidgetsView renders its <h1> only when it has data, so an
-    // empty list would make every assertion below pass against the empty state instead
-    // of against the screen the route actually mounted.
-    http.get(`${API_URL}/api/v1/widgets`, () =>
-      HttpResponse.json([
-        { id: "0199a0e6-0000-7000-8000-000000000001", name: "Sprocket", createdAt: "2026-01-01T00:00:00Z" },
-      ]),
-    ),
   );
 });
 
@@ -124,7 +116,7 @@ describe("the administrator gate on prefixed mounts", () => {
     mockMe("anonymous");
     renderAt("/");
 
-    expect(await screen.findByRole("heading", { name: /widgets/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /contractor orientation/i })).toBeInTheDocument();
     expect(pathname()).toBe("/");
   });
 
@@ -132,7 +124,7 @@ describe("the administrator gate on prefixed mounts", () => {
     mockMe([DESIGN_VERSIONS_PREVIEW]);
     renderAt("/v1.0.0");
 
-    expect(await screen.findByRole("heading", { name: /widgets/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /contractor orientation/i })).toBeInTheDocument();
     expect(pathname()).toBe("/v1.0.0");
   });
 
@@ -141,7 +133,7 @@ describe("the administrator gate on prefixed mounts", () => {
     renderAt("/v1.0.0");
 
     await waitFor(() => expect(pathname()).toBe("/"));
-    expect(await screen.findByRole("heading", { name: /widgets/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /contractor orientation/i })).toBeInTheDocument();
   });
 
   /**
@@ -180,13 +172,13 @@ describe("the administrator gate on prefixed mounts", () => {
 
     // Still on the prefixed mount, and showing nothing rather than having redirected.
     expect(pathname()).toBe("/v1.0.0");
-    expect(screen.queryByRole("heading", { name: /widgets/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: /contractor orientation/i })).not.toBeInTheDocument();
 
     release();
 
     // ...and once the answer lands, the administrator gets the page they asked for, at the
     // URL they asked for it at.
-    expect(await screen.findByRole("heading", { name: /widgets/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /contractor orientation/i })).toBeInTheDocument();
     expect(pathname()).toBe("/v1.0.0");
   });
 });

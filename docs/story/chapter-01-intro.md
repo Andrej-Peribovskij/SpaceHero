@@ -18,8 +18,8 @@ OpenSpec change that implements it.
   official history, and the first unreliable narrator in the game.
 - Presentation: 8-bit illustrated cards with captions over gloomy, mysterious
   chiptune music.
-- It ends on Mars in 158 A.D., on a snore. Beat 1 opens with Joe switching it
-  off.
+- It ends on Mars in 158 A.D., on a snore, and then on the ident of Module 2,
+  *What's the Drill*, waiting for a key. Beat 1 opens with Joe switching it off.
 
 ## The Frame
 
@@ -45,7 +45,9 @@ telling the story, never the story itself.
   drops out twice: at the Ganymede glitch and at the end. It is also
   **Absolute Connections' motif** — see [The Motif](#the-motif).
 - The video opens on the corporate ident with **PRESS ANY KEY TO BEGIN
-  ORIENTATION** — the corporation makes you opt in to its own propaganda.
+  ORIENTATION** — the corporation makes you opt in to its own propaganda. It
+  closes on the same ident for the next module, with **PRESS ANY KEY TO
+  CONTINUE ORIENTATION**: one module down, thirteen to go.
 - Skipping is allowed, and the skip prompt reads **Skipping is recorded.**
 
 ## Script
@@ -62,7 +64,11 @@ telling the story, never the story itself.
 | 7 | A sky full of ships leaving a white Earth. | 2547. The Diaspora began, and the calendar began again with it. Year Zero. |
 | 8 | A single small figure on a cracked Earth, looking up. | Some chose to stay. Absolute Connections respects every choice. |
 | 9 | The Martian surface. A dome. One lit window. | 158 years later, the Corridor carries us all — and it is carried by contractors like you. Your assignment awaits at Externa Prima. |
-| 10 | Black. The music stops. A snore. | *Module 2 of 14 will begin in 5… 4…* |
+| 10 | Black. The music stops. A snore. | |
+| 11 | Black. Pixel stars. The Absolute Connections logo rotates in, four colours. | ABSOLUTE CONNECTIONS · Contractor Orientation · Module 2 of 14: *What's the Drill* |
+
+Card 11 mirrors card 0 on purpose: the same ident, the same picture, the next
+module's title. Card 10 has no caption; the snore is the whole card.
 
 The dates are the bible's [timeline](README.md#timeline); a change to one is a
 change to both.
@@ -81,8 +87,9 @@ intro's clue.
 
 ## Hand-off to Beat 1
 
-The intro ends on card 10; beat 1 begins in Joe's room on the Mars surface,
-with the orientation still counting down on his screen. He slaps it off:
+The intro ends on card 11; beat 1 begins in Joe's room on the Mars surface,
+with Module 2's ident waiting on his screen: **PRESS ANY KEY TO CONTINUE
+ORIENTATION**. He presses one, by slapping the screen off:
 
 > **JOE:** F@#K1N6 corporate propaganda… I can't stand it.
 

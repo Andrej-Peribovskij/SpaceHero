@@ -7,6 +7,7 @@
 
 import { lazy, type ComponentType } from "react";
 
+import { IntroView } from "../views/intro/intro-view";
 import { WidgetsView } from "../views/widgets/widgets-view";
 import {
   assertNoReservedRootCollisionsIn,
@@ -86,10 +87,13 @@ export const PROD_VERSIONS: VersionEntry[] = [
     label: "v1.0.0 — current",
     entryRoute: "",
     routes: [
-      // Paths are RELATIVE — never "/v1.0.0/…". This one is the app's root screen, so it is
+      // Paths are RELATIVE — never "/v1.0.0/…". The first is the app's root screen, so it is
       // served at "/" on the canonical mount and at "/v1.0.0" on the administrator-only one,
       // by the same component.
-      { path: "", component: WidgetsView, guard: "none" },
+      { path: "", component: IntroView, guard: "none" },
+      // The Example module's reference screen, moved off the root when the game's first
+      // screen took it. It stays reachable until Modules/Example is deleted.
+      { path: "widgets", component: WidgetsView, guard: "none" },
     ],
   },
 ];
