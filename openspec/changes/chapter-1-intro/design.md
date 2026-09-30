@@ -22,6 +22,9 @@ reuse of the motif outside the intro.
    handoff. That adds ceremony without a reviewer it serves. When a designer
    exists, the next visual revision goes through the design layer as normal.
    The screen still goes through `registry.tsx`, never through `app.tsx`.
+   CLAUDE.md forbids editing the public app. The rule that makes this an
+   exception is `docs/adr/ADR-0005-hand-built-screens-without-a-designer.md`,
+   written after review of PR #8.
 
 2. **A pure timeline, rendered by a thin view.** A reducer, `intro-timeline`,
    owns the state: `gate → card(n, typedChars) → end`, with a glitch flag and

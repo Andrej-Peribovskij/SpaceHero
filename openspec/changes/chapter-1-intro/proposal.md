@@ -43,4 +43,4 @@ None. No baseline specs exist yet.
 - New glossary terms: Beat, Card, Motif. A product-debt record for the beat 1
   hand-off.
 - The design layer is not used. There is no designer export, so the intro is
-  hand-built inside the existing production version.
+  hand-built inside the existing production version, as ADR-0005 allows.
