@@ -20,6 +20,9 @@ import { expect, test, type Page } from "@playwright/test";
  */
 const VERSION_SHAPED = /^\/(v\d|design\/)/;
 
+/** What the public root shows first: the intro's start gate, which needs no API to render. */
+const INTRO_PROMPT = "PRESS ANY KEY TO BEGIN ORIENTATION";
+
 /** The pathname and query of wherever the page is now. */
 function here(page: Page): string {
   const url = new URL(page.url());
@@ -109,7 +112,7 @@ test("a visitor walks the public app and the URL never carries a version prefix"
 
   // The walk is only worth its runtime if the app actually rendered. Without this, an app that
   // failed to boot would satisfy every assertion above by visiting nothing but "/".
-  await expect(page.getByRole("heading", { name: "Widgets" })).toBeVisible();
+  await expect(page.getByText(INTRO_PROMPT)).toBeVisible();
 });
 
 /* Test 2 — the prefixed mount of the version that is currently public. */
@@ -120,7 +123,7 @@ test("a prefixed path sends a visitor to the canonical one", async ({ page }) =>
   await page.goto("/v1.0.0");
 
   await expectPath(page, "/");
-  await expect(page.getByRole("heading", { name: "Widgets" })).toBeVisible();
+  await expect(page.getByText(INTRO_PROMPT)).toBeVisible();
 });
 
 test("a prefixed path keeps its query when it sends a visitor back", async ({ page }) => {
@@ -138,7 +141,7 @@ test("a /design/ path sends a visitor to the canonical root", async ({ page }) =
   await page.goto("/design/v4.0.0/briefing");
 
   await expectPath(page, "/");
-  await expect(page.getByRole("heading", { name: "Widgets" })).toBeVisible();
+  await expect(page.getByText(INTRO_PROMPT)).toBeVisible();
 });
 
 test("a retired version prefix sends a visitor to the canonical root", async ({ page }) => {

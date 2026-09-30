@@ -5,23 +5,23 @@ referenced below.
 
 ## 1. Slice 1: the sequence at `/`
 
-- [ ] 1.1 In `apps/web/src/versions/registry.tsx`, point v1.0.0's `""` route at `IntroView` and move `WidgetsView` to `widgets` (design §1)
-- [ ] 1.2 Update `apps/web/src/versions/routing.test.tsx` to assert the intro's heading at `/` and `/v1.0.0`
-- [ ] 1.3 Update `tests/e2e/flows/widgets.spec.ts` to use `/widgets`, and `routing.spec.ts` and `design-preview/administrator-mounts.spec.ts` to expect the intro at `/`
-- [ ] 1.4 Add `views/intro/script.ts`: the 11 cards' captions word for word from `docs/story/chapter-01-intro.md`, plus the index of the Ganymede line
-- [ ] 1.5 Add the pure reducer `views/intro/intro-timeline.ts`: gate → card(n, typedChars) → end, with skip and a glitch event (design §2)
-- [ ] 1.6 Unit-test the reducer: gate holds without input; cards 1–10 in order; skip from any card reaches end; the countdown holds on "4…"; the glitch event fires once on the Ganymede line
-- [ ] 1.7 Add `views/intro/use-intro-timeline.ts`: one clock driving the reducer, which also reads `prefers-reduced-motion` and then reveals captions whole
-- [ ] 1.8 Add presentational components for the ident with its **PRESS ANY KEY TO BEGIN ORIENTATION** prompt, the card frame with a placeholder image, the caption, and the end card
-- [ ] 1.9 Gate input: any key, click or tap starts the sequence; after that, keys other than Escape do nothing
-- [ ] 1.10 Skip: a design-system `Button` reading **Skipping is recorded.**, with Escape as its shortcut (design §8)
-- [ ] 1.11 Captions: typed text `aria-hidden`, the full caption in a polite live region, set once per card (design §7)
-- [ ] 1.12 View tests with fake timers and MSW: the start gate (both scenarios); card order and caption text; skip sends no request and writes no storage; the end state; reduced motion shows captions whole
-- [ ] 1.13 Add an E2E flow `tests/e2e/flows/intro.spec.ts`: open `/`, press a key, see card 1, skip, see the end card
+- [x] 1.1 In `apps/web/src/versions/registry.tsx`, point v1.0.0's `""` route at `IntroView` and move `WidgetsView` to `widgets` (design §1)
+- [x] 1.2 Update `apps/web/src/versions/routing.test.tsx` to assert the intro's heading at `/` and `/v1.0.0`
+- [x] 1.3 Update `tests/e2e/flows/widgets.spec.ts` to use `/widgets`, and `routing.spec.ts` and `design-preview/administrator-mounts.spec.ts` to expect the intro at `/`
+- [x] 1.4 Add `views/intro/script.ts`: the 11 cards' captions word for word from `docs/story/chapter-01-intro.md`, plus the index of the Ganymede line
+- [x] 1.5 Add the pure reducer `views/intro/intro-timeline.ts`: gate → card(n, typedChars) → end, with skip and a glitch event (design §2)
+- [x] 1.6 Unit-test the reducer: gate holds without input; cards 1–10 in order; skip from any card reaches end; the countdown holds on "4…"; the glitch event fires once on the Ganymede line
+- [x] 1.7 Add `views/intro/use-intro-timeline.ts`: one clock driving the reducer, which also reads `prefers-reduced-motion` and then reveals captions whole
+- [x] 1.8 Add presentational components for the ident with its **PRESS ANY KEY TO BEGIN ORIENTATION** prompt, the card frame with a placeholder image, the caption, and the end card
+- [x] 1.9 Gate input: any key, click or tap starts the sequence; after that, keys other than Escape do nothing
+- [x] 1.10 Skip: a design-system `Button` reading **Skipping is recorded.**, with Escape as its shortcut (design §8)
+- [x] 1.11 Captions: typed text `aria-hidden`, the full caption in a polite live region, set once per card (design §7)
+- [x] 1.12 View tests with fake timers and MSW: the start gate (both scenarios); card order and caption text; skip sends no request and writes no storage; the end state; reduced motion shows captions whole
+- [x] 1.13 Add an E2E flow `tests/e2e/flows/intro.spec.ts`: open `/`, press a key, see card 1, skip, see the end card
 - [ ] 1.14 `docs/frontend.apps.md`: one sentence saying pixel-art palettes are artwork data, outside the hardcoded-hex rule (design §4)
 - [ ] 1.15 `docs/glossary.md`: add Beat, Card and Motif
 - [ ] 1.16 Add a `docs/product-debt/intro-hand-off-to-beat-1.md` record: the intro holds on card 10 until beat 1 exists
-- [ ] 1.17 Gate: `pnpm run verify` and `pnpm run test:e2e` pass
+- [x] 1.17 Gate: `pnpm run verify` and `pnpm run test:e2e` pass
 
 ## 2. Slice 2: pixel art and the Ganymede glitch
 

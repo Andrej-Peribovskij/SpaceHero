@@ -16,10 +16,10 @@ import { expect, test, type Page } from "@playwright/test";
  *
  * Two consequences are worth stating before the assertions, because both look like bugs:
  *
- *  - There is no database and no API here. `/api/v1/widgets` answers 501, so the screens below
- *    render their error state. That is the seam being honest — a preview works because the
- *    version is mocked, not because previews are free — and an error state is still proof that
- *    the route matched, the guard allowed it, and the page component ran.
+ *  - There is no database and no API here: every endpoint but `/api/v1/me` answers 501. The
+ *    root screen is the intro, which calls none of them, so it renders whole. A screen that did
+ *    call one would render its error state — the seam being honest, since a preview works
+ *    because the version is mocked, not because previews are free.
  *  - These tests assert on the URL first and the screen second. The screen is the same at both
  *    mounts by design: a version is not a copy of the app per mount. The URL is the only thing
  *    that distinguishes "reached the prefixed mount" from "was redirected off it".
@@ -41,14 +41,12 @@ async function expectPath(page: Page, expected: string): Promise<void> {
 }
 
 /**
- * The app rendered something of its own — a heading when data loads, or the alert when it does
- * not. Either means the route matched and the page component ran, which is what "reached this
- * mount" means. Anything less is a blank screen dressed up as a pass.
+ * The app rendered something of its own — the intro's start gate, the root screen of v1.0.0.
+ * It means the route matched and the page component ran, which is what "reached this mount"
+ * means. Anything less is a blank screen dressed up as a pass.
  */
 async function expectAppRendered(page: Page): Promise<void> {
-  await expect(
-    page.getByRole("heading", { name: "Widgets" }).or(page.getByRole("alert")),
-  ).toBeVisible();
+  await expect(page.getByText("PRESS ANY KEY TO BEGIN ORIENTATION")).toBeVisible();
 }
 
 test("the synthetic session really is an administrator", async ({ request }) => {
