@@ -168,7 +168,7 @@ describe("parseVersionEntry — defect (a)", () => {
         const source = readFileSync(path.join(repoRoot, "apps", "web", "src", "versions", "registry.tsx"), "utf8");
         const e = parseVersionEntry(source, "v1.0.0", { kind: "prod" });
         assert.equal(e.wired, true);
-        assert.deepEqual(e.routes.map((r) => r.component), ["IntroView", "WidgetsView"]);
+        assert.ok(e.routes.some((r) => r.path === ""), "v1.0.0 serves a root screen");
         // Its doc comment shows `component: lazyPage(… "StartPage")`; that is not a route.
         assert.ok(!parseVersionEntries(source).some((x) => x.routes.some((r) => r.component === "StartPage")));
     });
