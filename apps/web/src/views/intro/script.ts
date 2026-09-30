@@ -29,7 +29,8 @@ export interface IntroCard {
 const GANYMEDE_LINE = "Ganymede was found unsuitable.";
 
 /** The corporate ident's picture, which opens the video and — for Module 2 — closes it. */
-const IDENT_IMAGE = "Black. Pixel stars. The Absolute Connections logo rotates in, four colours.";
+const IDENT_IMAGE =
+  "Black. Twinkling pixel stars. The Absolute Connections logo turns: a four-colour square one way, a white dial inside it the other.";
 
 const CARD_6_LEAD = "Callisto, 2492. Europa, 2502. Io, 2514. ";
 

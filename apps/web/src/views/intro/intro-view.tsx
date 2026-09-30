@@ -1,6 +1,7 @@
 import { Button } from "@space-hero/design-system";
 import { useEffect, useRef } from "react";
 
+import { artFor } from "./art";
 import { IntroCardFrame } from "./intro-card-frame";
 import { INTRO_CARDS, captionText } from "./script";
 import { useIntroTimeline } from "./use-intro-timeline";
@@ -20,7 +21,7 @@ function KeyPrompt({ children }: { readonly children: string }) {
  * permission to play.
  */
 export function IntroView() {
-  const { state, shownChars, start, skip } = useIntroTimeline();
+  const { state, shownChars, reducedMotion, start, skip } = useIntroTimeline();
   const card = INTRO_CARDS[state.card]!;
   const mainRef = useRef<HTMLElement>(null);
 
@@ -56,7 +57,7 @@ export function IntroView() {
     >
       <h1 className="sr-only">Absolute Connections Contractor Orientation</h1>
 
-      <IntroCardFrame card={card} shownChars={shownChars} />
+      <IntroCardFrame card={card} shownChars={shownChars} art={artFor(state.card)} still={reducedMotion} />
 
       {/* Set once per card, so a screen reader hears each caption whole (design.md §7). */}
       <p className="sr-only" aria-live="polite">

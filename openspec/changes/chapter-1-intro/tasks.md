@@ -43,8 +43,8 @@ Story note (the ending):
 - [x] 2.3 Unit-test the parser: a valid grid; a wrong row count; a wrong row width; an unknown character; flipbook frames and a mismatched frame
 - [x] 2.4 Add the pure renderer: background, palette cycling, sprites rotated by stepped nearest-neighbour rotation, flipbooks, and a still frame at time 0
 - [x] 2.5 Unit-test the renderer: a cycle changes colour over time; a sprite is unrotated at time 0 and turned a quarter at a quarter turn; transparent sprite pixels show the background; a flipbook steps, wraps and runs backwards
-- [ ] 2.6 Add the pixel canvas: repaints at 12 fps, smoothing off, `image-rendering: pixelated`, holds still under reduced motion, and keeps the script's image line as its text alternative
-- [ ] 2.7 Draw card 0, reused by card 11: twinkling stars, the four-colour square turning clockwise, and the white dial turning anticlockwise as a 16-frame flipbook (1.25×, 64 steps)
+- [x] 2.6 Add the pixel canvas: repaints at 12 fps, smoothing off, `image-rendering: pixelated`, holds still under reduced motion, and keeps the script's image line as its text alternative
+- [x] 2.7 Draw card 0, reused by card 11: twinkling stars, the four-colour square turning clockwise, and the white dial turning anticlockwise as a 16-frame flipbook (1.25×, 64 steps)
 - [ ] 2.8 Draw cards 1–10 as art in `views/intro/art/cards/`, following the script's Image column. Silhouettes first, one card per file
 - [ ] 2.9 Add a test that every card's art parses and that every script card has art
 - [ ] 2.10 Glitch: exactly two painted frames of deterministic corruption (row shifts and palette swap) on the glitch event, skipped under reduced motion (design §6)

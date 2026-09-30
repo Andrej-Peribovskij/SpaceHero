@@ -25,7 +25,7 @@ to play sound. No audio SHALL play before the sequence starts.
 
 ### Requirement: Card sequence
 After the gate the sequence SHALL show cards 1 to 11 in script order, each with
-its 8-bit image and its caption, typed out beneath it. Each card MUST advance
+its animated 8-bit image and its caption, typed out beneath it. Each card MUST advance
 on its own once its caption is complete and has been held. Caption text MUST
 match the script word for word.
 
@@ -75,10 +75,10 @@ on, and nothing SHALL follow automatically.
 
 ### Requirement: Reduced motion
 When the player prefers reduced motion, captions SHALL appear whole instead of
-typed, and the glitch MUST NOT flash. The music still drops out, so the clue
+typed, card art SHALL hold still, and the glitch MUST NOT flash. The music still drops out, so the clue
 survives.
 
 #### Scenario: Reduced motion on card 6
 - **WHEN** reduced motion is preferred and card 6 reaches the Ganymede line
-- **THEN** the image does not flash, the caption is shown whole, and the music
-  drops out
+- **THEN** the image neither moves nor flashes, the caption is shown whole, and
+  the music drops out
