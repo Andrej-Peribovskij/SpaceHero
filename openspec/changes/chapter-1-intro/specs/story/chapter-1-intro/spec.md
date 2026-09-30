@@ -24,14 +24,14 @@ to play sound. No audio SHALL play before the sequence starts.
 - **THEN** the ident and prompt stay on screen, silent, and no card advances
 
 ### Requirement: Card sequence
-After the gate the sequence SHALL show cards 1 to 10 in script order, each with
+After the gate the sequence SHALL show cards 1 to 11 in script order, each with
 its 8-bit image and its caption, typed out beneath it. Each card MUST advance
 on its own once its caption is complete and has been held. Caption text MUST
 match the script word for word.
 
 #### Scenario: Cards play in order
 - **WHEN** the sequence runs without input
-- **THEN** cards 1 to 10 appear once each, in order, each caption as scripted
+- **THEN** cards 1 to 11 appear once each, in order, each caption as scripted
 
 ### Requirement: Orientation music
 A single chiptune loop SHALL play from the gate until the end or a skip. When
@@ -61,13 +61,17 @@ state. It MUST NOT send any request or store anything.
 - **THEN** the end state is shown and no network request or storage write occurs
 
 ### Requirement: End state
-The sequence SHALL end on card 10: black, music stopped, a snore, and the
-caption *Module 2 of 14 will begin in 5… 4…* counting down and holding on "4…".
-Nothing SHALL follow automatically.
+Card 10 SHALL be black with no caption: the music stops and a snore plays. The
+sequence SHALL then end on card 11, the Module 2 ident. Card 11 shows card 0's
+picture and the caption *ABSOLUTE CONNECTIONS · Contractor Orientation · Module
+2 of 14: What's the Drill*, whole rather than typed, above the prompt **PRESS
+ANY KEY TO CONTINUE ORIENTATION**. Until beat 1 exists, no input SHALL move it
+on, and nothing SHALL follow automatically.
 
 #### Scenario: Sequence ends
-- **WHEN** card 10's countdown reaches "4…"
-- **THEN** the screen holds there indefinitely and the music does not restart
+- **WHEN** card 11 is reached, and the player then presses a key
+- **THEN** the ident and prompt hold indefinitely, silent, and the music does
+  not restart
 
 ### Requirement: Reduced motion
 When the player prefers reduced motion, captions SHALL appear whole instead of

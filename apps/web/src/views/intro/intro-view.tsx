@@ -5,6 +5,11 @@ import { IntroCardFrame } from "./intro-card-frame";
 import { INTRO_CARDS, captionText } from "./script";
 import { useIntroTimeline } from "./use-intro-timeline";
 
+/** The blinking line under an ident that asks the player for a key. */
+function KeyPrompt({ children }: { readonly children: string }) {
+  return <p className="font-mono text-sm tracking-widest motion-safe:animate-pulse">{children}</p>;
+}
+
 /**
  * Chapter 1, beat 0: the Absolute Connections contractor orientation video.
  * Script: `docs/story/chapter-01-intro.md`. Behaviour: the `story/chapter-1-intro` spec.
@@ -58,11 +63,14 @@ export function IntroView() {
         {captionText(card)}
       </p>
 
-      {state.phase === "gate" && (
-        <p className="font-mono text-sm tracking-widest motion-safe:animate-pulse">
-          PRESS ANY KEY TO BEGIN ORIENTATION
-        </p>
-      )}
+      {state.phase === "gate" && <KeyPrompt>PRESS ANY KEY TO BEGIN ORIENTATION</KeyPrompt>}
+
+      {/*
+        The next module's ident asks for a key the same way the first did. Nothing answers it
+        yet: in beat 1 the key press is Joe slapping the screen off
+        (docs/product-debt/intro-hand-off-to-beat-1.md).
+      */}
+      {state.phase === "ended" && <KeyPrompt>PRESS ANY KEY TO CONTINUE ORIENTATION</KeyPrompt>}
 
       {/* No variant: the portable call, as in WidgetsView. Skipping records nothing. */}
       {state.phase === "playing" && <Button onClick={skip}>Skipping is recorded.</Button>}

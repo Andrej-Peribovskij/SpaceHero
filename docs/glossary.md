@@ -25,5 +25,5 @@ in the domain. Use these terms consistently in code, docs, and specs.
 | Recorded fixture | An API answer recorded with a `GET` from a running local stack by `capture-fixtures.mjs`, kept under `FIXTURES_DIR/<version>/` as a production export's mock data. Recorded, never hand-written |
 | Fixture curation | Declared edits to recorded fixtures that each remove one named artefact of a development database, applied by `curate-fixtures.mjs`. Never changes a figure; idempotent; every edit's note is repeated in the export README |
 | Beat | One step of a chapter's story, played in one game mode: a narrated sequence, an adventure scene, a strategy map or an action encounter. Numbered from 0 within its chapter; `docs/story/chapter-01.md` lists Chapter 1's |
-| Card | One still of a narrated sequence: an 8-bit picture and its caption, typed out beneath it. The Chapter 1 intro has eleven, numbered 0 to 10 as its script numbers them |
+| Card | One still of a narrated sequence: an 8-bit picture and its caption, typed out beneath it. The Chapter 1 intro has twelve, numbered 0 to 11 as its script numbers them. A card may have no caption |
 | Motif | A piece of music tied to one presence in the story and played wherever it appears. Absolute Connections' motif is the orientation video's loop |

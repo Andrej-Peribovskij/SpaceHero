@@ -64,6 +64,15 @@ function preferReducedMotion(): void {
 }
 
 const PROMPT = "PRESS ANY KEY TO BEGIN ORIENTATION";
+const CONTINUE_PROMPT = "PRESS ANY KEY TO CONTINUE ORIENTATION";
+
+/**
+ * On the last card, Module 2's ident. Its picture is card 0's by design, so the picture alone
+ * cannot tell the end from the start: the continue prompt and the Module 2 caption can.
+ */
+function atTheEnd(): boolean {
+  return screen.queryByText(CONTINUE_PROMPT) !== null && announced() === captionText(INTRO_CARDS[END_CARD]!);
+}
 
 describe("the start gate", () => {
   it("opens on the ident and waits, with nothing to skip", () => {
@@ -123,7 +132,7 @@ describe("the start gate", () => {
 });
 
 describe("the card sequence", () => {
-  it("plays cards 1 to 10 in order, each announcing its caption word for word", () => {
+  it("plays cards 1 to 11 in order, each announcing its caption word for word", () => {
     render(<IntroView />);
     fireEvent.keyDown(window, { key: "Enter" });
 
@@ -170,7 +179,7 @@ describe("skip", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Skipping is recorded." }));
 
-    expect(showsCard(END_CARD)).toBe(true);
+    expect(atTheEnd()).toBe(true);
     expect(requests).toEqual([]);
     expect(setItem).not.toHaveBeenCalled();
     expect(document.cookie).toBe("");
@@ -194,21 +203,34 @@ describe("skip", () => {
 
     fireEvent.keyDown(window, { key: "Escape" });
 
-    expect(showsCard(END_CARD)).toBe(true);
+    expect(atTheEnd()).toBe(true);
   });
 });
 
 describe("the end state", () => {
-  it("holds on card 10's countdown at '4…', with nothing left to press", () => {
+  it("holds on Module 2's ident, whole, asking for a key that nothing answers yet", () => {
     render(<IntroView />);
     fireEvent.keyDown(window, { key: "a" });
     fireEvent.keyDown(window, { key: "Escape" });
     advance(600_000);
+    fireEvent.keyDown(window, { key: "a" });
+    fireEvent.click(screen.getByRole("main"));
 
+    expect(atTheEnd()).toBe(true);
     expect(showsCard(END_CARD)).toBe(true);
-    expect(typed()).toBe("Module 2 of 14 will begin in 5… 4…");
+    expect(typed()).toBe("ABSOLUTE CONNECTIONS · Contractor Orientation · Module 2 of 14: What's the Drill");
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
     expect(screen.queryByText(PROMPT)).not.toBeInTheDocument();
+  });
+
+  it("goes through the captionless snore card before the ident", () => {
+    render(<IntroView />);
+    fireEvent.keyDown(window, { key: "a" });
+    advance(INTRO_CARDS.slice(0, END_CARD - 1).reduce((sum, _card, index) => sum + cardDurationMs(index), 0) + 100);
+
+    expect(showsCard(END_CARD - 1)).toBe(true);
+    expect(announced()).toBe("");
+    expect(screen.queryByText(CONTINUE_PROMPT)).not.toBeInTheDocument();
   });
 
   it("is reached on its own when nobody skips", () => {
@@ -216,7 +238,7 @@ describe("the end state", () => {
     fireEvent.keyDown(window, { key: "a" });
     advance(INTRO_CARDS.reduce((sum, _card, index) => sum + cardDurationMs(index), 0) + 1000);
 
-    expect(showsCard(END_CARD)).toBe(true);
+    expect(atTheEnd()).toBe(true);
     expect(within(screen.getByRole("main")).queryByRole("button")).not.toBeInTheDocument();
   });
 });

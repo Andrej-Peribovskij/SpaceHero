@@ -28,11 +28,14 @@ export interface IntroCard {
 
 const GANYMEDE_LINE = "Ganymede was found unsuitable.";
 
+/** The corporate ident's picture, which opens the video and — for Module 2 — closes it. */
+const IDENT_IMAGE = "Black. Pixel stars. The Absolute Connections logo rotates in, four colours.";
+
 const CARD_6_LEAD = "Callisto, 2492. Europa, 2502. Io, 2514. ";
 
 export const INTRO_CARDS: readonly IntroCard[] = [
   {
-    image: "Black. Pixel stars. The Absolute Connections logo rotates in, four colours.",
+    image: IDENT_IMAGE,
     caption: [
       { text: "ABSOLUTE CONNECTIONS · Contractor Orientation · Module 1 of 14: " },
       { text: "Where We Come From", emphasis: true },
@@ -109,12 +112,17 @@ export const INTRO_CARDS: readonly IntroCard[] = [
     ],
   },
   {
+    // No caption: the snore is the whole card.
     image: "Black. The music stops. A snore.",
-    // The countdown is typed like any caption, with a second's gap between the numbers. It
-    // stops on "4…" because beat 1 cuts it off there: Joe slaps the screen off.
+    caption: [],
+  },
+  {
+    // The next module's ident, mirroring card 0: one module down, thirteen to go. It waits for a
+    // key the way the first one did, and in beat 1 Joe presses one by slapping the screen off.
+    image: IDENT_IMAGE,
     caption: [
-      { text: "Module 2 of 14 will begin in 5… ", emphasis: true, pauseAfterMs: 1000 },
-      { text: "4…", emphasis: true },
+      { text: "ABSOLUTE CONNECTIONS · Contractor Orientation · Module 2 of 14: " },
+      { text: "What's the Drill", emphasis: true },
     ],
   },
 ];
@@ -122,7 +130,7 @@ export const INTRO_CARDS: readonly IntroCard[] = [
 /** The ident: shown at the gate and held briefly once the player opts in. */
 export const IDENT_CARD = 0;
 
-/** The last card, and the one the sequence ends — or is skipped — onto. */
+/** The last card — the next module's ident — and the one the sequence ends, or is skipped, onto. */
 export const END_CARD = INTRO_CARDS.length - 1;
 
 /** A caption as one string, for the live region and for tests. */

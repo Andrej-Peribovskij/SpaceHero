@@ -20,6 +20,7 @@ test("a player opts in, watches the first card, and skips to the end", async ({ 
 
   await page.getByRole("button", { name: "Skipping is recorded." }).click();
 
-  await expect(page.getByRole("img", { name: /^Black\. The music stops\. A snore\./ })).toBeVisible();
+  // The end is Module 2's ident, asking for a key the way the first one did.
+  await expect(page.getByText("PRESS ANY KEY TO CONTINUE ORIENTATION")).toBeVisible();
   await expect(page.getByRole("button", { name: "Skipping is recorded." })).toBeHidden();
 });

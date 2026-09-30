@@ -90,23 +90,26 @@ export function typedCharsAt(card: IntroCard, ms: number): number {
 
 /**
  * How long a card is on screen. The ident is already whole when the player opts in, so it only
- * holds; the last card never holds, because the video ends on it.
+ * holds. The last card — the next module's ident — takes no time at all: it appears whole, as the
+ * first one did, and the video ends the moment it is on screen.
  */
 export function cardDurationMs(index: number): number {
   const card = INTRO_CARDS[index]!;
   const typing = msToType(card, captionText(card).length);
 
   if (index === IDENT_CARD) return IDENT_HOLD_MS;
-  if (index === END_CARD) return typing;
+  if (index === END_CARD) return 0;
 
   return typing + HOLD_MS;
 }
 
-/** The characters of the current caption to show. The ident and the end are always whole. */
+/** The characters of the current caption to show. Both idents are always whole, never typed. */
 export function visibleChars(state: IntroState): number {
   const card = INTRO_CARDS[state.card]!;
 
-  if (state.phase !== "playing" || state.card === IDENT_CARD) return captionText(card).length;
+  if (state.phase !== "playing" || state.card === IDENT_CARD || state.card === END_CARD) {
+    return captionText(card).length;
+  }
 
   return typedCharsAt(card, state.elapsedMs);
 }
@@ -164,7 +167,9 @@ function tick(state: IntroState, dtMs: number): IntroStep {
   let { card, elapsedMs } = state;
   let remaining = dtMs;
 
-  while (remaining > 0) {
+  // Keep going while time is left, or while the card just entered is already used up: the last
+  // card takes no time, and must end the video in the tick that reaches it, not the next one.
+  while (remaining > 0 || elapsedMs >= cardDurationMs(card)) {
     const duration = cardDurationMs(card);
     const next = Math.min(duration, elapsedMs + remaining);
 

@@ -6,9 +6,10 @@
 ## What
 
 The Chapter 1 intro ([script](../story/chapter-01-intro.md)) is scripted to
-hand off to beat 1, where Joe slaps the orientation off mid-countdown. Beat 1
-does not exist yet. The intro therefore ends holding on card 10's countdown at
-"4…", with nothing to press and nowhere to go.
+hand off to beat 1, where Joe answers Module 2's **PRESS ANY KEY TO CONTINUE
+ORIENTATION** by slapping the screen off. Beat 1 does not exist yet. The intro
+therefore ends holding on Module 2's ident: its prompt asks for a key, and
+nothing answers it.
 
 ## Why
 
@@ -18,7 +19,7 @@ the first adventure scene, and it needs a game mode that does not exist yet.
 
 ## Resolution
 
-When beat 1 lands, the intro's end state becomes its opening. The countdown
-holds on "4…" behind Joe's room, and his line follows. That also decides where
-beat 1 lives in the routes, and whether the intro keeps `/` or moves behind a
-"new game" start.
+When beat 1 lands, the intro's end state becomes its opening: Module 2's
+ident waits on the screen in Joe's room, a key press is his slap, and his line
+follows. That also decides where beat 1 lives in the routes, and whether the
+intro keeps `/` or moves behind a "new game" start.

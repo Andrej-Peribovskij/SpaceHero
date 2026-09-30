@@ -32,13 +32,17 @@ Review fixes (PR #8):
 - [x] 1.22 `docs/adr/ADR-0005-hand-built-screens-without-a-designer.md` records when a production version's screens are built by hand
 - [ ] 1.23 Gate: `pnpm run verify` and `pnpm run test:e2e` pass after the review fixes
 
+Story note (the ending):
+
+- [x] 1.24 Card 10 becomes a captionless snore, and card 11 the Module 2 ident (*What's the Drill*), whole, with **PRESS ANY KEY TO CONTINUE ORIENTATION**; the story script, spec, glossary and product-debt record follow
+
 ## 2. Slice 2: pixel art and the Ganymede glitch
 
 - [ ] 2.1 Add `views/intro/art/palette.ts`: one shared palette, 16 colours or fewer, written as hex, with a comment pointing at design §4
 - [ ] 2.2 Add a grid parser that validates each grid: 96×54, only palette characters, and a clear error naming the card and row
 - [ ] 2.3 Unit-test the parser: a valid grid; a wrong row width; an unknown character
 - [ ] 2.4 Add the pixel canvas component: smoothing off, integer scale, `image-rendering: pixelated`, and a text alternative from the script's image line
-- [ ] 2.5 Draw cards 0–10 as grids in `views/intro/art/cards/`, following the script's Image column. Silhouettes first, one card per file
+- [ ] 2.5 Draw cards 0–11 as grids in `views/intro/art/cards/`, following the script's Image column. Silhouettes first, one card per file
 - [ ] 2.6 Add a test that every card's grid parses and that there is exactly one grid per script card
 - [ ] 2.7 Glitch: exactly two painted frames of deterministic corruption (row shifts and palette swap) on the glitch event, skipped under reduced motion (design §6)
 - [ ] 2.8 Glitch tests: two corrupted frames then normal; no corruption under reduced motion; card 7 keeps its normal timing

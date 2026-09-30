@@ -57,12 +57,12 @@ describe("the gate", () => {
 });
 
 describe("the sequence", () => {
-  it("shows cards 1 to 10 once each, in order, then ends", () => {
+  it("shows cards 1 to 11 once each, in order, then ends", () => {
     const { state, events } = play({ type: "start" }, ...frames(TOTAL_MS + 1000));
 
     const cards = events.flatMap((event) => (event.type === "card" ? [event.index] : []));
 
-    expect(cards).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    expect(cards).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
     expect(events.at(-1)).toEqual({ type: "ended" });
     expect(state.phase).toBe("ended");
   });
@@ -140,11 +140,27 @@ describe("skip", () => {
 });
 
 describe("the end", () => {
-  it("holds on the countdown's '4…' indefinitely", () => {
+  it("holds on Module 2's ident, whole, indefinitely", () => {
     const { state } = play({ type: "start" }, { type: "tick", dtMs: TOTAL_MS });
     const later = stepIntro(state, { type: "tick", dtMs: 600_000 });
 
-    expect(captionText(INTRO_CARDS[END_CARD]!).slice(0, visibleChars(state))).toMatch(/5… 4…$/);
+    expect(state.phase).toBe("ended");
+    expect(visibleChars(state)).toBe(captionText(INTRO_CARDS[END_CARD]!).length);
     expect(later).toEqual({ state, events: [] });
+  });
+
+  it("ends in the same tick that reaches the last card, never showing it as playing", () => {
+    const toLastCard = INTRO_CARDS.slice(0, END_CARD).reduce((sum, _card, index) => sum + cardDurationMs(index), 0);
+
+    // Exactly to the boundary: no time is left over once the last card is entered.
+    const { state, events } = play({ type: "start" }, { type: "tick", dtMs: toLastCard });
+
+    expect(state.phase).toBe("ended");
+    expect(events.slice(-2)).toEqual([{ type: "card", index: END_CARD }, { type: "ended" }]);
+  });
+
+  it("has a captionless card before the end: the snore", () => {
+    expect(captionText(INTRO_CARDS[END_CARD - 1]!)).toBe("");
+    expect(cardDurationMs(END_CARD - 1)).toBe(HOLD_MS);
   });
 });

@@ -8,7 +8,7 @@ Example widgets screen.
 ## What Changes
 
 - New intro sequence at `/` in production version v1.0.0: the Absolute
-  Connections orientation video, eleven cards (0–10) with typed-out captions.
+  Connections orientation video, twelve cards (0–11) with typed-out captions.
 - A **PRESS ANY KEY TO BEGIN ORIENTATION** ident gates the sequence. It also
   satisfies the browser rule that audio may only start after the player acts.
 - Card art is 8-bit pixel art drawn in code: a pixel grid and a shared palette
@@ -18,8 +18,8 @@ Example widgets screen.
 - The Ganymede glitch on card 6: two frames of visual corruption and the
   music drops out.
 - A skip control reading **Skipping is recorded.**, which records nothing.
-- The sequence ends holding on card 10's countdown. The hand-off to beat 1 is
-  deferred.
+- The sequence ends on a snore, then on the Module 2 ident, waiting on **PRESS
+  ANY KEY TO CONTINUE ORIENTATION**. The hand-off to beat 1 is deferred.
 - The Example widgets screen moves from `/` to `/widgets`.
 
 ## Capabilities
