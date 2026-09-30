@@ -23,6 +23,15 @@ referenced below.
 - [x] 1.16 Add a `docs/product-debt/intro-hand-off-to-beat-1.md` record: the intro holds on card 10 until beat 1 exists
 - [x] 1.17 Gate: `pnpm run verify` and `pnpm run test:e2e` pass
 
+Review fixes (PR #8):
+
+- [x] 1.18 Gate ignores Escape, modifiers on their own, and Ctrl/Alt/Meta shortcuts, which grant no audio permission; spec and tests updated
+- [ ] 1.19 `script.test.ts` holds every caption and image to the Script table in `docs/story/chapter-01-intro.md`
+- [x] 1.20 Skipping keeps keyboard focus on the video instead of dropping it to the document
+- [ ] 1.21 The design exporter's registry check asserts a root route, not the full route list
+- [ ] 1.22 `docs/adr/ADR-0005-hand-built-screens-without-a-designer.md` records when a production version's screens are built by hand
+- [ ] 1.23 Gate: `pnpm run verify` and `pnpm run test:e2e` pass after the review fixes
+
 ## 2. Slice 2: pixel art and the Ganymede glitch
 
 - [ ] 2.1 Add `views/intro/art/palette.ts`: one shared palette, 16 colours or fewer, written as hex, with a comment pointing at design §4

@@ -9,15 +9,18 @@ Code: `apps/web/src/views/intro/` (frontend only; no backend module)
 
 ### Requirement: Start gate
 The public root path SHALL open on card 0, the corporate ident, with the prompt
-**PRESS ANY KEY TO BEGIN ORIENTATION**. Any key, click or tap MUST start the
-sequence. No audio SHALL play before that input.
+**PRESS ANY KEY TO BEGIN ORIENTATION**. A click, a tap, or a key press MUST
+start the sequence. Escape, a modifier key on its own, and a shortcut held with
+Ctrl, Alt or Meta MUST NOT start it: browsers do not accept those as permission
+to play sound. No audio SHALL play before the sequence starts.
 
 #### Scenario: Player opts in
 - **WHEN** a player opens `/` and presses a key
 - **THEN** the prompt disappears, the music starts and card 1 follows the ident
 
-#### Scenario: Player does nothing
-- **WHEN** a player opens `/` and gives no input
+#### Scenario: Player does not opt in
+- **WHEN** a player opens `/` and gives no input, or presses only Escape, a
+  modifier or a shortcut
 - **THEN** the ident and prompt stay on screen, silent, and no card advances
 
 ### Requirement: Card sequence

@@ -1,5 +1,5 @@
 import { Button } from "@space-hero/design-system";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { IntroCardFrame } from "./intro-card-frame";
 import { INTRO_CARDS, captionText } from "./script";
@@ -17,6 +17,14 @@ import { useIntroTimeline } from "./use-intro-timeline";
 export function IntroView() {
   const { state, shownChars, start, skip } = useIntroTimeline();
   const card = INTRO_CARDS[state.card]!;
+  const mainRef = useRef<HTMLElement>(null);
+
+  // Ending unmounts the skip button. If it had focus, the browser drops focus to the top of the
+  // document and a keyboard or screen-reader user loses their place; keep them on the video.
+  useEffect(() => {
+    const focusLost = document.activeElement === null || document.activeElement === document.body;
+    if (state.phase === "ended" && focusLost) mainRef.current?.focus();
+  }, [state.phase]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -26,8 +34,7 @@ export function IntroView() {
         const modifierOnly = ["Shift", "Control", "Alt", "Meta"].includes(event.key);
         if (event.key === "Escape" || modifierOnly || event.ctrlKey || event.metaKey || event.altKey) return;
         start();
-      }
-      else if (state.phase === "playing" && event.key === "Escape") skip();
+      } else if (state.phase === "playing" && event.key === "Escape") skip();
     };
 
     window.addEventListener("keydown", onKeyDown);
@@ -36,7 +43,10 @@ export function IntroView() {
 
   return (
     <main
-      className="flex min-h-screen flex-col items-center justify-center gap-8 bg-[var(--color-black)] p-6 text-[var(--color-white)]"
+      ref={mainRef}
+      // Focusable from script only, as the landing place when skipping removes the button.
+      tabIndex={-1}
+      className="flex min-h-screen flex-col items-center justify-center gap-8 bg-[var(--color-black)] p-6 text-[var(--color-white)] outline-none"
       onClick={state.phase === "gate" ? start : undefined}
     >
       <h1 className="sr-only">Absolute Connections Contractor Orientation</h1>

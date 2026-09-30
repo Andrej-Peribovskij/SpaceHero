@@ -87,6 +87,31 @@ describe("the start gate", () => {
     expect(showsCard(1)).toBe(true);
   });
 
+  it.each([
+    ["Escape", {}],
+    ["Shift", { shiftKey: true }],
+    ["Control", { ctrlKey: true }],
+    ["Alt", { altKey: true }],
+    ["Meta", { metaKey: true }],
+    ["r", { ctrlKey: true }],
+    ["Tab", { altKey: true }],
+  ])("does not start on %s %o: no audio permission, or a shortcut on its way elsewhere", (key, modifiers) => {
+    render(<IntroView />);
+
+    fireEvent.keyDown(window, { key, ...modifiers });
+
+    expect(screen.getByText(PROMPT)).toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("still starts on a shifted key, which is a real key press", () => {
+    render(<IntroView />);
+
+    fireEvent.keyDown(window, { key: "A", shiftKey: true });
+
+    expect(screen.queryByText(PROMPT)).not.toBeInTheDocument();
+  });
+
   it("starts on a click or tap", () => {
     render(<IntroView />);
 
@@ -149,6 +174,18 @@ describe("skip", () => {
     expect(requests).toEqual([]);
     expect(setItem).not.toHaveBeenCalled();
     expect(document.cookie).toBe("");
+  });
+
+  it("keeps keyboard focus on the video when the focused skip button goes away", () => {
+    render(<IntroView />);
+    fireEvent.keyDown(window, { key: "a" });
+    const button = screen.getByRole("button", { name: "Skipping is recorded." });
+    button.focus();
+
+    fireEvent.click(button);
+
+    expect(button).not.toBeInTheDocument();
+    expect(document.activeElement).toBe(screen.getByRole("main"));
   });
 
   it("is also on Escape", () => {
