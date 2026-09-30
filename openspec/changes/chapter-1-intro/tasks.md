@@ -18,9 +18,9 @@ referenced below.
 - [x] 1.11 Captions: typed text `aria-hidden`, the full caption in a polite live region, set once per card (design §7)
 - [x] 1.12 View tests with fake timers and MSW: the start gate (both scenarios); card order and caption text; skip sends no request and writes no storage; the end state; reduced motion shows captions whole
 - [x] 1.13 Add an E2E flow `tests/e2e/flows/intro.spec.ts`: open `/`, press a key, see card 1, skip, see the end card
-- [ ] 1.14 `docs/frontend.apps.md`: one sentence saying pixel-art palettes are artwork data, outside the hardcoded-hex rule (design §4)
-- [ ] 1.15 `docs/glossary.md`: add Beat, Card and Motif
-- [ ] 1.16 Add a `docs/product-debt/intro-hand-off-to-beat-1.md` record: the intro holds on card 10 until beat 1 exists
+- [x] 1.14 `docs/frontend.apps.md`: one sentence saying pixel-art palettes are artwork data, outside the hardcoded-hex rule (design §4)
+- [x] 1.15 `docs/glossary.md`: add Beat, Card and Motif
+- [x] 1.16 Add a `docs/product-debt/intro-hand-off-to-beat-1.md` record: the intro holds on card 10 until beat 1 exists
 - [x] 1.17 Gate: `pnpm run verify` and `pnpm run test:e2e` pass
 
 ## 2. Slice 2: pixel art and the Ganymede glitch
