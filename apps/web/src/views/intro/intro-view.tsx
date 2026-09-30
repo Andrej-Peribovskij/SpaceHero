@@ -20,7 +20,13 @@ export function IntroView() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (state.phase === "gate") start();
+      if (state.phase === "gate") {
+        // Escape and modifier or shortcut presses are not user activation: starting on them
+        // would leave the music (slice 3) unable to play.
+        const modifierOnly = ["Shift", "Control", "Alt", "Meta"].includes(event.key);
+        if (event.key === "Escape" || modifierOnly || event.ctrlKey || event.metaKey || event.altKey) return;
+        start();
+      }
       else if (state.phase === "playing" && event.key === "Escape") skip();
     };
 
