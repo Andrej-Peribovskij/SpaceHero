@@ -46,7 +46,8 @@ export const INTRO_CARDS: readonly IntroCard[] = [
     ],
   },
   {
-    image: "The Sun, filling more of the frame than it should; the palette bleeds toward white.",
+    image:
+      "The Sun, filling more of the frame than it should; the palette bleeds toward white. Out of the white, a child on bare ground, arm across their eyes, as the light keeps rising.",
     caption: [
       {
         text: "2138. The Sun began to brighten. Faster than any model predicted. Faster than anyone was ready for.",

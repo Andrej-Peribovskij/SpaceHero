@@ -1,5 +1,6 @@
 import { END_CARD, IDENT_CARD } from "../script";
 import { CARD_00_ART } from "./cards/card-00";
+import { CARD_01_ART } from "./cards/card-01";
 import type { CardArt } from "./render";
 
 /**
@@ -11,6 +12,7 @@ import type { CardArt } from "./render";
  */
 const CARD_ART: ReadonlyMap<number, CardArt> = new Map([
   [IDENT_CARD, CARD_00_ART],
+  [1, CARD_01_ART],
   [END_CARD, CARD_00_ART],
 ]);
 

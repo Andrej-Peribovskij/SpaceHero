@@ -1,6 +1,7 @@
 import { act, render } from "@testing-library/react";
 
 import { CARD_00_ART } from "../art/cards/card-00";
+import { CARD_01_ART } from "../art/cards/card-01";
 import { FRAME_HEIGHT, FRAME_WIDTH } from "../art/grid";
 import { INTRO_CARDS } from "../script";
 import { PixelScreen } from "./pixel-screen";
@@ -91,3 +92,14 @@ it("stops painting when it unmounts", () => {
   expect(putImageData.mock.calls.length).toBe(painted);
 });
 
+it("under reduced motion, still repaints a card's cuts and fade steps, and nothing in between", () => {
+  const putImageData = fakeContext();
+  render(<PixelScreen art={CARD_01_ART} caption={[]} shownChars={0} prompt={undefined} still />);
+
+  advance(7000);
+
+  // Card 1 changes picture 1 + 6 + 1 + 6 times (start, bleed, cut, hand-over): a handful of
+  // paints, where moving at 12 fps would be 84.
+  expect(putImageData.mock.calls.length).toBeGreaterThanOrEqual(14);
+  expect(putImageData.mock.calls.length).toBeLessThanOrEqual(16);
+});
