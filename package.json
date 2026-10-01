@@ -25,6 +25,7 @@
     "backend:dev": "node scripts/backend.mjs run",
     "dev": "node scripts/dev.mjs",
     "design:preview": "node scripts/design-preview.mjs",
+    "intro:render-card": "node scripts/intro-render-card.mjs",
     "public-version": "node scripts/public-version.mjs",
     "public-version:set": "node scripts/public-version.mjs set",
     "public-version:check": "node scripts/public-version.mjs check",

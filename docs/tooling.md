@@ -127,6 +127,27 @@ from the repository root, because it needs the workspace manifests its
 dependencies are declared in. `pnpm run stack:up` builds both and runs them
 against the dev database.
 
+## Previewing Intro Cards
+
+`pnpm run intro:render-card <card> [times in ms…]` renders one card of the
+Chapter 1 intro to images, without running the game. It needs no server, no
+database and no browser. For the card it writes:
+
+- a contact sheet of eight evenly spaced moments;
+- an animated PNG of the whole card at 12 fps;
+- a still for each time given.
+
+Each image is the screen as a player sees it, caption band included. They land
+in `.cache/intro-previews/`, which git ignores, and open in any browser or
+image viewer. It is the quickest way to review card art, or to show it to
+someone.
+
+`scripts/intro-render-card.mjs` checks the arguments and passes them to
+`apps/web/src/views/intro/tools/render-card.preview.ts` through the
+environment, never on pnpm's command line. The renderer runs under Vitest
+because the card art is TypeScript. Its `.preview.ts` suffix keeps it out of
+the normal test run: only `apps/web/vitest.preview.config.ts` collects it.
+
 ## Related Docs
 
 - `delivery.md`: branching, commits, and incremental delivery
