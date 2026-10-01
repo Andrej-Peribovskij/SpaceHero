@@ -70,6 +70,21 @@ export function parseBackground(name: string, text: string): Background {
   return { pixels: parse(name, text, FRAME_WIDTH, FRAME_HEIGHT, false) as Pixel[] };
 }
 
+/** Row-major, `width × height` pixels; `null` is transparent. A hand-drawn figure, say. */
+export interface Picture {
+  readonly width: number;
+  readonly height: number;
+  readonly pixels: readonly (Pixel | null)[];
+}
+
+/** A rectangular picture with transparent pixels, its width set by its first row. */
+export function parsePicture(name: string, text: string): Picture {
+  const rows = rowsOf(text);
+  const width = [...(rows[0] ?? "")].length;
+
+  return { width, height: rows.length, pixels: parse(name, text, width, rows.length, true) };
+}
+
 /** A square sprite, as wide as it is tall, so that it can turn about its centre. */
 export function parseSprite(name: string, text: string): Sprite {
   const size = rowsOf(text).length;

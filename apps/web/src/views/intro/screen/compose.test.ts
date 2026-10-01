@@ -1,4 +1,5 @@
 import { FRAME_HEIGHT, FRAME_WIDTH } from "../art/grid";
+import { singleScene } from "../art/render";
 import { INTRO_CARDS, captionText } from "../script";
 import { BLINK_MS, CAPTION_COLUMNS, composeScreen, isLit, type ScreenContent } from "./compose";
 import { FONT } from "./font";
@@ -69,10 +70,7 @@ describe("the caption band", () => {
   });
 
   it("covers the art under the text with black, and leaves the art above it alone", () => {
-    const art = {
-      background: { pixels: new Array(FRAME_WIDTH * FRAME_HEIGHT).fill("b") },
-      layers: [],
-    } as const;
+    const art = singleScene({ kind: "grid", background: { pixels: new Array(FRAME_WIDTH * FRAME_HEIGHT).fill("b") } });
     const frame = screen({ art, caption: [{ text: "Year Zero." }], shownChars: 99 });
 
     expect(coloursIn(frame, 0, 150)).toEqual(new Set(["b"]));
@@ -80,7 +78,7 @@ describe("the caption band", () => {
   });
 
   it("draws no band at all for a card with no caption and no prompt", () => {
-    const art = { background: { pixels: new Array(FRAME_WIDTH * FRAME_HEIGHT).fill("b") }, layers: [] } as const;
+    const art = singleScene({ kind: "grid", background: { pixels: new Array(FRAME_WIDTH * FRAME_HEIGHT).fill("b") } });
 
     expect(new Set(screen({ art }))).toEqual(new Set(["b"]));
   });

@@ -41,7 +41,10 @@ export interface ScreenContent {
   readonly prompt: string | undefined;
   /** Whether the prompt is in the lit half of its blink. */
   readonly promptLit: boolean;
+  /** Time on the card's clock. */
   readonly timeMs: number;
+  /** Reduced motion: the art does not move, though its scenes and fades still change on cue. */
+  readonly still?: boolean;
 }
 
 /** Whether a blinking prompt is lit at `timeMs`: on for one period, off for the next. */
@@ -70,7 +73,7 @@ function bandHeight(lines: readonly CaptionLine[], prompt: string | undefined): 
 
 export function composeScreen(content: ScreenContent): PaletteChar[] {
   const frame = content.art
-    ? renderFrame(content.art, content.timeMs)
+    ? renderFrame(content.art, content.timeMs, { still: content.still })
     : new Array<PaletteChar>(FRAME_WIDTH * FRAME_HEIGHT).fill(".");
 
   // Laid out whole, before typing, so the band's height and every line stay put as it types.

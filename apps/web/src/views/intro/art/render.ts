@@ -1,9 +1,13 @@
-import { FRAME_HEIGHT, FRAME_WIDTH, type Background, type Sprite } from "./grid";
-import { PALETTE, colourAt, type PaletteChar } from "./palette";
+import { FRAME_HEIGHT, FRAME_WIDTH, type Background, type Pixel, type Sprite } from "./grid";
+import { PALETTE, brighter, colourAt, type PaletteChar } from "./palette";
 
 /**
  * Card art to pixels: a pure function of the art and the time, so every frame can be checked in
  * a test without a browser or a canvas (design.md §3).
+ *
+ * A card is a list of scenes, each from a moment of the card on; a scene is layers painted in
+ * order onto black; and a fade schedule can step the whole picture towards white. Each scene's
+ * layers run on the scene's own clock, starting at 0 when the scene cuts in.
  */
 
 /** The cards repaint at 12 frames a second: the cadence of old hardware, not of the display. */
@@ -18,6 +22,12 @@ interface Turning {
   readonly turnsPerSecond: number;
   /** The angle is rounded to this many positions per turn. Fewer steps, chunkier spin. */
   readonly stepsPerTurn: number;
+}
+
+/** A whole frame of pixel data, such as a starfield. */
+export interface GridLayer {
+  readonly kind: "grid";
+  readonly background: Background;
 }
 
 /** One sprite, rotated pixel by pixel. Suits chunky shapes, which keep their look at any angle. */
@@ -36,12 +46,57 @@ export interface Flipbook extends Turning {
   readonly frames: readonly Sprite[];
 }
 
-export type Layer = RotatedSprite | Flipbook;
+/** What a painted layer draws on: the frame so far, and the layer's own time. */
+export interface Canvas {
+  /** Time on the scene's clock: 0 when the scene cuts in, and always 0 under reduced motion. */
+  readonly timeMs: number;
+  /** Set a pixel. A cycle resolves to its colour at this time; off-frame pixels are ignored. */
+  set(x: number, y: number, pixel: Pixel): void;
+  /** The colour already painted at a pixel, or black off the frame. */
+  get(x: number, y: number): PaletteChar;
+}
+
+/**
+ * Scenery drawn by code (design.md §3, "hybrid"): a sky, a swelling Sun, rising light. Suits
+ * pictures that are geometry and effect, whose interesting numbers — a radius, a timing — are
+ * worth naming and tweaking; hand-drawn figures stay pixel data and are painted from it.
+ */
+export interface PaintedLayer {
+  readonly kind: "painted";
+  readonly paint: (canvas: Canvas) => void;
+}
+
+export type Layer = GridLayer | RotatedSprite | Flipbook | PaintedLayer;
+
+export interface Scene {
+  /** When, on the card's clock, the scene cuts in. The first scene starts at 0. */
+  readonly fromMs: number;
+  readonly layers: readonly Layer[];
+}
+
+/** From `atMs` on the card's clock, every colour of the art is `steps` shades brighter. */
+export interface FadeKey {
+  readonly atMs: number;
+  readonly steps: number;
+}
 
 export interface CardArt {
-  readonly background: Background;
-  /** Painted in order, over the background and over each other. */
-  readonly layers: readonly Layer[];
+  readonly scenes: readonly Scene[];
+  /** Step changes, in time order. Before the first, nothing is brightened. */
+  readonly fade?: readonly FadeKey[];
+}
+
+/** A fade one step every `stepMs`, from `fromSteps` to `toSteps`, starting at `atMs`. */
+export function fadeRamp(atMs: number, stepMs: number, fromSteps: number, toSteps: number): FadeKey[] {
+  const direction = Math.sign(toSteps - fromSteps);
+  const count = Math.abs(toSteps - fromSteps) + 1;
+
+  return Array.from({ length: count }, (_, index) => ({ atMs: atMs + index * stepMs, steps: fromSteps + index * direction }));
+}
+
+/** A card with one scene and no fade: the common case. */
+export function singleScene(...layers: Layer[]): CardArt {
+  return { scenes: [{ fromMs: 0, layers }] };
 }
 
 /** The time of the 12-fps frame that `timeMs` falls in. */
@@ -49,15 +104,45 @@ export function frameTime(timeMs: number): number {
   return Math.floor(timeMs / FRAME_MS) * FRAME_MS;
 }
 
+function sceneIndexAt(art: CardArt, timeMs: number): number {
+  let index = 0;
+  art.scenes.forEach((scene, candidate) => {
+    if (scene.fromMs <= timeMs) index = candidate;
+  });
+  return index;
+}
+
+function fadeStepsAt(art: CardArt, timeMs: number): number {
+  let steps = 0;
+  for (const key of art.fade ?? []) if (key.atMs <= timeMs) steps = key.steps;
+  return steps;
+}
+
+/**
+ * What decides the picture under reduced motion: the scene and the fade. When neither has
+ * changed, a still screen need not repaint.
+ */
+export function stillKey(art: CardArt, timeMs: number): string {
+  return `${sceneIndexAt(art, timeMs)}:${fadeStepsAt(art, timeMs)}`;
+}
+
 /** How many angle steps the layer has turned by `timeMs`: negative when turning anticlockwise. */
 function stepAt(layer: Turning, timeMs: number): number {
   return Math.round(layer.turnsPerSecond * (timeMs / 1000) * layer.stepsPerTurn);
 }
 
-function paint(frame: PaletteChar[], x: number, y: number, pixel: Sprite["pixels"][number], timeMs: number): void {
-  if (pixel && x >= 0 && y >= 0 && x < FRAME_WIDTH && y < FRAME_HEIGHT) {
-    frame[y * FRAME_WIDTH + x] = colourAt(pixel, timeMs);
-  }
+function canvasOn(frame: PaletteChar[], timeMs: number): Canvas {
+  return {
+    timeMs,
+    set(x, y, pixel) {
+      if (x >= 0 && y >= 0 && x < FRAME_WIDTH && y < FRAME_HEIGHT) {
+        frame[Math.floor(y) * FRAME_WIDTH + Math.floor(x)] = colourAt(pixel, timeMs);
+      }
+    },
+    get(x, y) {
+      return x >= 0 && y >= 0 && x < FRAME_WIDTH && y < FRAME_HEIGHT ? frame[y * FRAME_WIDTH + x]! : ".";
+    },
+  };
 }
 
 /**
@@ -65,9 +150,9 @@ function paint(frame: PaletteChar[], x: number, y: number, pixel: Sprite["pixels
  * pixel that lands on it. Pixels keep their hard edges at every angle, which is what makes a
  * rotation read as 8-bit rather than as a smoothed image.
  */
-function paintRotated(frame: PaletteChar[], layer: RotatedSprite, timeMs: number): void {
+function paintRotated(canvas: Canvas, layer: RotatedSprite): void {
   const { sprite, centreX, centreY } = layer;
-  const angle = (stepAt(layer, timeMs) * 2 * Math.PI) / layer.stepsPerTurn;
+  const angle = (stepAt(layer, canvas.timeMs) * 2 * Math.PI) / layer.stepsPerTurn;
   const cos = Math.cos(angle);
   const sin = Math.sin(angle);
   const half = sprite.size / 2;
@@ -80,36 +165,57 @@ function paintRotated(frame: PaletteChar[], layer: RotatedSprite, timeMs: number
       const dy = y + 0.5 - centreY;
       const u = Math.floor(dx * cos + dy * sin + half);
       const v = Math.floor(-dx * sin + dy * cos + half);
+      const pixel = u >= 0 && v >= 0 && u < sprite.size && v < sprite.size ? sprite.pixels[v * sprite.size + u] : null;
 
-      if (u >= 0 && v >= 0 && u < sprite.size && v < sprite.size) {
-        paint(frame, x, y, sprite.pixels[v * sprite.size + u], timeMs);
-      }
+      if (pixel) canvas.set(x, y, pixel);
     }
   }
 }
 
 /** Show the frame for the current step, centred on the layer's point, pixel for pixel. */
-function paintFlipbook(frame: PaletteChar[], layer: Flipbook, timeMs: number): void {
+function paintFlipbook(canvas: Canvas, layer: Flipbook): void {
   const count = layer.frames.length;
-  const sprite = layer.frames[((stepAt(layer, timeMs) % count) + count) % count]!;
+  const sprite = layer.frames[((stepAt(layer, canvas.timeMs) % count) + count) % count]!;
   const left = Math.floor(layer.centreX - sprite.size / 2);
   const top = Math.floor(layer.centreY - sprite.size / 2);
 
   sprite.pixels.forEach((pixel, index) => {
-    paint(frame, left + (index % sprite.size), top + Math.floor(index / sprite.size), pixel, timeMs);
+    if (pixel) canvas.set(left + (index % sprite.size), top + Math.floor(index / sprite.size), pixel);
   });
 }
 
-/** The frame at `timeMs`, as palette colours in row-major order. */
-export function renderFrame(art: CardArt, timeMs: number): PaletteChar[] {
-  const frame = art.background.pixels.map((pixel) => colourAt(pixel, timeMs));
-
-  for (const layer of art.layers) {
-    if (layer.kind === "rotated") paintRotated(frame, layer, timeMs);
-    else paintFlipbook(frame, layer, timeMs);
+function paintLayer(canvas: Canvas, layer: Layer): void {
+  switch (layer.kind) {
+    case "grid":
+      layer.background.pixels.forEach((pixel, index) => canvas.set(index % FRAME_WIDTH, Math.floor(index / FRAME_WIDTH), pixel));
+      return;
+    case "rotated":
+      return paintRotated(canvas, layer);
+    case "flipbook":
+      return paintFlipbook(canvas, layer);
+    case "painted":
+      return layer.paint(canvas);
   }
+}
 
-  return frame;
+export interface RenderOptions {
+  /**
+   * Reduced motion: nothing moves — every layer is painted at time 0 of its scene — but the story
+   * still advances, so scenes cut and fades step on cue.
+   */
+  readonly still?: boolean;
+}
+
+/** The frame at `timeMs` on the card's clock, as palette colours in row-major order. */
+export function renderFrame(art: CardArt, timeMs: number, options: RenderOptions = {}): PaletteChar[] {
+  const scene = art.scenes[sceneIndexAt(art, timeMs)]!;
+  const frame = new Array<PaletteChar>(FRAME_WIDTH * FRAME_HEIGHT).fill(".");
+  const canvas = canvasOn(frame, options.still ? 0 : timeMs - scene.fromMs);
+
+  for (const layer of scene.layers) paintLayer(canvas, layer);
+
+  const steps = fadeStepsAt(art, timeMs);
+  return steps === 0 ? frame : frame.map((colour) => brighter(colour, steps));
 }
 
 type Rgb = readonly [number, number, number];

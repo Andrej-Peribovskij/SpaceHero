@@ -65,8 +65,10 @@ reuse of the motif outside the intro.
    `image-rendering: pixelated` at the width of the frame. At widths that are
    not a multiple of 96, pixel widths are uneven; that is accepted, rather than
    measuring the container to force an integer scale. Under
-   `prefers-reduced-motion` the renderer paints time 0 once, so the picture
-   holds still.
+   `prefers-reduced-motion` nothing moves: every layer is painted at time 0 of
+   its scene. The story still advances, though: a card's scene cuts and fade
+   steps happen on cue, so a player who prefers reduced motion sees card 1's
+   child as everyone else does.
 
    Card 0's logo was chosen by prototype (2026-09-30). It is a square of four
    coloured corner brackets, turning clockwise, around a white dial with four
@@ -137,6 +139,28 @@ reuse of the motif outside the intro.
    when a character is typed. The skip control stays a design-system button
    outside the canvas, because it is an interactive control, not part of the
    picture.
+
+11. **Card art is a hybrid: code for scenery, pixel data for figures**
+   (2026-10-01, chosen with card 1). At 384×216 a full picture is 83,000
+   characters and an animated card would be about 600 KB of grids that nobody
+   reads or edits by hand. So each card now has three parts:
+   - **Scenery and effects are painted by code:** sky, Sun, light and fades.
+     The numbers worth tweaking (radius, timings, steps) are named constants at
+     the top of the card's file.
+   - **Hand-drawn figures stay pixel data:** the logo's square and dial, and
+     card 1's child.
+   - **The engine supplies the structure:** a card is a list of scenes, each
+     cutting in at a time and running on its own clock from 0. A fade schedule
+     steps every colour up a brightness ladder towards white
+     (`palette.ts`), as 8-bit games faded. Painted layers draw through a
+     small canvas.
+
+   Card 0 keeps its starfield as a grid; it predates the decision and costs
+   nothing to keep. Alternatives considered:
+   - Pixel data for everything: faithful to §3's first rule, but unreadable
+     at this size.
+   - Image files from a pixel editor: the best drawing tools, but binary, and
+     cannot be reviewed.
 
 ## Risks / Trade-offs
 

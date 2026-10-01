@@ -1,4 +1,4 @@
-import { FRAME_HEIGHT, FRAME_WIDTH, parseBackground, parseFrames, parseSprite } from "./grid";
+import { FRAME_HEIGHT, FRAME_WIDTH, parseBackground, parseFrames, parsePicture, parseSprite } from "./grid";
 
 const row = (char = ".") => char.repeat(FRAME_WIDTH);
 const grid = (rows: string[]) => `\n${rows.join("\n")}\n`;
@@ -79,5 +79,18 @@ describe("parseSprite", () => {
 
   it("refuses a sprite that is not square", () => {
     expect(() => parseSprite("bar", grid(["www", "www"]))).toThrow("bar, row 1: expected 2 pixels, found 3");
+  });
+});
+
+describe("parsePicture", () => {
+  it("reads a rectangle with transparent pixels, its width set by the first row", () => {
+    const picture = parsePicture("figure", grid(["_.", "..", "._"]));
+
+    expect([picture.width, picture.height]).toEqual([2, 3]);
+    expect(picture.pixels).toEqual([null, ".", ".", ".", ".", null]);
+  });
+
+  it("names the row that is a different width", () => {
+    expect(() => parsePicture("figure", grid(["__", "___"]))).toThrow("figure, row 2: expected 2 pixels, found 3");
   });
 });

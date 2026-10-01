@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 
 import { FRAME_HEIGHT, FRAME_WIDTH } from "../art/grid";
-import { FRAME_MS, writeRgba, type CardArt } from "../art/render";
+import { FRAME_MS, stillKey, writeRgba, type CardArt } from "../art/render";
 import type { CaptionSegment } from "../script";
 import { composeScreen, isLit } from "./compose";
 
@@ -10,7 +10,10 @@ interface PixelScreenProps {
   readonly caption: readonly CaptionSegment[];
   readonly shownChars: number;
   readonly prompt: string | undefined;
-  /** Freeze the art at time 0 and stop the prompt blinking: for players who prefer reduced motion. */
+  /**
+   * Reduced motion: the art does not move and the prompt does not blink, though the card's scenes
+   * and fades still change on cue, so the story is the same.
+   */
   readonly still: boolean;
 }
 
@@ -43,19 +46,20 @@ export function PixelScreen({ art, caption, shownChars, prompt, still }: PixelSc
 
     const image = context.createImageData(FRAME_WIDTH, FRAME_HEIGHT);
     let frame = 0;
-    let painted = -1;
+    let painted: string | undefined;
     let start: number | undefined;
     changed.current = true;
 
     const loop = (now: number) => {
       start ??= now;
-      const due = still ? 0 : Math.floor((now - start) / FRAME_MS);
+      const timeMs = Math.floor((now - start) / FRAME_MS) * FRAME_MS;
+      // Moving, every 12-fps frame is new. Still, only a cut or a fade step changes the picture.
+      const key = still ? (art ? stillKey(art, timeMs) : "") : String(timeMs);
 
-      if (due !== painted || changed.current) {
-        const timeMs = due * FRAME_MS;
-        painted = due;
+      if (key !== painted || changed.current) {
+        painted = key;
         changed.current = false;
-        writeRgba(composeScreen({ art, ...text.current, timeMs, promptLit: still || isLit(timeMs) }), image.data);
+        writeRgba(composeScreen({ art, ...text.current, timeMs, still, promptLit: still || isLit(timeMs) }), image.data);
         context.putImageData(image, 0, 0);
       }
 

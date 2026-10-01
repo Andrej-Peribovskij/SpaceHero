@@ -90,3 +90,4 @@ it("stops painting when it unmounts", () => {
 
   expect(putImageData.mock.calls.length).toBe(painted);
 });
+

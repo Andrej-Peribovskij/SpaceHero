@@ -1,5 +1,5 @@
 import { parseBackground, parseFrames, parseSprite } from "../grid";
-import type { CardArt } from "../render";
+import { singleScene, type CardArt } from "../render";
 
 /**
  * Card 0: the Absolute Connections ident. Card 11, Module 2's ident, shows the same art.
@@ -1045,10 +1045,8 @@ const DIAL = parseFrames(
 );
 
 /** The prototype's speeds at 1.25×: the square one turn per 4.8 s, the dial one per 3.2 s. */
-export const CARD_00_ART: CardArt = {
-  background: STARS,
-  layers: [
-    { kind: "flipbook", frames: DIAL, centreX: 192, centreY: 81, turnsPerSecond: -1.25 / 4, stepsPerTurn: 64 },
-    { kind: "rotated", sprite: SQUARE, centreX: 192, centreY: 81, turnsPerSecond: 1.25 / 6, stepsPerTurn: 64 },
-  ],
-};
+export const CARD_00_ART: CardArt = singleScene(
+  { kind: "grid", background: STARS },
+  { kind: "flipbook", frames: DIAL, centreX: 192, centreY: 81, turnsPerSecond: -1.25 / 4, stepsPerTurn: 64 },
+  { kind: "rotated", sprite: SQUARE, centreX: 192, centreY: 81, turnsPerSecond: 1.25 / 6, stepsPerTurn: 64 },
+);

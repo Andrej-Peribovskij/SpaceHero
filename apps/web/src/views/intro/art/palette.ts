@@ -32,13 +32,17 @@ export const CYCLE_STEP_MS = 140;
 
 const TWINKLE: readonly PaletteChar[] = ["b", "s", "p", "w", "p", "s"];
 
+/** Fire: orange and yellow, dipping to red, for a burning edge. */
+const FLICKER: readonly PaletteChar[] = ["o", "Y", "r", "o", "r", "Y"];
+
 /**
  * Colour cycles: characters that stand for a sequence of palette colours rather than one.
  *
  * Stars twinkle this way — palette cycling, the trick 8-bit games used for water, lava and
  * starfields, because changing what a colour means is cheaper than redrawing pixels. The six
  * twinkle cycles run the same sequence out of phase, one step apart, so stars drawn with
- * different digits never blink in unison.
+ * different digits never blink in unison. The three flicker cycles do the same for fire, such as
+ * the swelling Sun's edge.
  */
 export const CYCLES = {
   "1": { colours: TWINKLE, offset: 0 },
@@ -47,6 +51,9 @@ export const CYCLES = {
   "4": { colours: TWINKLE, offset: 3 },
   "5": { colours: TWINKLE, offset: 4 },
   "6": { colours: TWINKLE, offset: 5 },
+  "7": { colours: FLICKER, offset: 0 },
+  "8": { colours: FLICKER, offset: 2 },
+  "9": { colours: FLICKER, offset: 4 },
 } as const satisfies Record<string, { colours: readonly PaletteChar[]; offset: number }>;
 
 export type CycleChar = keyof typeof CYCLES;
@@ -71,3 +78,38 @@ export function colourAt(char: PaletteChar | CycleChar, timeMs: number): Palette
 
   return cycle.colours[step % cycle.colours.length]!;
 }
+
+/**
+ * One shade brighter, colour by colour: the ladder an 8-bit fade climbs. Every colour has a next
+ * step up its own family, and every ladder ends in white, so enough steps turn any picture white.
+ * Games faded this way, by swapping in a brighter palette a step at a time, because hardware with
+ * a fixed palette could not blend.
+ */
+const BRIGHTER: Readonly<Record<PaletteChar, PaletteChar>> = {
+  ".": "n",
+  n: "b",
+  b: "s",
+  s: "p",
+  p: "w",
+  w: "w",
+  d: "m",
+  m: "r",
+  r: "o",
+  o: "Y",
+  Y: "y",
+  y: "w",
+  k: "s",
+  g: "p",
+  a: "y",
+  t: "p",
+};
+
+/** The colour `steps` shades brighter: `steps` rungs up its ladder, stopping at white. */
+export function brighter(char: PaletteChar, steps: number): PaletteChar {
+  let colour = char;
+  for (let step = 0; step < steps && colour !== "w"; step += 1) colour = BRIGHTER[colour];
+  return colour;
+}
+
+/** The most steps any colour needs to reach white: a fade this long whites out any picture. */
+export const STEPS_TO_WHITE = 6;

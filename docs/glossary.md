@@ -27,3 +27,4 @@ in the domain. Use these terms consistently in code, docs, and specs.
 | Beat | One step of a chapter's story, played in one game mode: a narrated sequence, an adventure scene, a strategy map or an action encounter. Numbered from 0 within its chapter; `docs/story/chapter-01.md` lists Chapter 1's |
 | Card | One still of a narrated sequence: an 8-bit picture and its caption, typed out beneath it. The Chapter 1 intro has twelve, numbered 0 to 11 as its script numbers them. A card may have no caption |
 | Motif | A piece of music tied to one presence in the story and played wherever it appears. Absolute Connections' motif is the orientation video's loop |
+| Scene | One picture within a card, from the moment it cuts in until the next. A card may have several; card 1 cuts from the Sun to the child. Each scene's movement runs on its own clock, from 0 at its cut |
