@@ -39,11 +39,9 @@ function announced(): string {
   return document.querySelector("[aria-live]")?.textContent ?? "";
 }
 
-/** The part of the on-screen caption that has been typed so far. */
+/** The part of the caption typed so far: what the screen's canvas is drawing. */
 function typed(): string {
-  const caption = screen.getByTestId("intro-caption").cloneNode(true) as HTMLElement;
-  caption.querySelectorAll(".invisible").forEach((node) => node.remove());
-  return caption.textContent ?? "";
+  return document.querySelector("[data-caption-shown]")?.getAttribute("data-caption-shown") ?? "";
 }
 
 function showsCard(index: number): boolean {
@@ -218,7 +216,7 @@ describe("the end state", () => {
 
     expect(atTheEnd()).toBe(true);
     expect(showsCard(END_CARD)).toBe(true);
-    expect(typed()).toBe("ABSOLUTE CONNECTIONS · Contractor Orientation · Module 2 of 14: What's the Drill");
+    expect(typed()).toBe("ABSOLUTE CONNECTIONS · Contractor Orientation\nModule 2 of 14: What's the Drill");
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
     expect(screen.queryByText(PROMPT)).not.toBeInTheDocument();
   });

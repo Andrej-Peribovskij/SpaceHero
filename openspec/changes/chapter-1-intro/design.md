@@ -34,8 +34,8 @@ reuse of the motif outside the intro.
    a browser. The alternative, CSS animations with `animationend` handlers,
    hides the timing in stylesheets and cannot be tested in jsdom.
 
-3. **Animated pixel art, kept as character grids.** Each card is 96×54 pixels
-   (16:9). Its art is data, written as rows of single characters that index one
+3. **Animated pixel art, kept as character grids.** Each card is 384×216 pixels
+   (16:9; see §10 for why not the first build's 96×54). Its art is data, written as rows of single characters that index one
    shared palette of 16 colours or fewer, so a diff of a card shows which pixels
    changed. The cards move, because this is a video game and not a slideshow.
    Movement comes from three techniques that 8-bit hardware used, and each keeps
@@ -100,17 +100,43 @@ reuse of the motif outside the intro.
    out at the same event. Under `prefers-reduced-motion` the visual step is
    skipped and the drop-out remains.
 
-7. **Captions are read once by screen readers.** The typed text is
-   `aria-hidden`. The full caption sits in a polite live region, which is set
-   once per card, so a screen reader hears one line and not one character at
-   a time.
+7. **Captions are read once by screen readers.** The typed text is drawn on
+   the canvas, which is `aria-hidden`. The full caption sits in a polite live
+   region, set once per card, so a screen reader hears one line and not one
+   character at a time. The prompt is kept as visually hidden text beside the
+   canvas, for the same reason.
 
 8. **Skip is a design-system `Button`.** It is reachable by Tab, and Escape is
    a shortcut for it. It dispatches `skip` and calls `audio.stop()`, and
    nothing else. The spec forbids any request or storage write.
 
-9. **No pixel font.** Captions use the design system's typography. A pixel
-   font would be a new third-party asset and would need licence review.
+9. **A pixel font of our own** (superseding "no pixel font", see §10). A
+   third-party pixel font would need licence review. This one is drawn for the
+   game as data: one 7×11 grid per character in `screen/font.ts`, like the art.
+   It has no italics, so the script's italics are set in yellow. A test fails if
+   any caption or prompt needs a character the font lacks.
+
+10. **One screen: art and text in the same pixels** (2026-09-30, on
+   `feat/story/chapter-1-intro-pixel-screen`). Art at 96×54 sat awkwardly in a
+   modern page with crisp design-system text below it. So the whole video is
+   now one 384×216 canvas: the art fills it, and a black band over its lower
+   edge holds the caption and the prompt. Why 384×216:
+   - It is exactly 4× the first build's size, so art drawn at 96×54 scales up
+     by whole pixels.
+   - Shown 768 pixels wide, each pixel is 2×2 on screen.
+
+   The font is the size that makes this work. Doubling a 5×7 font would put
+   the ident's 45-character title at 540 pixels, wider than the screen. A 7×11
+   font on an 8-pixel step fits 46 characters a line, and its 9-pixel capitals
+   stay readable when a phone shows the screen at about 375 pixels wide. The
+   whole caption is laid out before typing starts, so words never jump lines
+   mid-type. The band's height follows the caption: the longest (card 4) takes
+   four lines, a 63-pixel band, so card art keeps what matters above row 153.
+
+   The screen repaints at 12 fps for the art, and on the next display frame
+   when a character is typed. The skip control stays a design-system button
+   outside the canvas, because it is an interactive control, not part of the
+   picture.
 
 ## Risks / Trade-offs
 

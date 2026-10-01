@@ -3,7 +3,7 @@ import { TRANSPARENT, isCycleChar, isPaletteChar, type CycleChar, type PaletteCh
 /**
  * Card art as text: rows of single characters, one per pixel (design.md §3).
  *
- * A background is the whole 96×54 frame. A sprite is a small square that the renderer turns
+ * A background is the whole frame. A sprite is a small square that the renderer turns
  * about a centre, where `_` leaves the pixel behind it showing. Both are validated when their
  * module loads, so a mistyped pixel fails the first test that imports the card, with the art's
  * name, the row and the column in the message.
@@ -12,8 +12,12 @@ import { TRANSPARENT, isCycleChar, isPaletteChar, type CycleChar, type PaletteCh
  * every row, and blank lines before and after the grid are ignored. Neither can be a pixel.
  */
 
-export const FRAME_WIDTH = 96;
-export const FRAME_HEIGHT = 54;
+/**
+ * The screen's resolution: 384×216, exactly four times the first build's 96×54, so a picture
+ * drawn at that size scales up by whole pixels. Shown 768 wide, each pixel is 2×2 screen pixels.
+ */
+export const FRAME_WIDTH = 384;
+export const FRAME_HEIGHT = 216;
 
 export type Pixel = PaletteChar | CycleChar;
 

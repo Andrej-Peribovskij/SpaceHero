@@ -75,7 +75,8 @@ on, and nothing SHALL follow automatically.
 
 ### Requirement: Reduced motion
 When the player prefers reduced motion, captions SHALL appear whole instead of
-typed, card art SHALL hold still, and the glitch MUST NOT flash. The music still drops out, so the clue
+typed, card art SHALL hold still, the prompt SHALL NOT blink, and the glitch
+MUST NOT flash. The music still drops out, so the clue
 survives.
 
 #### Scenario: Reduced motion on card 6

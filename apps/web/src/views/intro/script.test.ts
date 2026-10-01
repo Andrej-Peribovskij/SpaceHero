@@ -25,9 +25,9 @@ interface ScriptRow {
 /**
  * The rows of the doc's `| # | Image | Caption |` table, as plain text.
  *
- * Markdown the game renders differently is removed: `*…*` becomes plain words (the game sets
- * them in italics from `emphasis`), and card 6's cross-reference to the glitch section is a note
- * to the reader, not part of the caption.
+ * Markdown the game renders differently is translated: `<br>` is a line break, `*…*` becomes
+ * plain words (the game sets them apart from `emphasis`), and card 6's cross-reference to the
+ * glitch section is a note to the reader, not part of the caption.
  */
 function scriptRows(): ScriptRow[] {
   const markdown = readFileSync(SCRIPT_DOC, "utf8");
@@ -43,6 +43,7 @@ function scriptRows(): ScriptRow[] {
         index: Number(index),
         image: image!,
         caption: caption!
+          .replace(/<br>/g, "\n")
           .replace(/\s+—\s+\*see \[[^\]]*\]\([^)]*\)\*$/, "")
           .replace(/\*([^*]+)\*/g, "$1"),
       };

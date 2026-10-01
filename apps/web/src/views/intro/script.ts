@@ -7,7 +7,10 @@
  * Ganymede line ends.
  */
 
-/** A run of caption text. Italic runs are the ones the script sets in `*…*`. */
+/**
+ * A run of caption text. Italic runs are the ones the script sets in `*…*`. A `\n` is a line
+ * break, the script's `<br>`: the idents set their title on two lines.
+ */
 export interface CaptionSegment {
   readonly text: string;
   readonly emphasis?: boolean;
@@ -38,7 +41,7 @@ export const INTRO_CARDS: readonly IntroCard[] = [
   {
     image: IDENT_IMAGE,
     caption: [
-      { text: "ABSOLUTE CONNECTIONS · Contractor Orientation · Module 1 of 14: " },
+      { text: "ABSOLUTE CONNECTIONS · Contractor Orientation\nModule 1 of 14: " },
       { text: "Where We Come From", emphasis: true },
     ],
   },
@@ -122,7 +125,7 @@ export const INTRO_CARDS: readonly IntroCard[] = [
     // key the way the first one did, and in beat 1 Joe presses one by slapping the screen off.
     image: IDENT_IMAGE,
     caption: [
-      { text: "ABSOLUTE CONNECTIONS · Contractor Orientation · Module 2 of 14: " },
+      { text: "ABSOLUTE CONNECTIONS · Contractor Orientation\nModule 2 of 14: " },
       { text: "What's the Drill", emphasis: true },
     ],
   },

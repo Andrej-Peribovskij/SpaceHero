@@ -43,7 +43,9 @@ telling the story, never the story itself.
 - **Movement:** it is a video game, so the cards are never still. Stars
   twinkle, lights flicker, the logo turns — the way 8-bit games moved, by
   cycling colours and turning sprites rather than redrawing the picture.
-- **Captions:** short, typed out under the image.
+- **Captions:** short, typed out under the image, on the same screen and in
+  the same pixels: a pixel font of our own, with no italics, so the script's
+  italics are shown in yellow. The idents set their title on two lines.
 - **Music:** gloomy and mysterious chiptune, one loop for the whole video. It
   drops out twice: at the Ganymede glitch and at the end. It is also
   **Absolute Connections' motif** — see [The Motif](#the-motif).
@@ -57,7 +59,7 @@ telling the story, never the story itself.
 
 | # | Image | Caption |
 |---|-------|---------|
-| 0 | Black. Twinkling pixel stars. The Absolute Connections logo turns: a four-colour square one way, a white dial inside it the other. | ABSOLUTE CONNECTIONS · Contractor Orientation · Module 1 of 14: *Where We Come From* |
+| 0 | Black. Twinkling pixel stars. The Absolute Connections logo turns: a four-colour square one way, a white dial inside it the other. | ABSOLUTE CONNECTIONS · Contractor Orientation<br>Module 1 of 14: *Where We Come From* |
 | 1 | The Sun, filling more of the frame than it should; the palette bleeds toward white. | 2138. The Sun began to brighten. Faster than any model predicted. Faster than anyone was ready for. |
 | 2 | City silhouettes burning, crowds, torn flags, under a white sky. | Nations argued. Nations fought. For more than a century, humanity faced two enemies: the Sun above, and itself. |
 | 3 | Corporate towers in a ring under one sky. A pixel handshake. | 2251. The corporations did what governments could not. They united the world. Order returned. *One world. Many partners.* |
@@ -68,7 +70,7 @@ telling the story, never the story itself.
 | 8 | A single small figure on a cracked Earth, looking up. | Some chose to stay. Absolute Connections respects every choice. |
 | 9 | The Martian surface. A dome. One lit window. | 158 years later, the Corridor carries us all — and it is carried by contractors like you. Your assignment awaits at Externa Prima. |
 | 10 | Black. The music stops. A snore. | |
-| 11 | Black. Twinkling pixel stars. The Absolute Connections logo turns: a four-colour square one way, a white dial inside it the other. | ABSOLUTE CONNECTIONS · Contractor Orientation · Module 2 of 14: *What's the Drill* |
+| 11 | Black. Twinkling pixel stars. The Absolute Connections logo turns: a four-colour square one way, a white dial inside it the other. | ABSOLUTE CONNECTIONS · Contractor Orientation<br>Module 2 of 14: *What's the Drill* |
 
 Card 11 mirrors card 0 on purpose: the same ident, the same picture, the next
 module's title. Card 10 has no caption; the snore is the whole card.

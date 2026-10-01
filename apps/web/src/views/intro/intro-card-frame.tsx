@@ -1,36 +1,34 @@
-import { PixelCanvas } from "./art/pixel-canvas";
 import type { CardArt } from "./art/render";
-import { IntroCaption } from "./intro-caption";
-import type { IntroCard } from "./script";
+import { PixelScreen } from "./screen/pixel-screen";
+import { captionText, type IntroCard } from "./script";
 
 interface IntroCardFrameProps {
   readonly card: IntroCard;
   readonly shownChars: number;
-  /** The card's animated pixel art; a flat placeholder until the card is drawn. */
+  /** The card's animated pixel art; a black picture until the card is drawn. */
   readonly art: CardArt | undefined;
-  /** Hold the art still, for players who prefer reduced motion. */
+  /** The line asking for a key, under an ident. */
+  readonly prompt: string | undefined;
+  /** Hold the screen still, for players who prefer reduced motion. */
   readonly still: boolean;
 }
 
 /**
- * One card of the orientation video: its picture above, its caption below.
+ * One card of the orientation video, as one pixel screen: its picture, and under it its caption
+ * and any prompt, drawn in the same pixels.
  *
- * The picture carries the script's description of the image as its text alternative, so a
- * screen reader is told the same thing whether the card is drawn yet or not.
+ * The screen carries the script's description of the picture as its text alternative. What has
+ * been typed so far is also kept in `data-caption-shown`, so tests can read what the canvas shows.
  */
-export function IntroCardFrame({ card, shownChars, art, still }: IntroCardFrameProps) {
+export function IntroCardFrame({ card, shownChars, art, prompt, still }: IntroCardFrameProps) {
   return (
-    <figure className="flex w-full max-w-3xl flex-col gap-6">
-      <div
-        role="img"
-        aria-label={card.image}
-        className="aspect-video w-full border border-[var(--border)] bg-[var(--color-slate-950)]"
-      >
-        {art && <PixelCanvas art={art} still={still} />}
-      </div>
-      <figcaption>
-        <IntroCaption caption={card.caption} shownChars={shownChars} />
-      </figcaption>
-    </figure>
+    <div
+      role="img"
+      aria-label={card.image}
+      data-caption-shown={captionText(card).slice(0, shownChars)}
+      className="w-full max-w-3xl"
+    >
+      <PixelScreen art={art} caption={card.caption} shownChars={shownChars} prompt={prompt} still={still} />
+    </div>
   );
 }

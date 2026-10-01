@@ -23,14 +23,18 @@ describe("parseBackground", () => {
   });
 
   it("names the art when the row count is wrong", () => {
-    expect(() => parseBackground("card 3", grid([row(), row()]))).toThrow("card 3: expected 54 rows, found 2");
+    expect(() => parseBackground("card 3", grid([row(), row()]))).toThrow(
+      `card 3: expected ${FRAME_HEIGHT} rows, found 2`,
+    );
   });
 
   it("names the row when a row is the wrong width", () => {
     const rows = Array.from({ length: FRAME_HEIGHT }, () => row());
     rows[9] = row().slice(1);
 
-    expect(() => parseBackground("card 3", grid(rows))).toThrow("card 3, row 10: expected 96 pixels, found 95");
+    expect(() => parseBackground("card 3", grid(rows))).toThrow(
+      `card 3, row 10: expected ${FRAME_WIDTH} pixels, found ${FRAME_WIDTH - 1}`,
+    );
   });
 
   it("names the row and column of an unknown character", () => {

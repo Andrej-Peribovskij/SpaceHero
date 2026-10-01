@@ -6,10 +6,16 @@ import { IntroCardFrame } from "./intro-card-frame";
 import { INTRO_CARDS, captionText } from "./script";
 import { useIntroTimeline } from "./use-intro-timeline";
 
-/** The blinking line under an ident that asks the player for a key. */
-function KeyPrompt({ children }: { readonly children: string }) {
-  return <p className="font-mono text-sm tracking-widest motion-safe:animate-pulse">{children}</p>;
-}
+/**
+ * The line under an ident that asks the player for a key, if one is showing. The next module's
+ * ident asks the same way the first did, and nothing answers it yet: in beat 1 the key press is
+ * Joe slapping the screen off (docs/product-debt/intro-hand-off-to-beat-1.md).
+ */
+const PROMPTS = {
+  gate: "PRESS ANY KEY TO BEGIN ORIENTATION",
+  playing: undefined,
+  ended: "PRESS ANY KEY TO CONTINUE ORIENTATION",
+} as const;
 
 /**
  * Chapter 1, beat 0: the Absolute Connections contractor orientation video.
@@ -23,6 +29,7 @@ function KeyPrompt({ children }: { readonly children: string }) {
 export function IntroView() {
   const { state, shownChars, reducedMotion, start, skip } = useIntroTimeline();
   const card = INTRO_CARDS[state.card]!;
+  const prompt = PROMPTS[state.phase];
   const mainRef = useRef<HTMLElement>(null);
 
   // Ending unmounts the skip button. If it had focus, the browser drops focus to the top of the
@@ -57,21 +64,21 @@ export function IntroView() {
     >
       <h1 className="sr-only">Absolute Connections Contractor Orientation</h1>
 
-      <IntroCardFrame card={card} shownChars={shownChars} art={artFor(state.card)} still={reducedMotion} />
+      <IntroCardFrame
+        card={card}
+        shownChars={shownChars}
+        art={artFor(state.card)}
+        prompt={prompt}
+        still={reducedMotion}
+      />
 
       {/* Set once per card, so a screen reader hears each caption whole (design.md §7). */}
       <p className="sr-only" aria-live="polite">
         {captionText(card)}
       </p>
 
-      {state.phase === "gate" && <KeyPrompt>PRESS ANY KEY TO BEGIN ORIENTATION</KeyPrompt>}
-
-      {/*
-        The next module's ident asks for a key the same way the first did. Nothing answers it
-        yet: in beat 1 the key press is Joe slapping the screen off
-        (docs/product-debt/intro-hand-off-to-beat-1.md).
-      */}
-      {state.phase === "ended" && <KeyPrompt>PRESS ANY KEY TO CONTINUE ORIENTATION</KeyPrompt>}
+      {/* The prompt blinks on the screen; this is it as text, for assistive technology. */}
+      {prompt && <p className="sr-only">{prompt}</p>}
 
       {/* No variant: the portable call, as in WidgetsView. Skipping records nothing. */}
       {state.phase === "playing" && <Button onClick={skip}>Skipping is recorded.</Button>}
