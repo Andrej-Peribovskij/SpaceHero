@@ -55,7 +55,8 @@ export const INTRO_CARDS: readonly IntroCard[] = [
     ],
   },
   {
-    image: "City silhouettes burning, crowds, torn flags, under a white sky.",
+    image:
+      "City silhouettes burning, crowds, torn flags, under a white sky. A flash; closer, both crowds stream in and pile into one fighting mass, their flags mixed above it.",
     caption: [
       {
         text: "Nations argued. Nations fought. For more than a century, humanity faced two enemies: the Sun above, and itself.",

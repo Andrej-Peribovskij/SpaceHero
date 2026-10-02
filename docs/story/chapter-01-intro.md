@@ -61,7 +61,7 @@ telling the story, never the story itself.
 |---|-------|---------|
 | 0 | Black. Twinkling pixel stars. The Absolute Connections logo turns: a four-colour square one way, a white dial inside it the other. | ABSOLUTE CONNECTIONS · Contractor Orientation<br>Module 1 of 14: *Where We Come From* |
 | 1 | The Sun, filling more of the frame than it should; the palette bleeds toward white. Out of the white, a child on bare ground, arm across their eyes, as the light keeps rising. | 2138. The Sun began to brighten. Faster than any model predicted. Faster than anyone was ready for. |
-| 2 | City silhouettes burning, crowds, torn flags, under a white sky. | Nations argued. Nations fought. For more than a century, humanity faced two enemies: the Sun above, and itself. |
+| 2 | City silhouettes burning, crowds, torn flags, under a white sky. A flash; closer, both crowds stream in and pile into one fighting mass, their flags mixed above it. | Nations argued. Nations fought. For more than a century, humanity faced two enemies: the Sun above, and itself. |
 | 3 | Corporate towers in a ring under one sky. A pixel handshake. | 2251. The corporations did what governments could not. They united the world. Order returned. *One world. Many partners.* |
 | 4 | A dark server hall; one warm light at its centre. | 2256. Helios — the mind every corporation built together — delivered the Plan. Humanity would leave. Not all at once. Station by station. |
 | 5 | Mars and Deimos; a dotted line of stations reaching into the dark. | Externa, 2312. Steady Foot, 2389. Steady Hand, 2427. A corridor of light across the dark. |
