@@ -9,5 +9,7 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["src/**/*.preview.ts"],
+    // Rendering a whole card is a hundred frames and an animated PNG: seconds, not milliseconds.
+    testTimeout: 120_000,
   },
 });
