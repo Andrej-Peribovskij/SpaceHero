@@ -233,8 +233,11 @@ const STARS = parseBackground(
 `,
 );
 
-/** Teal, yellow, red and steel blue: one partner a corner. Turns clockwise, pixel by pixel. */
-const SQUARE = parseSprite(
+/**
+ * Teal, yellow, red and steel blue: one partner a corner. Turns clockwise, pixel by pixel. Card 3
+ * shows it again, round the sky between the towers.
+ */
+export const SQUARE = parseSprite(
   "card 0 square",
   `
   ttttttttttttttttttttttttttt__________________YYYYYYYYYYYYYYYYYYYYYYYYYYY
