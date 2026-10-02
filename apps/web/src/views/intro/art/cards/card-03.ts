@@ -1,6 +1,7 @@
 import { parsePicture, type Picture } from "../grid";
 import type { PaletteChar } from "../palette";
-import { FRAME_MS, type Canvas, type CardArt, type Scene } from "../render";
+import { cardDurationMs } from "../../intro-timeline";
+import { FRAME_MS, closeToBlack, type Canvas, type CardArt, type Scene } from "../render";
 import { SQUARE } from "./card-00";
 
 /**
@@ -15,7 +16,8 @@ import { SQUARE } from "./card-00";
  * windows come on floor by floor, from the street up towards the sky, and on "Order returned"
  * every light flashes at once and the beacons blink together: order, after card 2's chaos. On "One
  * world. Many partners.", Absolute Connections' square appears round that sky, the white circle
- * inscribed in it and its brackets over the towers, and turns against the ring. Chosen by draft (2026-10-02); the square replaced a pixel handshake, which the
+ * inscribed in it and its brackets over the towers, and turns against the ring. Then the dark
+ * closes in from the edges, the square last, and card 4 begins in it. Chosen by draft (2026-10-02); the square replaced a pixel handshake, which the
  * script had asked for and which never looked like one.
  *
  * The corporate touch is the slogan and the square that comes with it, the company signing its own
@@ -43,6 +45,12 @@ const FLASH_FRAMES = 2;
 const BLINK_MS = 500;
 /** The square appears as "One world. Many partners." starts typing. */
 export const LOGO_MS = 4360;
+/**
+ * The card closes to black from the edges in, onto the square, and is black before card 4 starts:
+ * card 4 opens on that black. Under reduced motion it cuts instead.
+ */
+const CLOSE_MS = 1300;
+export const CLOSE_FROM_MS = cardDurationMs(3) - CLOSE_MS - 100;
 
 // ── the first shot: the ruins and the towers ──
 /** The bottom of the visible picture: the caption band covers what is below. */
@@ -369,6 +377,7 @@ export const CARD_03_ART: CardArt = {
       layers: [
         ...shot(paintAbove, CUT_MS, LOGO_MS).layers,
         { kind: "rotated", sprite: SQUARE, centreX: RING_X, centreY: RING_Y, turnsPerSecond: LOGO_TURNS_PER_SECOND, stepsPerTurn: LOGO_STEPS },
+        closeToBlack(RING_X, RING_Y, CLOSE_FROM_MS - LOGO_MS, CLOSE_MS),
       ],
     },
   ],

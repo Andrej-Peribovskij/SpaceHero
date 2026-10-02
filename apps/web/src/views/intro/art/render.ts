@@ -1,5 +1,5 @@
 import { FRAME_HEIGHT, FRAME_WIDTH, type Background, type Pixel, type Sprite } from "./grid";
-import { PALETTE, brighter, colourAt, type PaletteChar } from "./palette";
+import { PALETTE, STEPS_TO_BLACK, brighter, colourAt, darker, type PaletteChar } from "./palette";
 
 /**
  * Card art to pixels: a pure function of the art and the time, so every frame can be checked in
@@ -92,6 +92,53 @@ export function fadeRamp(atMs: number, stepMs: number, fromSteps: number, toStep
   const count = Math.abs(toSteps - fromSteps) + 1;
 
   return Array.from({ length: count }, (_, index) => ({ atMs: atMs + index * stepMs, steps: fromSteps + index * direction }));
+}
+
+/**
+ * The 4×4 ordered-dither threshold of a pixel, in [0, 1): Bayer's matrix, the pattern 8-bit art
+ * used to step between two colours where it could not blend them. A pixel takes the next shade
+ * up once a value's fraction passes its threshold, so a smooth ramp becomes a crosshatch.
+ */
+const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5] as const;
+
+export function ditherAt(x: number, y: number): number {
+  return BAYER[(y & 3) * 4 + (x & 3)]! / 16;
+}
+
+/**
+ * A closing fade: the picture darkens from the edges in, towards a point, until only black is
+ * left. It is painted last and works on what the layers below painted, a pixel at a time: the
+ * further out a pixel lies behind the closing front, the more shades darker, dithered so each
+ * shade's edge is a crosshatch rather than a ring.
+ *
+ * `startMs` and `durationMs` are on the scene's clock. Under reduced motion that clock stands
+ * at 0, so the fade never starts and the card cuts to the next one instead.
+ */
+export function closeToBlack(centreX: number, centreY: number, startMs: number, durationMs: number): PaintedLayer {
+  /** How far behind the front each shade is: the width of one rung of the ladder. */
+  const band = 10;
+  const reach = Math.max(
+    ...[0, FRAME_WIDTH].flatMap((x) => [0, FRAME_HEIGHT].map((y) => Math.hypot(x - centreX, y - centreY))),
+  );
+
+  return {
+    kind: "painted",
+    paint(canvas) {
+      const progress = Math.min(1, (canvas.timeMs - startMs) / durationMs);
+      if (progress <= 0) return;
+
+      // From the farthest corner to past the centre by a full ladder, so the centre ends black.
+      const front = reach - progress * (reach + STEPS_TO_BLACK * band);
+
+      for (let y = 0; y < FRAME_HEIGHT; y += 1) {
+        for (let x = 0; x < FRAME_WIDTH; x += 1) {
+          const behind = Math.hypot(x + 0.5 - centreX, y + 0.5 - centreY) - front;
+          const steps = Math.floor(behind / band + ditherAt(x, y));
+          if (steps > 0) canvas.set(x, y, darker(canvas.get(x, y), steps));
+        }
+      }
+    },
+  };
 }
 
 /** A card with one scene and no fade: the common case. */

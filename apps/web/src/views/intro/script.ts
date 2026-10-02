@@ -65,7 +65,7 @@ export const INTRO_CARDS: readonly IntroCard[] = [
   },
   {
     image:
-      "Towers rise out of the ruins, too tall for the frame, and their shadows swallow the people. From below: corporate towers in a ring under one sky, their lights coming on together. In the sky between them, the Absolute Connections square appears, turning against them.",
+      "Towers rise out of the ruins, too tall for the frame, and their shadows swallow the people. From below: corporate towers in a ring under one sky, their lights coming on together. In the sky between them, the Absolute Connections square appears, turning against them. Then the dark closes in from the edges, onto the square.",
     caption: [
       {
         text: "2251. The corporations did what governments could not. They united the world. Order returned. ",

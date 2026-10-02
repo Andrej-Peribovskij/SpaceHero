@@ -113,3 +113,36 @@ export function brighter(char: PaletteChar, steps: number): PaletteChar {
 
 /** The most steps any colour needs to reach white: a fade this long whites out any picture. */
 export const STEPS_TO_WHITE = 6;
+
+/**
+ * One shade darker: the ladder a fade to black climbs down. Blues sink through navy, fire through
+ * embers and earth, and every ladder ends in black.
+ */
+const DARKER: Readonly<Record<PaletteChar, PaletteChar>> = {
+  ".": ".",
+  n: ".",
+  b: "n",
+  s: "b",
+  p: "s",
+  w: "p",
+  d: ".",
+  m: "d",
+  r: "m",
+  o: "r",
+  Y: "o",
+  y: "Y",
+  k: "n",
+  g: "b",
+  a: "m",
+  t: "s",
+};
+
+/** The colour `steps` shades darker: `steps` rungs down its ladder, stopping at black. */
+export function darker(char: PaletteChar, steps: number): PaletteChar {
+  let colour = char;
+  for (let step = 0; step < steps && colour !== "."; step += 1) colour = DARKER[colour];
+  return colour;
+}
+
+/** The most steps any colour needs to reach black: a fade this long blacks out any picture. */
+export const STEPS_TO_BLACK = 6;

@@ -2,7 +2,7 @@ import { cardDurationMs, typedCharsAt } from "../../intro-timeline";
 import { INTRO_CARDS, captionText } from "../../script";
 import { FRAME_WIDTH } from "../grid";
 import { FRAME_MS, renderFrame } from "../render";
-import { CARD_03_ART, CUT_MS, HORIZON, LOGO_MS, ORDER_MS, RING_X, RING_Y, RISEN_MS, SKY_RADIUS } from "./card-03";
+import { CARD_03_ART, CLOSE_FROM_MS, CUT_MS, HORIZON, LOGO_MS, ORDER_MS, RING_X, RING_Y, RISEN_MS, SKY_RADIUS } from "./card-03";
 
 const at = (frame: readonly string[], x: number, y: number) => frame[y * FRAME_WIDTH + x];
 const END_MS = cardDurationMs(3) - 1;
@@ -158,6 +158,17 @@ describe("card 3: the corporations", () => {
     const turned = yellowAngle(renderFrame(CARD_03_ART, LOGO_MS + 500)) - yellowAngle(renderFrame(CARD_03_ART, LOGO_MS));
 
     expect(Math.atan2(Math.sin(turned), Math.cos(turned))).toBeLessThan(0);
+  });
+
+  it("closes to black once the slogan is typed, from the edges in, onto the square", () => {
+    const card = INTRO_CARDS[3]!;
+    const closing = renderFrame(CARD_03_ART, CLOSE_FROM_MS + 700);
+
+    expect(typedCharsAt(card, CLOSE_FROM_MS)).toBe(captionText(card).length);
+    expect(count(region(renderFrame(CARD_03_ART, CLOSE_FROM_MS - 1), 0, 0, 40, 40), ".")).toBeLessThan(400);
+    expect(new Set(region(closing, 0, 0, 40, 40))).toEqual(new Set(["."]));
+    expect(at(closing, RING_X, RING_Y)).toBe("w");
+    expect(new Set(renderFrame(CARD_03_ART, END_MS))).toEqual(new Set(["."]));
   });
 
   it("under reduced motion, holds a still for each beat: the ruins, the towers, the ring lit, the square", () => {
