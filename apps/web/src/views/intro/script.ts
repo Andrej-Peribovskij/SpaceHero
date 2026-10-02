@@ -75,7 +75,7 @@ export const INTRO_CARDS: readonly IntroCard[] = [
     ],
   },
   {
-    image: "A dark server hall; one warm light at its centre.",
+    image: "Black. A spark at the centre of a dark server hall grows into a small sun hung in cables; its warm light spreads along the racks, and their lights come on in every company's colour. Round itself it draws the Plan: three orbits, and a dotted line of stations reaching out, one by one, into the dark.",
     caption: [
       {
         text: "2256. Helios — the mind every corporation built together — delivered the Plan. Humanity would leave. Not all at once. Station by station.",
