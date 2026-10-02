@@ -18,7 +18,8 @@ import { fadeRamp, type Canvas, type CardArt, type FadeKey, type Scene } from ".
  * The card is a serious one, so it carries no corporate touch (docs/story/chapter-01-intro.md,
  * "The Frame"). The scenery is code (design.md §11): the numbers worth tweaking are named below.
  * The people are pixel data, and can be redrawn a pixel at a time; the big figures of the close
- * shot were drawn from stick-figure skeletons and are stored as pixels like the rest.
+ * shot were drawn from stick-figure skeletons by `tools/fighters.ts` and are stored as pixels like
+ * the rest.
  */
 
 // ── timings, on the card's clock (card 2 lasts about 7.4 s: its caption typed, then held) ──
@@ -727,6 +728,10 @@ const POLE_COLUMN = 13;
 /**
  * The close shot's people, facing right, and as big as the frame allows: running, in two strides;
  * winding up and landing a blow; and charging with a flag, its top hand at `CHARGE_GRIP`.
+ *
+ * Drawn by `tools/fighters.ts` from a skeleton each: to change a pose, move its joints there and
+ * paste what `pnpm run intro:draw-fighters` prints. Its test fails if these grids and the
+ * skeletons part ways.
  */
 const RUN_A: Picture = parsePicture(
   "card 2 running, stride A",
@@ -1149,6 +1154,9 @@ const CHARGING_BEARER: Picture = parsePicture(
 );
 
 const CHARGE_GRIP = { x: 29, y: 15 };
+
+/** The close shot's fighters, by the name of the pose that drew them. */
+export const CLOSE_FIGHTERS = { RUN_A, RUN_B, WIND_UP, BLOW, CHARGING_BEARER } as const;
 
 interface Figure {
   readonly picture: Picture;

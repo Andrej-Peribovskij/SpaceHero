@@ -60,7 +60,8 @@ function main() {
 
   mkdirSync(OUTPUT_DIR, { recursive: true });
 
-  return runPnpm(["--filter", "./apps/web", "exec", "vitest", "run", "--config", "vitest.preview.config.ts"], {
+  // Named, because the preview config collects every `.preview.ts`, and this runs only the renderer.
+  return runPnpm(["--filter", "./apps/web", "exec", "vitest", "run", "--config", "vitest.preview.config.ts", "render-card"], {
     cwd: repoRoot,
     env: {
       INTRO_CARD: String(parsed.card),

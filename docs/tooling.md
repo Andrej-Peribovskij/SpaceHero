@@ -148,6 +148,20 @@ environment, never on pnpm's command line. The renderer runs under Vitest
 because the card art is TypeScript. Its `.preview.ts` suffix keeps it out of
 the normal test run: only `apps/web/vitest.preview.config.ts` collects it.
 
+### Redrawing Card 2's Fighters
+
+Card 2's close shot stores its five big fighters as pixel grids, like all card
+figures. They were drawn by `apps/web/src/views/intro/tools/fighters.ts` from a
+stick-figure skeleton each: joints in a 36×78 box, fleshed out into capsules.
+To change a pose, move its joints there, run
+`pnpm run intro:draw-fighters`, and paste the new grid from
+`.cache/intro-previews/fighters.txt` into `cards/card-02.ts`.
+`tools/fighters.test.ts` fails while the skeletons and the stored grids
+disagree, so the two cannot drift apart unnoticed.
+
+Every `.preview.ts` shares the preview config, so each command names the file
+it runs.
+
 ## Related Docs
 
 - `delivery.md`: branching, commits, and incremental delivery
