@@ -122,9 +122,13 @@ export const INTRO_CARDS: readonly IntroCard[] = [
     ],
   },
   {
-    image: "A single small figure on a cracked Earth, looking up.",
+    image:
+      "The dive goes on into the glare, all white; out of it, a cliff of bleached rock towering out of the frame, a white sky and a swollen Sun beside it, and in the cliff a few caverns where the ones who stayed live, the rock their shelter from the light: dark mouths, ledges, awnings, fires, small figures in the shade; on the cracked plain, a ship that never left. The camera closes in on one cave, and from inside it: a single small figure, cloaked, alone at the edge of the shade, a hand to the brow, looking up at the white sky where a last ship climbs away.",
     caption: [
-      { text: "Some chose to stay. ", pauseAfterMs: 800 },
+      // The caption waits while the picture falls on from card 7 into the glare and out of it, and
+      // while it closes in on the one who looks up.
+      { text: "", pauseAfterMs: 1900 },
+      { text: "Some chose to stay. ", pauseAfterMs: 1900 },
       { text: "Absolute Connections respects every choice." },
     ],
   },
