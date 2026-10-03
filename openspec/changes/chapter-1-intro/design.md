@@ -90,8 +90,30 @@ reuse of the motif outside the intro.
    caption, the prompt, the skip control and the background.
 
 5. **Web Audio synth behind a port.** `IntroAudio` exposes `start`, `dropOut`,
-   `resume`, `stop` and `snore`. The Web Audio implementation plays square and
-   triangle voices from a note table, with a noise burst for the snore. A no-op
+   `resume`, `stop` and `snore`, `pause` and `unpause` for a hidden page, and
+   `close` to release the `AudioContext` when the intro unmounts. The synth
+   computes the samples itself in plain
+   arithmetic: square and triangle voices from a note table, and a noise burst
+   for the snore, from a shift register like a console's noise channel. Web
+   Audio only plays the result. Each sound plays through a gain of its own: the
+   loop's is closed and opened by the glitch, and every stop fades a gain out
+   over a few milliseconds before the source stops, since a source cut mid-wave
+   clicks. The snore is played once, and a stop silences it too, even while it
+   waits out its beat, so a skip on card 10 never lets it play over Module 2's
+   music. A hidden page suspends the context, as it pauses the timeline (§2),
+   and the snore's wait holds with it. The music stops on card 10
+   and starts again from the top on card 11, Module 2's ident: the snore needs
+   the silence, and the music coming back is what wakes Joe in beat 1. The
+   loop is rendered once and kept for the restart. Computing the samples rather
+   than using Web Audio's oscillators makes the music a pure function: the same
+   numbers in every browser, in tests, and in a WAV the preview tool writes for
+   listening (`pnpm run intro:render-music`). Rendering the loop takes tens of
+   milliseconds, too long for the gate's handler, so the view renders it once
+   the browser is idle after mount: the samples need no `AudioContext`, and
+   the key press only copies them into a buffer. A render ahead that fails or
+   has not run yet costs nothing: `start` renders the loop itself. If sound
+   breaks partway, the audio is closed, not just dropped, so nothing it
+   started can play on. A no-op
    implementation is used when `AudioContext` is missing or throws, and tests
    use a recording fake. Browsers only let audio start after a user gesture.
    So the `AudioContext` is created and resumed inside the gate's key or click
@@ -116,8 +138,9 @@ reuse of the motif outside the intro.
    canvas, for the same reason.
 
 8. **Skip is a design-system `Button`.** It is reachable by Tab, and Escape is
-   a shortcut for it. It dispatches `skip` and calls `audio.stop()`, and
-   nothing else. The spec forbids any request or storage write.
+   a shortcut for it. It dispatches `skip`, which stops Module 1's music,
+   and nothing else; the end state then starts Module 2's, as it does when the
+   video plays through. The spec forbids any request or storage write.
 
 9. **A pixel font of our own** (superseding "no pixel font", see §10). A
    third-party pixel font would need licence review. This one is drawn for the
@@ -176,8 +199,9 @@ reuse of the motif outside the intro.
 - [The UDS Button looks corporate in an 8-bit frame] → In-world that is
   fitting, since the corporation owns the video. If it jars, record tech debt.
   Do not hand-roll a button.
-- [Audio differs across browsers] → Keep only oscillator and gain nodes.
-  Specs never assert on sound, only on port calls.
+- [Audio differs across browsers] → The synth computes every sample, so Web
+  Audio only plays buffers, through buffer source and gain nodes. Specs never
+  assert on sound, only on port calls.
 - [Moving widgets off `/` breaks routing tests and E2E] → Update them in the
   same slice to target `/widgets` for the Example flow and `/` for the intro.
 

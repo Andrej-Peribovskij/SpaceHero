@@ -11,7 +11,7 @@ import {
   type IntroEvent,
   type IntroState,
 } from "./intro-timeline";
-import { END_CARD, INTRO_CARDS, captionText } from "./script";
+import { END_CARD, INTRO_CARDS, SNORE_CARD, captionText } from "./script";
 
 /** Run a list of actions from the gate, collecting every event on the way. */
 function play(...actions: Parameters<typeof stepIntro>[1][]): { state: IntroState; events: IntroEvent[] } {
@@ -168,8 +168,13 @@ describe("the end", () => {
     expect(events.slice(-2)).toEqual([{ type: "card", index: END_CARD }, { type: "ended" }]);
   });
 
-  it("has a captionless card before the end: the snore", () => {
-    expect(captionText(INTRO_CARDS[END_CARD - 1]!)).toBe("");
-    expect(cardDurationMs(END_CARD - 1)).toBe(HOLD_MS);
+  it("has a captionless card before the end, the snore, held for its own hold rather than a caption's", () => {
+    expect(INTRO_CARDS[SNORE_CARD]!.caption).toEqual([]);
+    expect(cardDurationMs(SNORE_CARD)).toBe(INTRO_CARDS[SNORE_CARD]!.holdMs);
+    expect(cardDurationMs(SNORE_CARD)).toBeGreaterThan(HOLD_MS);
+  });
+
+  it("holds every other card for the usual hold once its caption is typed", () => {
+    expect(cardDurationMs(1)).toBe(captionText(INTRO_CARDS[1]!).length * MS_PER_CHAR + HOLD_MS);
   });
 });

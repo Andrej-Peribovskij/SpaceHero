@@ -26,6 +26,11 @@ export interface IntroCard {
   readonly image: string;
   readonly caption: readonly CaptionSegment[];
   /**
+   * How long the card stays once its caption is typed, if not the usual hold: a card whose sound
+   * needs more time than its caption gives it.
+   */
+  readonly holdMs?: number;
+  /**
    * The character count at which the Ganymede glitch fires, counted across the whole caption.
    * Set on card 6 only: the one place the video visibly hides something.
    */
@@ -145,14 +150,17 @@ export const INTRO_CARDS: readonly IntroCard[] = [
     ],
   },
   {
-    // No caption: the snore is the whole card.
-    image: "Black. The music stops. A snore.",
+    // No caption: the snore is the whole card. It holds a second longer than a caption's hold, so
+    // the snore ends in silence before Module 2 starts the music again.
+    image: "Black. The music stops. A snore. A beat of silence.",
     caption: [],
+    holdMs: 4000,
   },
   {
     // The next module's ident, mirroring card 0: one module down, thirteen to go. It waits for a
-    // key the way the first one did, and in beat 1 Joe presses one by slapping the screen off.
-    image: IDENT_IMAGE,
+    // key the way the first one did, but with its music playing, and in beat 1 that music wakes Joe,
+    // who presses a key by slapping the screen off.
+    image: `${IDENT_IMAGE} The music starts again.`,
     caption: [
       { text: "ABSOLUTE CONNECTIONS · Contractor Orientation\nModule 2 of 14: " },
       { text: "What's the Drill", emphasis: true },
@@ -165,6 +173,9 @@ export const IDENT_CARD = 0;
 
 /** The last card — the next module's ident — and the one the sequence ends, or is skipped, onto. */
 export const END_CARD = INTRO_CARDS.length - 1;
+
+/** Card 10, black and captionless: the music stops on it, and someone snores. */
+export const SNORE_CARD = END_CARD - 1;
 
 /** A caption as one string, for the live region and for tests. */
 export function captionText(card: IntroCard): string {

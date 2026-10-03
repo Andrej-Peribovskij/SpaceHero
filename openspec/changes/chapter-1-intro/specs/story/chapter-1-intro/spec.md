@@ -34,8 +34,9 @@ match the script word for word.
 - **THEN** cards 1 to 11 appear once each, in order, each caption as scripted
 
 ### Requirement: Orientation music
-A single chiptune loop SHALL play from the gate until the end or a skip. When
-audio is unavailable, the sequence MUST still play in full, silently.
+A single chiptune loop SHALL play from the gate until card 10 or a skip, and
+again, from the top, on card 11. When audio is unavailable, the sequence MUST
+still play in full, silently.
 
 #### Scenario: Audio cannot start
 - **WHEN** the browser provides no working audio output
@@ -61,17 +62,23 @@ state. It MUST NOT send any request or store anything.
 - **THEN** the end state is shown and no network request or storage write occurs
 
 ### Requirement: End state
-Card 10 SHALL be black with no caption: the music stops and a snore plays. The
-sequence SHALL then end on card 11, the Module 2 ident. Card 11 shows card 0's
+Card 10 SHALL be black with no caption: the music stops, a snore plays, and a
+beat of silence follows it. The sequence SHALL then end on card 11, the Module
+2 ident, which starts the music again from the top. Card 11 shows card 0's
 picture and the caption *ABSOLUTE CONNECTIONS · Contractor Orientation · Module
 2 of 14: What's the Drill*, whole rather than typed, above the prompt **PRESS
 ANY KEY TO CONTINUE ORIENTATION**. Until beat 1 exists, no input SHALL move it
 on, and nothing SHALL follow automatically.
 
 #### Scenario: Sequence ends
-- **WHEN** card 11 is reached, and the player then presses a key
-- **THEN** the ident and prompt hold indefinitely, silent, and the music does
-  not restart
+- **WHEN** card 10 plays through to card 11, and the player then presses a key
+- **THEN** the snore ends before the music starts again, and the ident and
+  prompt hold indefinitely with the music looping
+
+#### Scenario: Skipped to the end
+- **WHEN** the player skips during any card
+- **THEN** the music stops and starts again from the top on card 11, with no
+  snore
 
 ### Requirement: Reduced motion
 When the player prefers reduced motion, captions SHALL appear whole instead of
