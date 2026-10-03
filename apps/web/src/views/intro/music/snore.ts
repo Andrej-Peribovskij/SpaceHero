@@ -4,7 +4,7 @@ import { SAMPLE_RATE } from "./synth";
  * Card 10's snore, as samples: one long rattling breath in, a short breathy one out.
  *
  * A snore is the soft palate flapping in the airflow. Each flap shuts the airway for an instant
- * and lets it go with a burst, twenty to forty times a second and never quite evenly, and the
+ * and lets it go with a burst, fifteen to thirty times a second and never quite evenly, and the
  * throat colours those bursts into a low growl. So the breath in is built that way: noise, beaten
  * by a train of flaps whose rate and strength wander, rung through resonances like a throat's and
  * swelling and fading with the air. The rattle only starts once enough air is moving, so it opens
@@ -32,27 +32,27 @@ interface Breath {
 }
 
 const INHALE: Breath = {
-  ms: 1500,
+  ms: 1800,
   peakAt: 0.65,
   volume: 0.55,
-  flapHz: [22, 34],
+  flapHz: [16, 24],
   rattle: 0.95,
   formants: [
-    [170, 90, 1],
-    [480, 110, 0.55],
-    [1250, 300, 0.15],
+    [110, 70, 1],
+    [300, 100, 0.5],
+    [750, 250, 0.12],
   ],
 };
 const PAUSE_MS = 150;
 const EXHALE: Breath = {
-  ms: 1000,
+  ms: 1050,
   peakAt: 0.25,
   volume: 0.2,
   flapHz: [0, 0],
   rattle: 0,
   formants: [
-    [650, 350, 0.6],
-    [1700, 700, 0.5],
+    [420, 300, 0.6],
+    [1100, 600, 0.4],
   ],
 };
 
@@ -110,8 +110,8 @@ function airflow(breath: Breath, through: number): number {
  */
 const flap = (phase: number) => (1 - Math.exp(-phase * 40)) * Math.exp(-phase * 8);
 
-/** The knock of the palate slapping shut, which sets the throat ringing: it dies in about a millisecond. */
-const KNOCK_SAMPLES = 0.0012 * SAMPLE_RATE;
+/** The knock of the palate slapping shut, which sets the throat ringing: it dies in a few milliseconds. */
+const KNOCK_SAMPLES = 0.0025 * SAMPLE_RATE;
 const KNOCK = 10;
 /** How much of the rush of air is still heard under the knocks, at full rattle. */
 const RUSH = 0.5;

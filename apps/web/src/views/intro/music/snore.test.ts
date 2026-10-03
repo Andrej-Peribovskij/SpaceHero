@@ -32,7 +32,7 @@ describe("renderSnore", () => {
     const power = centred.reduce((sum, value) => sum + value * value, 0);
 
     let best = { strength: 0, hz: 0 };
-    for (let lag = Math.round(SAMPLE_RATE / 50); lag <= Math.round(SAMPLE_RATE / 18); lag += 1) {
+    for (let lag = Math.round(SAMPLE_RATE / 50); lag <= Math.round(SAMPLE_RATE / 12); lag += 1) {
       let sum = 0;
       for (let i = lag; i < centred.length; i += 1) sum += centred[i]! * centred[i - lag]!;
       const strength = sum / power;
@@ -49,7 +49,7 @@ describe("renderSnore", () => {
   };
 
   it("is a breath in, a pause and a breath out, leaving the black card time to fall silent", () => {
-    expect(snore.length / SAMPLE_RATE).toBeCloseTo(2.65, 2);
+    expect(snore.length / SAMPLE_RATE).toBeCloseTo(3, 2);
   });
 
   it("is the same snore every time: the noise is a shift register, not a random number", () => {
@@ -63,28 +63,28 @@ describe("renderSnore", () => {
   });
 
   it("pauses between the breaths", () => {
-    expect(seconds(1.505, 1.645).every((value) => value === 0)).toBe(true);
+    expect(seconds(1.805, 1.945).every((value) => value === 0)).toBe(true);
   });
 
   it("breathes in louder than it breathes out", () => {
-    expect(loudest(seconds(0, 1.5))).toBeGreaterThan(2 * loudest(seconds(1.65, 2.65)));
+    expect(loudest(seconds(0, 1.8))).toBeGreaterThan(2 * loudest(seconds(1.95, 3)));
   });
 
-  it("rattles as it breathes in: a strong beat, twenty to forty flaps a second, at the height of the breath", () => {
-    const { strength, hz } = rattle(seconds(0.6, 1.3));
+  it("rattles as it breathes in: a strong beat, fifteen to thirty flaps a second, at the height of the breath", () => {
+    const { strength, hz } = rattle(seconds(0.8, 1.6));
 
     expect(strength).toBeGreaterThan(0.4);
-    expect(hz).toBeGreaterThanOrEqual(20);
-    expect(hz).toBeLessThanOrEqual(40);
+    expect(hz).toBeGreaterThanOrEqual(15);
+    expect(hz).toBeLessThanOrEqual(30);
   });
 
   it("opens on plain breath, and breathes out without a rattle", () => {
-    expect(rattle(seconds(0, 0.3)).strength).toBeLessThan(0.25);
-    expect(rattle(seconds(1.7, 2.4)).strength).toBeLessThan(0.25);
+    expect(rattle(seconds(0, 0.35)).strength).toBeLessThan(0.25);
+    expect(rattle(seconds(2, 2.8)).strength).toBeLessThan(0.25);
   });
 
   it("growls low through the throat as it breathes in, and breathes out higher and softer", () => {
-    expect(crossingsHz(seconds(0.7, 1.2))).toBeLessThan(500);
-    expect(crossingsHz(seconds(1.7, 2.2))).toBeGreaterThan(crossingsHz(seconds(0.7, 1.2)));
+    expect(crossingsHz(seconds(0.8, 1.5))).toBeLessThan(200);
+    expect(crossingsHz(seconds(2, 2.5))).toBeGreaterThan(crossingsHz(seconds(0.8, 1.5)));
   });
 });

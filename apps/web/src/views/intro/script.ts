@@ -150,11 +150,11 @@ export const INTRO_CARDS: readonly IntroCard[] = [
     ],
   },
   {
-    // No caption: the snore is the whole card. It holds a second longer than a caption's hold, so
-    // the snore ends in silence before Module 2 starts the music again.
+    // No caption: the snore is the whole card. It holds longer than a caption's hold, so the snore
+    // ends in silence before Module 2 starts the music again.
     image: "Black. The music stops. A snore. A beat of silence.",
     caption: [],
-    holdMs: 4000,
+    holdMs: 4200,
   },
   {
     // The next module's ident, mirroring card 0: one module down, thirteen to go. It waits for a
