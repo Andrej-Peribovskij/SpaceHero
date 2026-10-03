@@ -166,6 +166,9 @@ export const IDENT_CARD = 0;
 /** The last card — the next module's ident — and the one the sequence ends, or is skipped, onto. */
 export const END_CARD = INTRO_CARDS.length - 1;
 
+/** Card 10, black and captionless: the music stops on it, and someone snores. */
+export const SNORE_CARD = END_CARD - 1;
+
 /** A caption as one string, for the live region and for tests. */
 export function captionText(card: IntroCard): string {
   return card.caption.map((segment) => segment.text).join("");

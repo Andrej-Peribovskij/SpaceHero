@@ -3,8 +3,12 @@ import { useEffect, useRef, useState } from "react";
 
 import { artFor } from "./art";
 import { IntroCardFrame } from "./intro-card-frame";
+import type { IntroAudio } from "./music/intro-audio";
+import { ORIENTATION_TUNE } from "./music/tune";
+import { openIntroAudio } from "./music/web-audio";
 import { canvasDraws } from "./screen/canvas";
 import { INTRO_CARDS, captionText } from "./script";
+import { useIntroMusic } from "./use-intro-music";
 import { useIntroTimeline } from "./use-intro-timeline";
 
 /**
@@ -18,6 +22,14 @@ const PROMPTS = {
   ended: "PRESS ANY KEY TO CONTINUE ORIENTATION",
 } as const;
 
+/** The orientation music through Web Audio, or silence where the browser has none to give. */
+const openOrientationAudio = () => openIntroAudio(ORIENTATION_TUNE);
+
+export interface IntroViewProps {
+  /** Opens the music, from inside the gate's key or click handler. Tests pass a recording one. */
+  readonly openAudio?: () => IntroAudio;
+}
+
 /**
  * Chapter 1, beat 0: the Absolute Connections contractor orientation video.
  * Script: `docs/story/chapter-01-intro.md`. Behaviour: the `story/chapter-1-intro` spec.
@@ -27,8 +39,8 @@ const PROMPTS = {
  * until the user has pressed or clicked something, so the gate is where the music gets
  * permission to play.
  */
-export function IntroView() {
-  const { phase, card: index, shownChars, clock, reducedMotion, start, skip } = useIntroTimeline();
+export function IntroView({ openAudio = openOrientationAudio }: IntroViewProps = {}) {
+  const { phase, card: index, shownChars, clock, reducedMotion, start, skip } = useIntroTimeline(useIntroMusic(openAudio));
   const card = INTRO_CARDS[index]!;
   const prompt = PROMPTS[phase];
   const mainRef = useRef<HTMLElement>(null);
@@ -48,7 +60,7 @@ export function IntroView() {
     const onKeyDown = (event: KeyboardEvent) => {
       if (phase === "gate") {
         // Escape and modifier or shortcut presses are not user activation: starting on them
-        // would leave the music (slice 3) unable to play.
+        // would leave the music unable to play.
         const modifierOnly = ["Shift", "Control", "Alt", "Meta"].includes(event.key);
         if (event.key === "Escape" || modifierOnly || event.ctrlKey || event.metaKey || event.altKey) return;
         start();

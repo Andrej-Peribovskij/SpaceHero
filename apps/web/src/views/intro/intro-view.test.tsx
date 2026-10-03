@@ -1,8 +1,9 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 
 import { server, installMockApi } from "../../testing/msw";
-import { cardDurationMs } from "./intro-timeline";
-import { END_CARD, INTRO_CARDS, captionText } from "./script";
+import { GLITCH_SILENCE_MS, cardDurationMs, glitchMs } from "./intro-timeline";
+import { recordingIntroAudio } from "./music/recording-intro-audio";
+import { END_CARD, INTRO_CARDS, SNORE_CARD, captionText } from "./script";
 import { IntroView } from "./intro-view";
 
 installMockApi();
@@ -316,6 +317,172 @@ describe("reduced motion", () => {
 
     expect(showsCard(1)).toBe(true);
     expect(typed()).toBe(captionText(INTRO_CARDS[1]!));
+  });
+});
+
+describe("the music", () => {
+  /** When card `index` starts, counted from the key press. */
+  const cardStartMs = (index: number) =>
+    INTRO_CARDS.slice(0, index).reduce((sum, _card, before) => sum + cardDurationMs(before), 0);
+
+  /** The Ganymede card: the one card with a glitch. */
+  const GANYMEDE_CARD = INTRO_CARDS.findIndex((card) => card.glitchAtChar !== undefined);
+
+  /** Lets a few frames go by: the first frame only starts the clock, so the video runs behind the timers. */
+  const FRAMES = 100;
+
+  function playWithMusic() {
+    const audio = recordingIntroAudio();
+    const view = render(<IntroView openAudio={() => audio} />);
+    return { audio, view };
+  }
+
+  it("plays nothing before the gate, whatever is pressed that does not open it", () => {
+    const opened = vi.fn(recordingIntroAudio);
+    render(<IntroView openAudio={opened} />);
+
+    advance(60_000);
+    fireEvent.keyDown(window, { key: "Escape" });
+    fireEvent.keyDown(window, { key: "r", ctrlKey: true });
+
+    expect(opened).not.toHaveBeenCalled();
+  });
+
+  it("opens and starts inside the key press, while the browser still counts it as the player's", () => {
+    const { audio } = playWithMusic();
+
+    fireEvent.keyDown(window, { key: "a" });
+
+    expect(audio.calls).toEqual(["start"]);
+  });
+
+  it("starts on a click too", () => {
+    const { audio } = playWithMusic();
+
+    fireEvent.click(screen.getByRole("main"));
+
+    expect(audio.calls).toEqual(["start"]);
+  });
+
+  it("drops out as the Ganymede line finishes typing, and comes back while card 6 holds", () => {
+    const { audio } = playWithMusic();
+    fireEvent.keyDown(window, { key: "a" });
+    const glitch = cardStartMs(GANYMEDE_CARD) + glitchMs(GANYMEDE_CARD)!;
+
+    advance(glitch - 200);
+    expect(audio.calls).toEqual(["start"]);
+
+    advance(200 + FRAMES);
+    expect(audio.calls).toEqual(["start", "dropOut"]);
+
+    advance(GLITCH_SILENCE_MS);
+    expect(audio.calls).toEqual(["start", "dropOut", "resume"]);
+    expect(showsCard(GANYMEDE_CARD)).toBe(true);
+  });
+
+  it("still drops out under reduced motion, where the picture does not flash: the clue survives", () => {
+    preferReducedMotion();
+    const { audio } = playWithMusic();
+    fireEvent.keyDown(window, { key: "a" });
+
+    advance(cardStartMs(GANYMEDE_CARD) + glitchMs(GANYMEDE_CARD)! + FRAMES);
+
+    expect(audio.calls).toEqual(["start", "dropOut"]);
+  });
+
+  it("stops on the black card, then snores, and is silent from there to the end", () => {
+    const { audio } = playWithMusic();
+    fireEvent.keyDown(window, { key: "a" });
+
+    advance(cardStartMs(SNORE_CARD) - FRAMES);
+    expect(audio.calls).not.toContain("stop");
+
+    advance(2 * FRAMES);
+    expect(showsCard(SNORE_CARD)).toBe(true);
+    expect(audio.calls).toEqual(["start", "dropOut", "resume", "stop", "snore"]);
+
+    advance(600_000);
+    fireEvent.keyDown(window, { key: "a" });
+    fireEvent.click(screen.getByRole("main"));
+
+    expect(atTheEnd()).toBe(true);
+    expect(audio.calls).toEqual(["start", "dropOut", "resume", "stop", "snore"]);
+  });
+
+  it("stops on skip, with no snore: nobody fell asleep", () => {
+    const { audio } = playWithMusic();
+    fireEvent.keyDown(window, { key: "a" });
+    advance(cardStartMs(3) + FRAMES);
+
+    fireEvent.click(screen.getByRole("button", { name: "Skipping is recorded." }));
+    advance(600_000);
+
+    expect(audio.calls).toEqual(["start", "stop"]);
+  });
+
+  it("lets go of the audio when the intro leaves the screen", () => {
+    const { audio, view } = playWithMusic();
+    fireEvent.keyDown(window, { key: "a" });
+
+    view.unmount();
+
+    expect(audio.calls).toEqual(["start", "close"]);
+  });
+
+  describe("when the browser cannot play it", () => {
+    function playsEveryCard(): void {
+      fireEvent.keyDown(window, { key: "a" });
+
+      for (let index = 1; index <= END_CARD; index += 1) {
+        advance(cardDurationMs(index - 1));
+        advance(FRAMES);
+        expect(showsCard(index)).toBe(true);
+        expect(announced()).toBe(captionText(INTRO_CARDS[index]!));
+      }
+      expect(atTheEnd()).toBe(true);
+    }
+
+    it("plays every card, silently and with no error shown, where AudioContext throws", () => {
+      const error = vi.spyOn(console, "error").mockImplementation(() => {});
+      vi.stubGlobal(
+        "AudioContext",
+        class {
+          constructor() {
+            throw new Error("NotSupportedError");
+          }
+        },
+      );
+      render(<IntroView />);
+
+      playsEveryCard();
+
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      expect(error).not.toHaveBeenCalled();
+    });
+
+    it("plays every card where there is no AudioContext at all", () => {
+      vi.stubGlobal("AudioContext", undefined);
+      render(<IntroView />);
+
+      playsEveryCard();
+    });
+
+    it("plays every card, and stays silent after, when the music breaks partway", () => {
+      const error = vi.spyOn(console, "error").mockImplementation(() => {});
+      const audio = recordingIntroAudio();
+      const broken = {
+        ...audio,
+        dropOut: () => {
+          throw new Error("InvalidStateError");
+        },
+      };
+      render(<IntroView openAudio={() => broken} />);
+
+      playsEveryCard();
+
+      expect(audio.calls).toEqual(["start"]);
+      expect(error).not.toHaveBeenCalled();
+    });
   });
 });
 
