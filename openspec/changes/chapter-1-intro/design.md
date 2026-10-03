@@ -93,8 +93,12 @@ reuse of the motif outside the intro.
    `resume`, `stop` and `snore`, `pause` and `unpause` for a hidden page, and
    `close` to release the `AudioContext` when the intro unmounts. The synth
    computes the samples itself in plain
-   arithmetic: square and triangle voices from a note table, and a noise burst
-   for the snore, from a shift register like a console's noise channel. Web
+   arithmetic: square and triangle voices from a note table, and for the snore
+   the soft palate flapping in the airflow, as a real snore is made. That
+   means knocks about thirty a second and never quite even, plus the rush of
+   air as noise from a shift register like a console's noise channel. Both
+   ring through resonances like a throat's. The first snore, noise with an
+   even wobble, sounded like a hiss rather than a sleeper (task 4.1). Web
    Audio only plays the result. Each sound plays through a gain of its own: the
    loop's is closed and opened by the glitch, and every stop fades a gain out
    over a few milliseconds before the source stops, since a source cut mid-wave

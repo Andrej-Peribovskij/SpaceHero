@@ -82,4 +82,6 @@ Story note (the ending):
 
 - [ ] 4.1 Play the intro in a browser end to end, by ear and eye, then tune timings and the tune
 - [x] 4.1a A debugging jump for tuning, in the dev server only (design.md §12): a `seek` action on the timeline; → and ← once playing; `?card=N` starts there once the gate opens; the music restarts from the top on a jump; tests for each, and for its absence in production
+- [x] 4.1b From the playthrough: in card 5's pull-out, Jupiter no longer shrinks away with Steady Hand; it glides to its place on the map
+- [ ] 4.1c From the playthrough: a snore that sounds like one — palate knocks, irregular, through throat resonances, then a breathy out (`snore.wav` from `pnpm run intro:render-music`)
 - [ ] 4.2 `pnpm run spec:validate chapter-1-intro` passes and every task above matches the implementation
