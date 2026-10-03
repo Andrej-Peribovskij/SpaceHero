@@ -277,6 +277,27 @@ const PEARL_REACH = 0.03;
 const PEARL_FLOW = bandAt(-32).flow;
 
 /**
+ * The spot's cloud, looked up rather than worked out: its noise depends only on how far round the
+ * spot and how far out a point is, so it is tabulated once, finer than any pixel of the dive.
+ */
+const SPOT_STEPS = 2048;
+const SPOT_RINGS = 256;
+let spotTables: { readonly wander: Float32Array; readonly streak: Float32Array } | undefined;
+
+function spotNoise() {
+  if (spotTables) return spotTables;
+  const wander = new Float32Array(SPOT_STEPS);
+  const streak = new Float32Array(SPOT_STEPS * SPOT_RINGS);
+  for (let step = 0; step < SPOT_STEPS; step += 1) {
+    const around = (step + 0.5) / SPOT_STEPS;
+    wander[step] = smoothNoise(around * 10, 40, 10);
+    for (let ring = 0; ring < SPOT_RINGS; ring += 1) streak[step * SPOT_RINGS + ring] = smoothNoise(around * 24, ((ring + 0.5) / SPOT_RINGS) * 16, 24);
+  }
+  spotTables = { wander, streak };
+  return spotTables;
+}
+
+/**
  * The tone of the spot at a point of it, or undefined outside it. `along` and `across` are the
  * point's offset from the spot's middle, in units of its half width and half height.
  *
@@ -292,9 +313,9 @@ function spotTone(along: number, across: number, t: number): number | undefined 
   const turn = -SPOT_SPIN * (t / 1000) * (1.5 - reach);
   const around = fraction((Math.atan2(across, along) - turn) / (2 * Math.PI));
   // The rings are not perfect: their edges wander, a little, as the cloud turns.
-  const wander = (smoothNoise(around * 10, 40, 10) - 0.5) * 0.12;
+  const wander = (spotNoise().wander[Math.floor(around * SPOT_STEPS)]! - 0.5) * 0.12;
   const ring = reach + wander;
-  const streak = smoothNoise(around * 24, reach * 16, 24) - 0.5;
+  const streak = spotNoise().streak[Math.floor(around * SPOT_STEPS) * SPOT_RINGS + Math.min(SPOT_RINGS - 1, Math.floor(reach * SPOT_RINGS))]! - 0.5;
   const tone = ring > 0.84 ? 0.86 : ring > 0.55 ? 1.02 : ring > 0.24 ? 1.16 : 0.94;
   return tone + streak * 0.22;
 }
@@ -317,65 +338,134 @@ function stormAround(along: number, across: number): { readonly hollow: number; 
  * another, the Great Red Spot between a dark belt and a pale zone. Its look comes from where on the sphere a pixel
  * falls rather than from the pixel, so it stays crisp however close the camera comes.
  */
-function paintJupiter(canvas: Canvas, camera: Camera, t: number): void {
-  const [cx, cy] = view(camera, JUPITER_X, JUPITER_Y);
-  const radius = JUPITER_RADIUS * camera.zoom;
-  const seconds = t / 1000;
+/** What a pixel of Jupiter is, wherever the camera is: off the disc, the haze off its limb, or the disc. */
+const OFF = 0;
+const HAZE = 1;
+const DISC = 2;
 
-  for (let y = Math.max(0, Math.floor(cy - radius - 2)); y < Math.min(VISIBLE, cy + radius + 2); y += 1) {
-    for (let x = Math.max(0, Math.floor(cx - radius - 2)); x < Math.min(FRAME_WIDTH, cx + radius + 2); x += 1) {
+/** The buffers are made once, the size of the screen, and refilled whenever the camera moves. */
+const SCREEN_PIXELS = FRAME_WIDTH * VISIBLE;
+const geometry = {
+  key: "",
+  left: 0,
+  top: 0,
+  width: 0,
+  size: 0,
+  kind: new Uint8Array(SCREEN_PIXELS),
+  light: new Float64Array(SCREEN_PIXELS),
+  latitude: new Float64Array(SCREEN_PIXELS),
+  longitude: new Float64Array(SCREEN_PIXELS),
+  plainFlow: new Float64Array(SCREEN_PIXELS),
+  hollow: new Float64Array(SCREEN_PIXELS),
+  wake: new Float64Array(SCREEN_PIXELS),
+};
+
+/**
+ * Where each pixel falls on Jupiter for a camera position: its light, latitude and longitude, the
+ * band it lies in and how much the storm stirs it. None of it moves with time, so it is worked out
+ * once for as long as the camera holds still — all the card after the dive — rather than every frame.
+ */
+function sphereGeometry(cx: number, cy: number, radius: number): typeof geometry {
+  const key = `${cx},${cy},${radius}`;
+  if (geometry.key === key) return geometry;
+
+  const left = Math.max(0, Math.floor(cx - radius - 2));
+  const top = Math.max(0, Math.floor(cy - radius - 2));
+  const width = Math.max(0, Math.ceil(Math.min(FRAME_WIDTH, cx + radius + 2)) - left);
+  const height = Math.max(0, Math.ceil(Math.min(VISIBLE, cy + radius + 2)) - top);
+  const built = Object.assign(geometry, { key, left, top, width, size: width * height });
+  built.kind.fill(OFF, 0, built.size);
+
+  for (let y = top; y < top + height; y += 1) {
+    if (y >= cy + radius + 2) break;
+    const dy = (y + 0.5 - cy) / radius;
+    // Latitude and the plain band depend on the row alone.
+    const latitude = Math.abs(dy) <= 1 ? Math.asin(-dy) : 0;
+    const plainFlow = bandAt((latitude * 180) / Math.PI).flow;
+    for (let x = left; x < left + width; x += 1) {
+      if (x >= cx + radius + 2) break;
+      const at = (y - top) * width + (x - left);
       const dx = (x + 0.5 - cx) / radius;
-      const dy = (y + 0.5 - cy) / radius;
       const squared = dx * dx + dy * dy;
 
       if (squared > 1) {
         // A thin haze off the sunlit limb.
         const off = (Math.sqrt(squared) - 1) * radius;
-        if (off < 1.5 && dx * SUN[0] + dy * SUN[1] > 0.2 && ditherAt(x, y) < 0.5 - off * 0.3) canvas.set(x, y, "m");
+        if (off < 1.5 && dx * SUN[0] + dy * SUN[1] > 0.2 && ditherAt(x, y) < 0.5 - off * 0.3) built.kind[at] = HAZE;
         continue;
       }
 
       const dz = Math.sqrt(1 - squared);
-      // Lit by the Sun, and darker towards the limb, as a cloudy planet is.
-      const light = Math.max(AMBIENT, sunlight(dx, dy, dz)) * (0.6 + 0.4 * dz);
-      const latitude = Math.asin(-dy);
       const longitude = Math.atan2(dx, dz);
-
-      const along = (longitude - SPOT_LONGITUDE) / SPOT_HALF_WIDTH;
-      const across = (latitude - SPOT_LATITUDE) / SPOT_HALF_HEIGHT;
-      const spot = spotTone(along, across, t);
-      if (spot !== undefined) {
-        canvas.set(x, y, rungOf(SPOT_LADDER, light * spot, x, y));
-        continue;
-      }
-
-      // The band, its edge ragged: the latitude is nudged by turbulence that flows with the band.
-      const plain = bandAt((latitude * 180) / Math.PI);
-      const flowing = longitude + plain.flow * seconds;
-      const ragged = latitude + (smoothNoise(flowing * 14, latitude * 22) - 0.5) * 0.05 + Math.sin(flowing * 20 + latitude * 40) * 0.008;
-      const band = bandAt((ragged * 180) / Math.PI);
-      const swirl = smoothNoise((longitude + band.flow * seconds) * 30, latitude * 60) - 0.5;
-      let tone = band.tone + swirl * 0.16;
-
-      // Round the spot: the belt paled into a hollow, and stirred into a wake behind it.
-      const { hollow, wake } = stormAround(along, across);
-      if (hollow > 0) tone += (HOLLOW_TONE - tone) * hollow;
-      if (wake > 0) {
-        // Eddies: noise looked up through noise, so its blotches curl, pale cloud among dark.
-        const drift = longitude + band.flow * seconds * 0.5;
-        const [u, v] = [drift * 26, latitude * 44];
-        const eddy = smoothNoise(u + 2.2 * smoothNoise(u * 0.5, v * 0.5), v + 2.2 * smoothNoise(u * 0.5 + 7, v * 0.5 + 7));
-        tone += ((eddy - 0.5) * 1.3 + 0.12) * wake;
-      }
-
-      if (Math.abs(latitude - PEARL_LATITUDE) < PEARL_REACH) {
-        const drifting = longitude + PEARL_FLOW * seconds;
-        for (const pearl of PEARLS) {
-          if (Math.hypot((drifting - pearl.longitude) / 1.6, latitude - PEARL_LATITUDE) < pearl.size) tone = 1.2;
-        }
-      }
-      canvas.set(x, y, rungOf(JUPITER_LADDER, light * tone, x, y));
+      const { hollow, wake } = stormAround((longitude - SPOT_LONGITUDE) / SPOT_HALF_WIDTH, (latitude - SPOT_LATITUDE) / SPOT_HALF_HEIGHT);
+      built.kind[at] = DISC;
+      // Lit by the Sun, and darker towards the limb, as a cloudy planet is.
+      built.light[at] = Math.max(AMBIENT, sunlight(dx, dy, dz)) * (0.6 + 0.4 * dz);
+      built.latitude[at] = latitude;
+      built.longitude[at] = longitude;
+      built.plainFlow[at] = plainFlow;
+      built.hollow[at] = hollow;
+      built.wake[at] = wake;
     }
+  }
+
+  return built;
+}
+
+function paintJupiter(canvas: Canvas, camera: Camera, t: number): void {
+  const [cx, cy] = view(camera, JUPITER_X, JUPITER_Y);
+  const radius = JUPITER_RADIUS * camera.zoom;
+  const seconds = t / 1000;
+  const sphere = sphereGeometry(cx, cy, radius);
+
+  for (let at = 0; at < sphere.size; at += 1) {
+    const kind = sphere.kind[at]!;
+    if (kind === OFF) continue;
+    const x = sphere.left + (at % sphere.width);
+    const y = sphere.top + Math.floor(at / sphere.width);
+    if (kind === HAZE) {
+      canvas.set(x, y, "m");
+      continue;
+    }
+
+    const light = sphere.light[at]!;
+    const latitude = sphere.latitude[at]!;
+    const longitude = sphere.longitude[at]!;
+
+    const along = (longitude - SPOT_LONGITUDE) / SPOT_HALF_WIDTH;
+    const across = (latitude - SPOT_LATITUDE) / SPOT_HALF_HEIGHT;
+    const spot = spotTone(along, across, t);
+    if (spot !== undefined) {
+      canvas.set(x, y, rungOf(SPOT_LADDER, light * spot, x, y));
+      continue;
+    }
+
+    // The band, its edge ragged: the latitude is nudged by turbulence that flows with the band.
+    const flowing = longitude + sphere.plainFlow[at]! * seconds;
+    const ragged = latitude + (smoothNoise(flowing * 14, latitude * 22) - 0.5) * 0.05 + Math.sin(flowing * 20 + latitude * 40) * 0.008;
+    const band = bandAt((ragged * 180) / Math.PI);
+    const swirl = smoothNoise((longitude + band.flow * seconds) * 30, latitude * 60) - 0.5;
+    let tone = band.tone + swirl * 0.16;
+
+    // Round the spot: the belt paled into a hollow, and stirred into a wake behind it.
+    const hollow = sphere.hollow[at]!;
+    const wake = sphere.wake[at]!;
+    if (hollow > 0) tone += (HOLLOW_TONE - tone) * hollow;
+    if (wake > 0) {
+      // Eddies: noise looked up through noise, so its blotches curl, pale cloud among dark.
+      const drift = longitude + band.flow * seconds * 0.5;
+      const [u, v] = [drift * 26, latitude * 44];
+      const eddy = smoothNoise(u + 2.2 * smoothNoise(u * 0.5, v * 0.5), v + 2.2 * smoothNoise(u * 0.5 + 7, v * 0.5 + 7));
+      tone += ((eddy - 0.5) * 1.3 + 0.12) * wake;
+    }
+
+    if (Math.abs(latitude - PEARL_LATITUDE) < PEARL_REACH) {
+      const drifting = longitude + PEARL_FLOW * seconds;
+      for (const pearl of PEARLS) {
+        if (Math.hypot((drifting - pearl.longitude) / 1.6, latitude - PEARL_LATITUDE) < pearl.size) tone = 1.2;
+      }
+    }
+    canvas.set(x, y, rungOf(JUPITER_LADDER, light * tone, x, y));
   }
 }
 
