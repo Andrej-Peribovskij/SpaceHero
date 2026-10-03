@@ -76,6 +76,7 @@ Story note (the ending):
 - [x] 3.6 Tests against the recording fake: nothing plays before the gate; drop-out on the Ganymede line, including under reduced motion; stop plus snore, then a restart on card 11, after the snore; stop then restart on skip; close on unmount
 - [x] 3.7 Test that a throwing `AudioContext` still plays every card, silently and with no error shown
 - [x] 3.8 Gate: `pnpm run verify` and `pnpm run test:e2e` pass
+- [x] 3.9 Review follow-ups from PR #10: close the audio when a cue breaks; a skip on card 10 stops the snore; fade out on a stop instead of cutting; pause the music with a hidden page (`pause`, `unpause`); render the loop in idle time, not in the key press; card 10's longer hold as `holdMs`, not a caption
 
 ## 4. Final verification
 

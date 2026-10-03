@@ -90,22 +90,30 @@ reuse of the motif outside the intro.
    caption, the prompt, the skip control and the background.
 
 5. **Web Audio synth behind a port.** `IntroAudio` exposes `start`, `dropOut`,
-   `resume`, `stop` and `snore`, and `close` to release the `AudioContext` when
-   the intro unmounts. The synth computes the samples itself in plain
+   `resume`, `stop` and `snore`, `pause` and `unpause` for a hidden page, and
+   `close` to release the `AudioContext` when the intro unmounts. The synth
+   computes the samples itself in plain
    arithmetic: square and triangle voices from a note table, and a noise burst
    for the snore, from a shift register like a console's noise channel. Web
-   Audio only plays the result. The loop runs through one gain, which the glitch
-   closes and opens, and the snore is played once. The music stops on card 10
+   Audio only plays the result. Each sound plays through a gain of its own: the
+   loop's is closed and opened by the glitch, and every stop fades a gain out
+   over a few milliseconds before the source stops, since a source cut mid-wave
+   clicks. The snore is played once, and a stop silences it too, even while it
+   waits out its beat, so a skip on card 10 never lets it play over Module 2's
+   music. A hidden page suspends the context, as it pauses the timeline (§2),
+   and the snore's wait holds with it. The music stops on card 10
    and starts again from the top on card 11, Module 2's ident: the snore needs
    the silence, and the music coming back is what wakes Joe in beat 1. The
    loop is rendered once and kept for the restart. Computing the samples rather
    than using Web Audio's oscillators makes the music a pure function: the same
    numbers in every browser, in tests, and in a WAV the preview tool writes for
-   listening (`pnpm run intro:render-music`). Rendering the loop happens inside
-   the gate's handler: about 90 ms the first time in Node, 40 ms warm, so the
-   logo may skip one 12-fps frame at the key press. If that shows when the intro
-   is played end to end, the samples can be rendered ahead in idle time, since
-   they need no `AudioContext`. A no-op
+   listening (`pnpm run intro:render-music`). Rendering the loop takes tens of
+   milliseconds, too long for the gate's handler, so the view renders it once
+   the browser is idle after mount: the samples need no `AudioContext`, and
+   the key press only copies them into a buffer. A render ahead that fails or
+   has not run yet costs nothing: `start` renders the loop itself. If sound
+   breaks partway, the audio is closed, not just dropped, so nothing it
+   started can play on. A no-op
    implementation is used when `AudioContext` is missing or throws, and tests
    use a recording fake. Browsers only let audio start after a user gesture.
    So the `AudioContext` is created and resumed inside the gate's key or click
