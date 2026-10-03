@@ -25,6 +25,8 @@
     "backend:dev": "node scripts/backend.mjs run",
     "dev": "node scripts/dev.mjs",
     "design:preview": "node scripts/design-preview.mjs",
+    "intro:render-card": "node scripts/intro-render-card.mjs",
+    "intro:draw-fighters": "pnpm --filter ./apps/web exec vitest run --config vitest.preview.config.ts draw-fighters",
     "public-version": "node scripts/public-version.mjs",
     "public-version:set": "node scripts/public-version.mjs set",
     "public-version:check": "node scripts/public-version.mjs check",

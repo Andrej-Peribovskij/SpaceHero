@@ -1,14 +1,22 @@
 import { Button } from "@space-hero/design-system";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import { artFor } from "./art";
 import { IntroCardFrame } from "./intro-card-frame";
+import { canvasDraws } from "./screen/canvas";
 import { INTRO_CARDS, captionText } from "./script";
 import { useIntroTimeline } from "./use-intro-timeline";
 
-/** The blinking line under an ident that asks the player for a key. */
-function KeyPrompt({ children }: { readonly children: string }) {
-  return <p className="font-mono text-sm tracking-widest motion-safe:animate-pulse">{children}</p>;
-}
+/**
+ * The line under an ident that asks the player for a key, if one is showing. The next module's
+ * ident asks the same way the first did, and nothing answers it yet: in beat 1 the key press is
+ * Joe slapping the screen off (docs/product-debt/intro-hand-off-to-beat-1.md).
+ */
+const PROMPTS = {
+  gate: "PRESS ANY KEY TO BEGIN ORIENTATION",
+  playing: undefined,
+  ended: "PRESS ANY KEY TO CONTINUE ORIENTATION",
+} as const;
 
 /**
  * Chapter 1, beat 0: the Absolute Connections contractor orientation video.
@@ -20,31 +28,36 @@ function KeyPrompt({ children }: { readonly children: string }) {
  * permission to play.
  */
 export function IntroView() {
-  const { state, shownChars, start, skip } = useIntroTimeline();
-  const card = INTRO_CARDS[state.card]!;
+  const { phase, card: index, shownChars, clock, reducedMotion, start, skip } = useIntroTimeline();
+  const card = INTRO_CARDS[index]!;
+  const prompt = PROMPTS[phase];
   const mainRef = useRef<HTMLElement>(null);
+  // The caption and the prompt are kept as text for assistive technology. Where the screen cannot
+  // paint them, that text is everyone's: shown, rather than an empty screen and no way to start.
+  const [asText] = useState(() => !canvasDraws());
+  const textClass = asText ? "font-mono text-sm tracking-widest" : "sr-only";
 
   // Ending unmounts the skip button. If it had focus, the browser drops focus to the top of the
   // document and a keyboard or screen-reader user loses their place; keep them on the video.
   useEffect(() => {
     const focusLost = document.activeElement === null || document.activeElement === document.body;
-    if (state.phase === "ended" && focusLost) mainRef.current?.focus();
-  }, [state.phase]);
+    if (phase === "ended" && focusLost) mainRef.current?.focus();
+  }, [phase]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (state.phase === "gate") {
+      if (phase === "gate") {
         // Escape and modifier or shortcut presses are not user activation: starting on them
         // would leave the music (slice 3) unable to play.
         const modifierOnly = ["Shift", "Control", "Alt", "Meta"].includes(event.key);
         if (event.key === "Escape" || modifierOnly || event.ctrlKey || event.metaKey || event.altKey) return;
         start();
-      } else if (state.phase === "playing" && event.key === "Escape") skip();
+      } else if (phase === "playing" && event.key === "Escape") skip();
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [state.phase, start, skip]);
+  }, [phase, start, skip]);
 
   return (
     <main
@@ -52,28 +65,30 @@ export function IntroView() {
       // Focusable from script only, as the landing place when skipping removes the button.
       tabIndex={-1}
       className="flex min-h-screen flex-col items-center justify-center gap-8 bg-[var(--color-black)] p-6 text-[var(--color-white)] outline-none"
-      onClick={state.phase === "gate" ? start : undefined}
+      onClick={phase === "gate" ? start : undefined}
     >
       <h1 className="sr-only">Absolute Connections Contractor Orientation</h1>
 
-      <IntroCardFrame card={card} shownChars={shownChars} />
+      <IntroCardFrame
+        index={index}
+        clock={clock}
+        card={card}
+        shownChars={shownChars}
+        art={artFor(index)}
+        prompt={prompt}
+        still={reducedMotion}
+      />
 
       {/* Set once per card, so a screen reader hears each caption whole (design.md §7). */}
-      <p className="sr-only" aria-live="polite">
+      <p className={textClass} aria-live="polite">
         {captionText(card)}
       </p>
 
-      {state.phase === "gate" && <KeyPrompt>PRESS ANY KEY TO BEGIN ORIENTATION</KeyPrompt>}
-
-      {/*
-        The next module's ident asks for a key the same way the first did. Nothing answers it
-        yet: in beat 1 the key press is Joe slapping the screen off
-        (docs/product-debt/intro-hand-off-to-beat-1.md).
-      */}
-      {state.phase === "ended" && <KeyPrompt>PRESS ANY KEY TO CONTINUE ORIENTATION</KeyPrompt>}
+      {/* The prompt blinks on the screen; this is it as text, for assistive technology. */}
+      {prompt && <p className={textClass}>{prompt}</p>}
 
       {/* No variant: the portable call, as in WidgetsView. Skipping records nothing. */}
-      {state.phase === "playing" && <Button onClick={skip}>Skipping is recorded.</Button>}
+      {phase === "playing" && <Button onClick={skip}>Skipping is recorded.</Button>}
     </main>
   );
 }

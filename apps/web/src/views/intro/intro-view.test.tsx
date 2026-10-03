@@ -39,11 +39,9 @@ function announced(): string {
   return document.querySelector("[aria-live]")?.textContent ?? "";
 }
 
-/** The part of the on-screen caption that has been typed so far. */
+/** The part of the caption typed so far: what the screen's canvas is drawing. */
 function typed(): string {
-  const caption = screen.getByTestId("intro-caption").cloneNode(true) as HTMLElement;
-  caption.querySelectorAll(".invisible").forEach((node) => node.remove());
-  return caption.textContent ?? "";
+  return document.querySelector("[data-caption-shown]")?.getAttribute("data-caption-shown") ?? "";
 }
 
 function showsCard(index: number): boolean {
@@ -218,7 +216,7 @@ describe("the end state", () => {
 
     expect(atTheEnd()).toBe(true);
     expect(showsCard(END_CARD)).toBe(true);
-    expect(typed()).toBe("ABSOLUTE CONNECTIONS · Contractor Orientation · Module 2 of 14: What's the Drill");
+    expect(typed()).toBe("ABSOLUTE CONNECTIONS · Contractor Orientation\nModule 2 of 14: What's the Drill");
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
     expect(screen.queryByText(PROMPT)).not.toBeInTheDocument();
   });
@@ -318,5 +316,26 @@ describe("reduced motion", () => {
 
     expect(showsCard(1)).toBe(true);
     expect(typed()).toBe(captionText(INTRO_CARDS[1]!));
+  });
+});
+
+describe("without a canvas to paint on", () => {
+  it("shows the prompt and the caption as text, so the player can still see how to start", () => {
+    // jsdom's canvas, like a browser that refuses one, gives no 2D context (vitest.setup.ts).
+    render(<IntroView />);
+
+    expect(screen.getByText(PROMPT)).not.toHaveClass("sr-only");
+    expect(document.querySelector("[aria-live]")).not.toHaveClass("sr-only");
+  });
+
+  it("keeps that text for assistive technology alone when the screen can paint it", () => {
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+      createImageData: (width: number, height: number) => ({ data: new Uint8ClampedArray(width * height * 4) }),
+      putImageData: () => {},
+    } as unknown as CanvasRenderingContext2D);
+    render(<IntroView />);
+
+    expect(screen.getByText(PROMPT)).toHaveClass("sr-only");
+    expect(document.querySelector("[aria-live]")).toHaveClass("sr-only");
   });
 });

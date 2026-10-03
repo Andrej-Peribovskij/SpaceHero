@@ -33,8 +33,10 @@ This is the **primary rule** for `apps/` code:
   spacing, or non-token font values in app code.
   **Artwork is not a design value.** A pixel-art palette, like the pixels of an
   image file, is content, and may be written as hex beside the art that uses it
-  (for example `views/intro/art/`). Everything around the picture — frame,
-  captions, controls, background — still uses tokens.
+  (for example `views/intro/art/`). So is text drawn *into* a picture, in a
+  bitmap font kept as data (`views/intro/screen/font.ts`). Everything around
+  the picture — its frame, controls, background, and any text in the page
+  itself — still uses tokens.
 - **When a required component or token is missing from `@space-hero/design-system`:**
   1. Check the staging export, `@space-hero/design-system/staging` — it holds
      components that exist but have not been promoted yet.

@@ -94,24 +94,44 @@ export function typedCharsAt(card: IntroCard, ms: number): number {
  * first one did, and the video ends the moment it is on screen.
  */
 export function cardDurationMs(index: number): number {
+  return TIMINGS[index]!.durationMs;
+}
+
+function durationOf(index: number): number {
   const card = INTRO_CARDS[index]!;
-  const typing = msToType(card, captionText(card).length);
 
   if (index === IDENT_CARD) return IDENT_HOLD_MS;
   if (index === END_CARD) return 0;
 
-  return typing + HOLD_MS;
+  return msToType(card, captionText(card).length) + HOLD_MS;
 }
 
-/** The characters of the current caption to show. Both idents are always whole, never typed. */
-export function visibleChars(state: IntroState): number {
+export interface VisibleCharsOptions {
+  /** Show every caption whole, never typed: for players who prefer reduced motion. */
+  readonly whole?: boolean;
+}
+
+/**
+ * The characters of the current caption to show. Both idents are always whole, never typed, and
+ * so is every caption when `whole` is asked for: this is the one place that rule lives.
+ */
+export function visibleChars(state: IntroState, options: VisibleCharsOptions = {}): number {
   const card = INTRO_CARDS[state.card]!;
+  const whole = options.whole || state.phase !== "playing" || state.card === IDENT_CARD || state.card === END_CARD;
 
-  if (state.phase !== "playing" || state.card === IDENT_CARD || state.card === END_CARD) {
-    return captionText(card).length;
-  }
+  return whole ? TIMINGS[state.card]!.captionLength : typedCharsAt(card, state.elapsedMs);
+}
 
-  return typedCharsAt(card, state.elapsedMs);
+/**
+ * When, from the start of a card, the Ganymede glitch fires: as its line finishes typing. One
+ * moment for both what reacts to it, the screen tearing and the music dropping out.
+ */
+export function glitchMs(index: number): number | undefined {
+  return TIMINGS[index]!.glitchMs;
+}
+
+function glitchOf(card: IntroCard): number | undefined {
+  return card.glitchAtChar === undefined ? undefined : msToType(card, card.glitchAtChar);
 }
 
 interface Cue {
@@ -121,17 +141,33 @@ interface Cue {
 
 /** The events that fire partway through a card, rather than on entering it. */
 function cuesOf(index: number): readonly Cue[] {
-  const card = INTRO_CARDS[index]!;
+  const atMs = glitchOf(INTRO_CARDS[index]!);
 
-  if (card.glitchAtChar === undefined) return [];
-
-  const glitchMs = msToType(card, card.glitchAtChar);
+  if (atMs === undefined) return [];
 
   return [
-    { atMs: glitchMs, event: { type: "glitch" } },
-    { atMs: glitchMs + GLITCH_SILENCE_MS, event: { type: "glitch-end" } },
+    { atMs, event: { type: "glitch" } },
+    { atMs: atMs + GLITCH_SILENCE_MS, event: { type: "glitch-end" } },
   ];
 }
+
+interface CardTiming {
+  readonly durationMs: number;
+  readonly cues: readonly Cue[];
+  readonly captionLength: number;
+  readonly glitchMs: number | undefined;
+}
+
+/**
+ * Each card's timings, worked out once: the script never changes, and `tick` reads them every
+ * frame. Walking every caption again sixty times a second would be work for nothing.
+ */
+const TIMINGS: readonly CardTiming[] = INTRO_CARDS.map((card, index) => ({
+  durationMs: durationOf(index),
+  cues: cuesOf(index),
+  captionLength: captionText(card).length,
+  glitchMs: glitchOf(card),
+}));
 
 const ENDED: IntroState = { phase: "ended", card: END_CARD, elapsedMs: cardDurationMs(END_CARD) };
 
@@ -173,7 +209,7 @@ function tick(state: IntroState, dtMs: number): IntroStep {
     const duration = cardDurationMs(card);
     const next = Math.min(duration, elapsedMs + remaining);
 
-    for (const cue of cuesOf(card)) {
+    for (const cue of TIMINGS[card]!.cues) {
       if (elapsedMs < cue.atMs && cue.atMs <= next) events.push(cue.event);
     }
 

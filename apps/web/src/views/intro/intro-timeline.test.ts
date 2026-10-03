@@ -88,6 +88,15 @@ describe("the sequence", () => {
     expect(visibleChars(typed)).toBe(captionText(card1).length);
   });
 
+  it("shows a caption whole, never typed, when asked to: for reduced motion", () => {
+    const card1 = INTRO_CARDS[1]!;
+    const onCard1 = play({ type: "start" }, { type: "tick", dtMs: cardDurationMs(0) });
+    const justStarted = stepIntro(onCard1.state, { type: "tick", dtMs: MS_PER_CHAR }).state;
+
+    expect(visibleChars(justStarted)).toBe(1);
+    expect(visibleChars(justStarted, { whole: true })).toBe(captionText(card1).length);
+  });
+
   it("waits out a pause inside a caption", () => {
     const card8 = INTRO_CARDS[8]!;
     const first = card8.caption[0]!;

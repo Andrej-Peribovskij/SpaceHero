@@ -127,6 +127,41 @@ from the repository root, because it needs the workspace manifests its
 dependencies are declared in. `pnpm run stack:up` builds both and runs them
 against the dev database.
 
+## Previewing Intro Cards
+
+`pnpm run intro:render-card <card> [times in ms…]` renders one card of the
+Chapter 1 intro to images, without running the game. It needs no server, no
+database and no browser. For the card it writes:
+
+- a contact sheet of eight evenly spaced moments;
+- an animated PNG of the whole card at 12 fps;
+- a still for each time given.
+
+Each image is the screen as a player sees it, caption band included. They land
+in `.cache/intro-previews/`, which git ignores, and open in any browser or
+image viewer. It is the quickest way to review card art, or to show it to
+someone.
+
+`scripts/intro-render-card.mjs` checks the arguments and passes them to
+`apps/web/src/views/intro/tools/render-card.preview.ts` through the
+environment, never on pnpm's command line. The renderer runs under Vitest
+because the card art is TypeScript. Its `.preview.ts` suffix keeps it out of
+the normal test run: only `apps/web/vitest.preview.config.ts` collects it.
+
+### Redrawing Card 2's Fighters
+
+Card 2's close shot stores its five big fighters as pixel grids, like all card
+figures. They were drawn by `apps/web/src/views/intro/tools/fighters.ts` from a
+stick-figure skeleton each: joints in a 36×78 box, fleshed out into capsules.
+To change a pose, move its joints there, run
+`pnpm run intro:draw-fighters`, and paste the new grid from
+`.cache/intro-previews/fighters.txt` into `cards/card-02.ts`.
+`tools/fighters.test.ts` fails while the skeletons and the stored grids
+disagree, so the two cannot drift apart unnoticed.
+
+Every `.preview.ts` shares the preview config, so each command names the file
+it runs.
+
 ## Related Docs
 
 - `delivery.md`: branching, commits, and incremental delivery

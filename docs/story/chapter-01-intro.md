@@ -40,7 +40,12 @@ telling the story, never the story itself.
 
 - **Images:** one suggestive 8-bit illustration per card, low resolution, a
   limited palette. Silhouettes and light do the work; detail does not.
-- **Captions:** short, typed out under the image.
+- **Movement:** it is a video game, so the cards are never still. Stars
+  twinkle, lights flicker, the logo turns — the way 8-bit games moved, by
+  cycling colours and turning sprites rather than redrawing the picture.
+- **Captions:** short, typed out under the image, on the same screen and in
+  the same pixels: a pixel font of our own, with no italics, so the script's
+  italics are shown in yellow. The idents set their title on two lines.
 - **Music:** gloomy and mysterious chiptune, one loop for the whole video. It
   drops out twice: at the Ganymede glitch and at the end. It is also
   **Absolute Connections' motif** — see [The Motif](#the-motif).
@@ -54,18 +59,18 @@ telling the story, never the story itself.
 
 | # | Image | Caption |
 |---|-------|---------|
-| 0 | Black. Pixel stars. The Absolute Connections logo rotates in, four colours. | ABSOLUTE CONNECTIONS · Contractor Orientation · Module 1 of 14: *Where We Come From* |
-| 1 | The Sun, filling more of the frame than it should; the palette bleeds toward white. | 2138. The Sun began to brighten. Faster than any model predicted. Faster than anyone was ready for. |
-| 2 | City silhouettes burning, crowds, torn flags, under a white sky. | Nations argued. Nations fought. For more than a century, humanity faced two enemies: the Sun above, and itself. |
-| 3 | Corporate towers in a ring under one sky. A pixel handshake. | 2251. The corporations did what governments could not. They united the world. Order returned. *One world. Many partners.* |
-| 4 | A dark server hall; one warm light at its centre. | 2256. Helios — the mind every corporation built together — delivered the Plan. Humanity would leave. Not all at once. Station by station. |
-| 5 | Mars and Deimos; a dotted line of stations reaching into the dark. | Externa, 2312. Steady Foot, 2389. Steady Hand, 2427. A corridor of light across the dark. |
-| 6 | Jupiter. Its moons light up one by one. One stays dark. | Callisto, 2492. Europa, 2502. Io, 2514. Ganymede was found unsuitable. — *see [The Ganymede Glitch](#the-ganymede-glitch)* |
-| 7 | A sky full of ships leaving a white Earth. | 2547. The Diaspora began, and the calendar began again with it. Year Zero. |
-| 8 | A single small figure on a cracked Earth, looking up. | Some chose to stay. Absolute Connections respects every choice. |
-| 9 | The Martian surface. A dome. One lit window. | 158 years later, the Corridor carries us all — and it is carried by contractors like you. Your assignment awaits at Externa Prima. |
+| 0 | Black. Twinkling pixel stars. The Absolute Connections logo turns: a four-colour square one way, a white dial inside it the other. | ABSOLUTE CONNECTIONS · Contractor Orientation<br>Module 1 of 14: *Where We Come From* |
+| 1 | The Sun, filling more of the frame than it should; the palette bleeds toward white. Out of the white, a child on bare ground, arm across their eyes, as the light keeps rising. | 2138. The Sun began to brighten. Faster than any model predicted. Faster than anyone was ready for. |
+| 2 | City silhouettes burning, crowds, torn flags, under a white sky. A flash; closer, both crowds stream in and pile into one fighting mass, their flags mixed above it. | Nations argued. Nations fought. For more than a century, humanity faced two enemies: the Sun above, and itself. |
+| 3 | Towers rise out of the ruins, too tall for the frame, and their shadows swallow the people. From below: corporate towers in a ring under one sky, their lights coming on together. In the sky between them, the Absolute Connections square appears, turning against them. Then the dark closes in from the edges, onto the square. | 2251. The corporations did what governments could not. They united the world. Order returned. *One world. Many partners.* |
+| 4 | Black. A spark at the centre of a dark server hall grows into a small sun hung in cables; its warm light spreads along the racks, and their lights come on in every company's colour. Round itself it draws the Plan: three orbits, and a dotted line of stations reaching out, one by one, into the dark. | 2256. Helios — the mind every corporation built together — delivered the Plan. Humanity would leave. Not all at once. Station by station. |
+| 5 | The Plan, zoomed into along Mars's orbit until Mars and Deimos fill the frame; Externa's lights come on across Deimos. Close: Externa Prima on Deimos's horizon, Mars dark above it, its cities lit. Jumps along the Corridor: to Steady Foot among Mars's trojans, then through the belt to Steady Hand, Jupiter ahead. Pulled out: the Sun, Mars, the belt, Jupiter, and between them a dotted line of stations lighting up, a corridor of light. | Externa, 2312. Steady Foot, 2389. Steady Hand, 2427. A corridor of light across the dark. |
+| 6 | Jupiter's dot on the Corridor, dived into, down into the Great Red Spot until the storm fills the frame; then back out to Jupiter, a giant behind four dark moons. The moons light up one by one as the line of light reaches them: Callisto, Europa, Io. One stays dark: Ganymede. | Callisto, 2492. Europa, 2502. Io, 2514. Ganymede was found unsuitable. — *see [The Ganymede Glitch](#the-ganymede-glitch)* |
+| 7 | White; out of it, a launch field on a bleached white Earth under a white sky, the great ships dark on their pads. They light one after another, and the sky fills with ships rising on columns of smoke. The camera climbs with them into the black. From orbit: the white Earth, its ships gathering into rivers of light, a few ending at Mars and Deimos, most streaming on past Mars, bound for the stations beyond. Then the camera dives into the Earth, down to its cracked ground. | 2547. The Diaspora began, and the calendar began again with it. Year Zero. |
+| 8 | The dive goes on into the glare, all white; out of it, a cliff of bleached rock towering out of the frame, a white sky and a swollen Sun beside it, and in the cliff a few caverns where the ones who stayed live, the rock their shelter from the light: dark mouths, ledges, awnings, fires, small figures in the shade; on the cracked plain, a ship that never left. The camera closes in on one cave, and from inside it: a single small figure, cloaked, alone at the edge of the shade, a hand to the brow, looking up at the white sky where a last ship climbs away. | Some chose to stay. Absolute Connections respects every choice. |
+| 9 | Card 8's light goes out. Out of the dark, stars, and the camera tilts down to the Martian surface at dusk, the sunset blue, Deimos high up with Externa's lights, shuttles climbing to it from a far port. On the plain, a dome half sunk in the dunes, a small ship by it, a ring of dark windows, and one lit. Close: through that window, a dark room, its walls lit only by the flicker of this video, playing on a screen out of sight. Above the dome, Externa's beacon blinks teal. | 158 years later, the Corridor carries us all — and it is carried by contractors like you. Your assignment awaits at Externa Prima. |
 | 10 | Black. The music stops. A snore. | |
-| 11 | Black. Pixel stars. The Absolute Connections logo rotates in, four colours. | ABSOLUTE CONNECTIONS · Contractor Orientation · Module 2 of 14: *What's the Drill* |
+| 11 | Black. Twinkling pixel stars. The Absolute Connections logo turns: a four-colour square one way, a white dial inside it the other. | ABSOLUTE CONNECTIONS · Contractor Orientation<br>Module 2 of 14: *What's the Drill* |
 
 Card 11 mirrors card 0 on purpose: the same ident, the same picture, the next
 module's title. Card 10 has no caption; the snore is the whole card.
@@ -89,7 +94,9 @@ intro's clue.
 
 The intro ends on card 11; beat 1 begins in Joe's room on the Mars surface,
 with Module 2's ident waiting on his screen: **PRESS ANY KEY TO CONTINUE
-ORIENTATION**. He presses one, by slapping the screen off:
+ORIENTATION**. Joe has been asleep in bed through all of it: the video started
+on its own, for no reason he can see, and it is what wakes him. He presses a
+key, by slapping the screen off:
 
 > **JOE:** F@#K1N6 corporate propaganda… I can't stand it.
 

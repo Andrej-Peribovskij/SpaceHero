@@ -153,7 +153,10 @@ Externa Prima. Joe's contract obliges him to report there for his next mission.
 It has been compromised from within: see Danny Mellow. New contractors must sit
 through its fourteen-module orientation, whose gloomy chiptune loop is the
 corporation's musical motif, heard wherever it is present. See the
-[Chapter 1 intro](chapter-01-intro.md).
+[Chapter 1 intro](chapter-01-intro.md). Its logo is a square of four coloured
+corners — teal, yellow, red and steel blue — around a white dial, the two
+turning in opposite directions: four partners, one connection, always in
+motion.
 
 **The pursuers.** Someone — or something — trying to get rid of Joe before he
 reaches Absolute Connections. *(proposal)* Their technology is not quite human:
