@@ -15,7 +15,7 @@ import { SAMPLE_RATE, renderTune, type Tune } from "./synth";
 const CUT_S = 0.005;
 
 /** The beat of silence on the black card between the music stopping and the snore. */
-const SNORE_PAUSE_S = 0.6;
+export const SNORE_PAUSE_S = 0.6;
 
 interface Playing {
   readonly source: AudioBufferSourceNode;
