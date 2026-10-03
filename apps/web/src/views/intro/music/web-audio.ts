@@ -78,6 +78,15 @@ export function webIntroAudio(context: AudioContext, tune: Tune): IntroAudio {
 
       snore = play(bufferOf(context, renderSnore()), { loop: false, at: context.currentTime + SNORE_PAUSE_S });
     },
+    // The context's own clock stops with it, so whatever was scheduled holds its place too. A
+    // context once allowed to play may be resumed outside a gesture; if the browser says no, the
+    // video plays on without it.
+    pause: () => {
+      if (!closed) context.suspend().catch(() => {});
+    },
+    unpause: () => {
+      if (!closed) context.resume().catch(() => {});
+    },
     close: () => {
       if (closed) return;
 

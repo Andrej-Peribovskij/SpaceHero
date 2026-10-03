@@ -66,7 +66,14 @@ class FakeContext {
     this.gains.push(gain);
     return gain;
   }
+  suspended = false;
+
   resume() {
+    this.suspended = false;
+    return Promise.resolve();
+  }
+  suspend() {
+    this.suspended = true;
     return Promise.resolve();
   }
   close() {
@@ -189,6 +196,31 @@ describe("webIntroAudio", () => {
     const [, snore, again] = context.sources;
     expect(snore!.stopped).toBe(true);
     expect(again!.stopped).toBe(false);
+  });
+
+  it("pauses by suspending the context, and goes on by resuming it, with every sound kept", () => {
+    const { context, audio } = play();
+    audio.start();
+
+    audio.pause();
+    expect(context.suspended).toBe(true);
+
+    audio.unpause();
+    expect(context.suspended).toBe(false);
+    expect(context.sources[0]!.stopped).toBe(false);
+  });
+
+  it("does not wake a closed context on a pause or an unpause", () => {
+    const { context, audio } = play();
+    const suspend = vi.spyOn(context, "suspend");
+    const resume = vi.spyOn(context, "resume");
+    audio.close();
+
+    audio.pause();
+    audio.unpause();
+
+    expect(suspend).not.toHaveBeenCalled();
+    expect(resume).not.toHaveBeenCalled();
   });
 
   it("snores nothing once closed", () => {

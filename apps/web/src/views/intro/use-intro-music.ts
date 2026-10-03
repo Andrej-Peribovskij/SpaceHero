@@ -62,6 +62,22 @@ export function useIntroMusic(open: () => IntroAudio): (event: IntroEvent) => vo
 
   useEffect(() => silence, [silence]);
 
+  // Hidden, the video pauses (`useIntroTimeline`), and the music holds with it rather than playing
+  // on to an empty room. Before the gate the audio is the silent one, so nothing opens here.
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      try {
+        if (document.visibilityState === "hidden") audio.current.pause();
+        else audio.current.unpause();
+      } catch {
+        silence();
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", onVisibilityChange);
+  }, [silence]);
+
   return useCallback(
     (event: IntroEvent) => {
       try {

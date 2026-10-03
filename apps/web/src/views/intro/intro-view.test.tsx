@@ -443,6 +443,50 @@ describe("the music", () => {
     expect(audio.calls.slice(-3)).toEqual(["snore", "stop", "start"]);
   });
 
+  describe("in a hidden tab", () => {
+    function setVisibility(state: DocumentVisibilityState): void {
+      Object.defineProperty(document, "visibilityState", { configurable: true, value: state });
+      act(() => {
+        document.dispatchEvent(new Event("visibilitychange"));
+      });
+    }
+
+    afterEach(() => {
+      Object.defineProperty(document, "visibilityState", { configurable: true, value: "visible" });
+    });
+
+    it("pauses the music with the video, and goes on with it when the tab is back", () => {
+      const { audio } = playWithMusic();
+      fireEvent.keyDown(window, { key: "a" });
+
+      setVisibility("hidden");
+      expect(audio.calls).toEqual(["start", "pause"]);
+
+      setVisibility("visible");
+      expect(audio.calls).toEqual(["start", "pause", "unpause"]);
+    });
+
+    it("opens nothing when the tab is hidden before the gate", () => {
+      const opened = vi.fn(recordingIntroAudio);
+      render(<IntroView openAudio={opened} />);
+
+      setVisibility("hidden");
+      setVisibility("visible");
+
+      expect(opened).not.toHaveBeenCalled();
+    });
+
+    it("stops listening once the intro leaves the screen", () => {
+      const { audio, view } = playWithMusic();
+      fireEvent.keyDown(window, { key: "a" });
+      view.unmount();
+
+      setVisibility("hidden");
+
+      expect(audio.calls).toEqual(["start", "close"]);
+    });
+  });
+
   it("lets go of the audio when the intro leaves the screen", () => {
     const { audio, view } = playWithMusic();
     fireEvent.keyDown(window, { key: "a" });
