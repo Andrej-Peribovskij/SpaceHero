@@ -1,8 +1,9 @@
 import { Button } from "@space-hero/design-system";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { artFor } from "./art";
 import { IntroCardFrame } from "./intro-card-frame";
+import { canvasDraws } from "./screen/canvas";
 import { INTRO_CARDS, captionText } from "./script";
 import { useIntroTimeline } from "./use-intro-timeline";
 
@@ -31,6 +32,10 @@ export function IntroView() {
   const card = INTRO_CARDS[index]!;
   const prompt = PROMPTS[phase];
   const mainRef = useRef<HTMLElement>(null);
+  // The caption and the prompt are kept as text for assistive technology. Where the screen cannot
+  // paint them, that text is everyone's: shown, rather than an empty screen and no way to start.
+  const [asText] = useState(() => !canvasDraws());
+  const textClass = asText ? "font-mono text-sm tracking-widest" : "sr-only";
 
   // Ending unmounts the skip button. If it had focus, the browser drops focus to the top of the
   // document and a keyboard or screen-reader user loses their place; keep them on the video.
@@ -75,12 +80,12 @@ export function IntroView() {
       />
 
       {/* Set once per card, so a screen reader hears each caption whole (design.md §7). */}
-      <p className="sr-only" aria-live="polite">
+      <p className={textClass} aria-live="polite">
         {captionText(card)}
       </p>
 
       {/* The prompt blinks on the screen; this is it as text, for assistive technology. */}
-      {prompt && <p className="sr-only">{prompt}</p>}
+      {prompt && <p className={textClass}>{prompt}</p>}
 
       {/* No variant: the portable call, as in WidgetsView. Skipping records nothing. */}
       {phase === "playing" && <Button onClick={skip}>Skipping is recorded.</Button>}

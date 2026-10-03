@@ -318,3 +318,24 @@ describe("reduced motion", () => {
     expect(typed()).toBe(captionText(INTRO_CARDS[1]!));
   });
 });
+
+describe("without a canvas to paint on", () => {
+  it("shows the prompt and the caption as text, so the player can still see how to start", () => {
+    // jsdom's canvas, like a browser that refuses one, gives no 2D context (vitest.setup.ts).
+    render(<IntroView />);
+
+    expect(screen.getByText(PROMPT)).not.toHaveClass("sr-only");
+    expect(document.querySelector("[aria-live]")).not.toHaveClass("sr-only");
+  });
+
+  it("keeps that text for assistive technology alone when the screen can paint it", () => {
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+      createImageData: (width: number, height: number) => ({ data: new Uint8ClampedArray(width * height * 4) }),
+      putImageData: () => {},
+    } as unknown as CanvasRenderingContext2D);
+    render(<IntroView />);
+
+    expect(screen.getByText(PROMPT)).toHaveClass("sr-only");
+    expect(document.querySelector("[aria-live]")).toHaveClass("sr-only");
+  });
+});
