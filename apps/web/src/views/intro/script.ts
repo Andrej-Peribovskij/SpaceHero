@@ -110,11 +110,15 @@ export const INTRO_CARDS: readonly IntroCard[] = [
     glitchAtChar: CARD_6_LEAD.length + GANYMEDE_LINE.length,
   },
   {
-    image: "A sky full of ships leaving a white Earth.",
+    image:
+      "White; out of it, a launch field on a bleached white Earth under a white sky, the great ships dark on their pads. They light one after another, and the sky fills with ships rising on columns of smoke. The camera climbs with them into the black. From orbit: the white Earth, its ships gathering into rivers of light, a few ending at Mars and Deimos, most streaming on past Mars, bound for the stations beyond. Then white again.",
     caption: [
-      {
-        text: "2547. The Diaspora began, and the calendar began again with it. Year Zero.",
-      },
+      // The caption waits while the launch field comes out of the white, while the ships rise, and
+      // while the camera climbs with them into orbit.
+      { text: "", pauseAfterMs: 800 },
+      { text: "2547. The Diaspora began, ", pauseAfterMs: 1700 },
+      { text: "and the calendar began again with it. ", pauseAfterMs: 1300 },
+      { text: "Year Zero." },
     ],
   },
   {
