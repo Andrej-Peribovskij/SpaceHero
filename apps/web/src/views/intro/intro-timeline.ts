@@ -114,6 +114,11 @@ export function visibleChars(state: IntroState): number {
   return typedCharsAt(card, state.elapsedMs);
 }
 
+/** When, from the start of a card, the Ganymede glitch fires: as its line finishes typing. */
+export function glitchMs(card: IntroCard): number | undefined {
+  return card.glitchAtChar === undefined ? undefined : msToType(card, card.glitchAtChar);
+}
+
 interface Cue {
   readonly atMs: number;
   readonly event: IntroEvent;
@@ -121,15 +126,13 @@ interface Cue {
 
 /** The events that fire partway through a card, rather than on entering it. */
 function cuesOf(index: number): readonly Cue[] {
-  const card = INTRO_CARDS[index]!;
+  const atMs = glitchMs(INTRO_CARDS[index]!);
 
-  if (card.glitchAtChar === undefined) return [];
-
-  const glitchMs = msToType(card, card.glitchAtChar);
+  if (atMs === undefined) return [];
 
   return [
-    { atMs: glitchMs, event: { type: "glitch" } },
-    { atMs: glitchMs + GLITCH_SILENCE_MS, event: { type: "glitch-end" } },
+    { atMs, event: { type: "glitch" } },
+    { atMs: atMs + GLITCH_SILENCE_MS, event: { type: "glitch-end" } },
   ];
 }
 

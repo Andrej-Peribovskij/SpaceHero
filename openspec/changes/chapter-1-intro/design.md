@@ -96,10 +96,14 @@ reuse of the motif outside the intro.
    story. The note table stays in `views/intro/`. It gets promoted when beat 6
    reuses the motif, not before.
 
-6. **Glitch as two rendered frames.** On the Ganymede line the timeline sets
-   `glitch` for exactly two animation frames. The canvas paints a
-   deterministic corruption: shifted rows and palette swaps. The music drops
-   out at the same event. Under `prefers-reduced-motion` the visual step is
+6. **Glitch as two rendered frames.** As the Ganymede line finishes typing,
+   the screen tears for exactly two of its 12-fps frames, then goes on as if
+   nothing happened. The tear is deterministic: bands of rows shifted
+   sideways, smeared, or in swapped palette colours, across the whole screen,
+   caption included. Like the art, it is a pure function of the card's clock
+   (`screen/glitch.ts`): the moment comes from the caption (`glitchMs`), the
+   same one at which the timeline emits its `glitch` event, and the music
+   drops out on that event. Under `prefers-reduced-motion` the visual step is
    skipped and the drop-out remains.
 
 7. **Captions are read once by screen readers.** The typed text is drawn on

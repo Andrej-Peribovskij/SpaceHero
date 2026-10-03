@@ -1,4 +1,5 @@
 import type { CardArt } from "./art/render";
+import { glitchMs } from "./intro-timeline";
 import { PixelScreen } from "./screen/pixel-screen";
 import { captionText, type IntroCard } from "./script";
 
@@ -28,7 +29,14 @@ export function IntroCardFrame({ card, shownChars, art, prompt, still }: IntroCa
       data-caption-shown={captionText(card).slice(0, shownChars)}
       className="w-full max-w-3xl"
     >
-      <PixelScreen art={art} caption={card.caption} shownChars={shownChars} prompt={prompt} still={still} />
+      <PixelScreen
+        art={art}
+        caption={card.caption}
+        shownChars={shownChars}
+        prompt={prompt}
+        still={still}
+        glitchAtMs={glitchMs(card)}
+      />
     </div>
   );
 }

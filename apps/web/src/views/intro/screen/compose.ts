@@ -3,6 +3,7 @@ import type { PaletteChar } from "../art/palette";
 import { renderFrame, type CardArt } from "../art/render";
 import type { CaptionSegment } from "../script";
 import { FONT, ADVANCE } from "./font";
+import { glitchFrameAt, glitchScreen } from "./glitch";
 import { GLYPH_COLUMNS, GLYPH_ROWS } from "./glyphs";
 import { layoutCaption, type CaptionLine } from "./layout";
 
@@ -45,6 +46,11 @@ export interface ScreenContent {
   readonly timeMs: number;
   /** Reduced motion: the art does not move, though its scenes and fades still change on cue. */
   readonly still?: boolean;
+  /**
+   * When, on the card's clock, the screen tears for two frames: the Ganymede glitch, on card 6
+   * only. Never under reduced motion.
+   */
+  readonly glitchAtMs?: number;
 }
 
 /** Whether a blinking prompt is lit at `timeMs`: on for one period, off for the next. */
@@ -98,5 +104,7 @@ export function composeScreen(content: ScreenContent): PaletteChar[] {
     [...content.prompt].forEach((char, column) => drawChar(frame, char, left + column * ADVANCE, y, PROMPT));
   }
 
-  return frame;
+  // The glitch tears the whole screen, caption and all: the monitor fails, not the picture.
+  const glitched = content.glitchAtMs === undefined || content.still ? undefined : glitchFrameAt(content.glitchAtMs, content.timeMs);
+  return glitched === undefined ? frame : glitchScreen(frame, glitched);
 }

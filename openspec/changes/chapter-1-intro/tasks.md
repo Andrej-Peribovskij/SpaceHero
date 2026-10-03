@@ -60,8 +60,8 @@ Story note (the ending):
 - [x] 2.8h Draw card 9, Mars, 158 A.D.: opening on card 8's last frame, the light goes out of it a step at a time; out of the dark, stars, and a tilt down to the Martian horizon at dusk, the sunset blue, Deimos high up with Externa's lights, Phobos crossing, shuttles climbing to Deimos from a far port, one leaving on "the Corridor", the caption held back until the tilt lands; on the plain, a dome half sunk in the dunes, a small ship by it, a ring of dark windows and one lit; on "contractors like you" a push-in onto that window, dissolving to it close: a dark room, its walls lit only by the video playing on a screen out of sight, its light flickering and changing colour at every cut; on "Externa Prima" Externa's beacon above the dome blinks Absolute Connections teal
 - [x] 2.8i Card 10, the snore: black on purpose, an art of its own with nothing painted, and no caption band
 - [x] 2.9 Add a test that every card's art parses and that every script card has art
-- [ ] 2.10 Glitch: exactly two painted frames of deterministic corruption (row shifts and palette swap) on the glitch event, skipped under reduced motion (design §6)
-- [ ] 2.11 Glitch tests: two corrupted frames then normal; no corruption under reduced motion; card 7 keeps its normal timing
+- [x] 2.10 Glitch: exactly two painted frames of deterministic corruption (row shifts and palette swap) on the glitch event, skipped under reduced motion (design §6)
+- [x] 2.11 Glitch tests: two corrupted frames then normal; no corruption under reduced motion; card 7 keeps its normal timing
 - [ ] 2.12 Replace the slice 1 placeholders with the canvas
 - [ ] 2.13 Review follow-ups from PR #8: set React state only when the rendered projection changes; precompute card timings once; one "whole caption" rule in `visibleChars`
 - [ ] 2.14 Gate: `pnpm run verify` and `pnpm run test:e2e` pass

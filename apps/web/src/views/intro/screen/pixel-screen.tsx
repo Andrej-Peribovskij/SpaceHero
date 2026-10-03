@@ -15,6 +15,8 @@ interface PixelScreenProps {
    * and fades still change on cue, so the story is the same.
    */
   readonly still: boolean;
+  /** When, on the card's clock, the screen tears for two frames: the Ganymede glitch. */
+  readonly glitchAtMs?: number | undefined;
 }
 
 /**
@@ -29,16 +31,16 @@ interface PixelScreenProps {
  * The canvas is hidden from assistive technology: the view carries the picture's description,
  * the caption in a live region, and the prompt as text.
  */
-export function PixelScreen({ art, caption, shownChars, prompt, still }: PixelScreenProps) {
+export function PixelScreen({ art, caption, shownChars, prompt, still, glitchAtMs }: PixelScreenProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const text = useRef({ caption, shownChars, prompt });
+  const text = useRef({ caption, shownChars, prompt, glitchAtMs });
   const changed = useRef(true);
 
   // What the text shows is read by the loop below, which outlives any one render.
   useLayoutEffect(() => {
-    text.current = { caption, shownChars, prompt };
+    text.current = { caption, shownChars, prompt, glitchAtMs };
     changed.current = true;
-  }, [caption, shownChars, prompt]);
+  }, [caption, shownChars, prompt, glitchAtMs]);
 
   useEffect(() => {
     const context = canvasRef.current?.getContext("2d");
