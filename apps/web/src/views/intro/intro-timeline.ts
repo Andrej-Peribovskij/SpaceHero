@@ -122,8 +122,15 @@ export function visibleChars(state: IntroState, options: VisibleCharsOptions = {
   return whole ? TIMINGS[state.card]!.captionLength : typedCharsAt(card, state.elapsedMs);
 }
 
-/** When, from the start of a card, the Ganymede glitch fires: as its line finishes typing. */
-export function glitchMs(card: IntroCard): number | undefined {
+/**
+ * When, from the start of a card, the Ganymede glitch fires: as its line finishes typing. One
+ * moment for both what reacts to it, the screen tearing and the music dropping out.
+ */
+export function glitchMs(index: number): number | undefined {
+  return TIMINGS[index]!.glitchMs;
+}
+
+function glitchOf(card: IntroCard): number | undefined {
   return card.glitchAtChar === undefined ? undefined : msToType(card, card.glitchAtChar);
 }
 
@@ -134,7 +141,7 @@ interface Cue {
 
 /** The events that fire partway through a card, rather than on entering it. */
 function cuesOf(index: number): readonly Cue[] {
-  const atMs = glitchMs(INTRO_CARDS[index]!);
+  const atMs = glitchOf(INTRO_CARDS[index]!);
 
   if (atMs === undefined) return [];
 
@@ -148,6 +155,7 @@ interface CardTiming {
   readonly durationMs: number;
   readonly cues: readonly Cue[];
   readonly captionLength: number;
+  readonly glitchMs: number | undefined;
 }
 
 /**
@@ -158,6 +166,7 @@ const TIMINGS: readonly CardTiming[] = INTRO_CARDS.map((card, index) => ({
   durationMs: durationOf(index),
   cues: cuesOf(index),
   captionLength: captionText(card).length,
+  glitchMs: glitchOf(card),
 }));
 
 const ENDED: IntroState = { phase: "ended", card: END_CARD, elapsedMs: cardDurationMs(END_CARD) };

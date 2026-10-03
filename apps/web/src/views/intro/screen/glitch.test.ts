@@ -1,12 +1,12 @@
 import { artFor } from "../art";
 import { FRAME_MS } from "../art/render";
-import { cardDurationMs, glitchMs, initialIntroState, stepIntro, typedCharsAt, type IntroEvent } from "../intro-timeline";
+import { glitchMs, initialIntroState, stepIntro, typedCharsAt, type IntroEvent } from "../intro-timeline";
 import { INTRO_CARDS } from "../script";
 import { composeScreen, isLit } from "./compose";
 import { GLITCH_FRAMES, glitchFrameAt } from "./glitch";
 
 const CARD = INTRO_CARDS[6]!;
-const GLITCH_MS = glitchMs(CARD)!;
+const GLITCH_MS = glitchMs(6)!;
 
 /** Card 6's screen at a moment, as the view shows it: glitching, unless told not to. */
 function screen(timeMs: number, options: { still?: boolean; glitch?: boolean } = {}) {
@@ -28,7 +28,7 @@ const differing = (a: readonly string[], b: readonly string[]) => a.filter((pixe
 
 describe("the Ganymede glitch", () => {
   it("fires on card 6 only, as \"Ganymede was found unsuitable.\" finishes typing", () => {
-    expect(INTRO_CARDS.filter((card) => glitchMs(card) !== undefined)).toEqual([CARD]);
+    expect(INTRO_CARDS.filter((_card, index) => glitchMs(index) !== undefined)).toEqual([CARD]);
     expect(CARD.caption.map((segment) => segment.text).join("").slice(0, CARD.glitchAtChar)).toMatch(/Ganymede was found unsuitable\.$/);
   });
 
@@ -54,19 +54,16 @@ describe("the Ganymede glitch", () => {
     for (const time of AROUND) expect(screen(time, { still: true })).toEqual(screen(time, { still: true, glitch: false }));
   });
 
-  it("takes no time: card 7 starts when card 6's time is up, as it would without it", () => {
+  it("tears on the moment the timeline's glitch event fires, for the music to drop out on", () => {
     let state = stepIntro(initialIntroState, { type: "start" }).state;
-    let elapsed = 0;
-    let card7At: number | undefined;
-    while (card7At === undefined) {
-      const step = stepIntro(state, { type: "tick", dtMs: FRAME_MS });
-      elapsed += FRAME_MS;
+    let glitchedAt: number | undefined;
+    while (glitchedAt === undefined) {
+      const step = stepIntro(state, { type: "tick", dtMs: 1 });
       state = step.state;
-      if (step.events.some((event: IntroEvent) => event.type === "card" && event.index === 7)) card7At = elapsed;
+      if (step.events.some((event: IntroEvent) => event.type === "glitch")) glitchedAt = state.elapsedMs;
     }
-    const expected = [0, 1, 2, 3, 4, 5, 6].reduce((sum, card) => sum + cardDurationMs(card), 0);
 
-    expect(card7At - expected).toBeGreaterThanOrEqual(0);
-    expect(card7At - expected).toBeLessThan(FRAME_MS);
+    expect(state.card).toBe(6);
+    expect(glitchedAt).toBe(GLITCH_MS);
   });
 });

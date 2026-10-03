@@ -47,7 +47,7 @@ function screenAt(timeMs: number): Frame {
       prompt: PROMPTS.get(card),
       promptLit: isLit(timeMs),
       timeMs,
-      glitchAtMs: glitchMs(script),
+      glitchAtMs: glitchMs(card),
     }),
   };
 }

@@ -30,8 +30,11 @@ reuse of the motif outside the intro.
    owns the state: `gate → card(n, typedChars) → end`, with a glitch flag and
    a skip transition. A hook drives it from one clock (`requestAnimationFrame`
    plus elapsed milliseconds) and sends events to the audio. The components
-   only render state. Vitest fake timers then cover the whole sequence without
-   a browser. The alternative, CSS animations with `animationend` handlers,
+   only render state. The pixel screen paints from that same clock, read every
+   frame: while a card plays, the picture's time is the card's time on the
+   timeline, so it pauses with a hidden page and keeps the caption's pace. A
+   second clock would let the picture run ahead of the beats it is cued to.
+   Vitest fake timers then cover the whole sequence without a browser. The alternative, CSS animations with `animationend` handlers,
    hides the timing in stylesheets and cannot be tested in jsdom.
 
 3. **Animated pixel art, kept as character grids.** Each card is 384×216 pixels

@@ -1,11 +1,19 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 
 import { FRAME_HEIGHT, FRAME_WIDTH } from "../art/grid";
-import { FRAME_MS, stillKey, writeRgba, type CardArt } from "../art/render";
+import { frameTime, stillKey, writeRgba, type CardArt } from "../art/render";
 import type { CaptionSegment } from "../script";
+import type { CardClock } from "../use-intro-timeline";
 import { composeScreen, isLit } from "./compose";
 
 interface PixelScreenProps {
+  /** The card on screen, by its number in the script. */
+  readonly card: number;
+  /**
+   * The clock to paint from, read on every display frame: the timeline's, so the picture keeps step
+   * with the caption. While it still counts another card's time, the screen holds its picture.
+   */
+  readonly clock: { readonly current: CardClock };
   readonly art: CardArt | undefined;
   readonly caption: readonly CaptionSegment[];
   readonly shownChars: number;
@@ -26,12 +34,13 @@ interface PixelScreenProps {
  * It paints from its own animation loop, not through React state: a frame is pixels on a canvas,
  * and re-rendering the view for each one would be work for nothing. The art moves at 12 frames a
  * second; a newly typed character is painted on the next display frame, so typing is not held
- * back to the art's cadence. The art's clock starts when the card's art does.
+ * back to the art's cadence. The time it paints is the clock it is handed: the timeline's, so the
+ * picture stops when the video does and keeps the caption's pace, whatever the frame rate.
  *
  * The canvas is hidden from assistive technology: the view carries the picture's description,
  * the caption in a live region, and the prompt as text.
  */
-export function PixelScreen({ art, caption, shownChars, prompt, still, glitchAtMs }: PixelScreenProps) {
+export function PixelScreen({ card, clock, art, caption, shownChars, prompt, still, glitchAtMs }: PixelScreenProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const text = useRef({ caption, shownChars, prompt, glitchAtMs });
   const changed = useRef(true);
@@ -49,12 +58,15 @@ export function PixelScreen({ art, caption, shownChars, prompt, still, glitchAtM
     const image = context.createImageData(FRAME_WIDTH, FRAME_HEIGHT);
     let frame = 0;
     let painted: string | undefined;
-    let start: number | undefined;
     changed.current = true;
 
-    const loop = (now: number) => {
-      start ??= now;
-      const timeMs = Math.floor((now - start) / FRAME_MS) * FRAME_MS;
+    const loop = () => {
+      const now = clock.current;
+      if (now.card !== card) {
+        frame = requestAnimationFrame(loop);
+        return;
+      }
+      const timeMs = frameTime(now.ms);
       // Moving, every 12-fps frame is new. Still, only a cut or a fade step changes the picture.
       const key = still ? (art ? stillKey(art, timeMs) : "") : String(timeMs);
 
@@ -70,7 +82,7 @@ export function PixelScreen({ art, caption, shownChars, prompt, still, glitchAtM
 
     frame = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frame);
-  }, [art, still]);
+  }, [card, clock, art, still]);
 
   return (
     <canvas

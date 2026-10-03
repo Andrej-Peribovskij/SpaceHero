@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 
-import { HOLD_MS, MS_PER_CHAR, cardDurationMs } from "./intro-timeline";
-import { INTRO_CARDS, captionText } from "./script";
+import { HOLD_MS, MS_PER_CHAR, cardDurationMs, typedCharsAt } from "./intro-timeline";
+import { END_CARD, INTRO_CARDS, captionText } from "./script";
 import { useIntroTimeline } from "./use-intro-timeline";
 
 beforeEach(() => {
@@ -28,6 +28,38 @@ function advance(ms: number): void {
     vi.advanceTimersByTime(ms);
   });
 }
+
+describe("the screen's clock", () => {
+  it("runs for the ident at the gate, where the timeline has not started", () => {
+    const { hook } = counted();
+    advance(1000);
+
+    expect(hook.result.current.phase).toBe("gate");
+    expect(hook.result.current.clock.current.card).toBe(0);
+    expect(hook.result.current.clock.current.ms).toBeGreaterThan(900);
+  });
+
+  it("is the card's own time on the timeline while it plays, so the picture keeps the caption's pace", () => {
+    const { hook } = counted();
+    act(() => hook.result.current.start());
+    advance(cardDurationMs(0) + 25 * MS_PER_CHAR);
+
+    const { card, ms } = hook.result.current.clock.current;
+    expect(card).toBe(1);
+    expect(hook.result.current.card).toBe(1);
+    expect(typedCharsAt(INTRO_CARDS[1]!, ms)).toBe(hook.result.current.shownChars);
+  });
+
+  it("starts the next module's ident from 0 when the player skips", () => {
+    const { hook } = counted();
+    act(() => hook.result.current.start());
+    advance(cardDurationMs(0) + 2000);
+
+    act(() => hook.result.current.skip());
+
+    expect(hook.result.current.clock.current).toEqual({ card: END_CARD, ms: 0 });
+  });
+});
 
 describe("useIntroTimeline", () => {
   it("re-renders when what is shown changes, not on every frame", () => {

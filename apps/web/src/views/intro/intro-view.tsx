@@ -27,7 +27,7 @@ const PROMPTS = {
  * permission to play.
  */
 export function IntroView() {
-  const { phase, card: index, shownChars, reducedMotion, start, skip } = useIntroTimeline();
+  const { phase, card: index, shownChars, clock, reducedMotion, start, skip } = useIntroTimeline();
   const card = INTRO_CARDS[index]!;
   const prompt = PROMPTS[phase];
   const mainRef = useRef<HTMLElement>(null);
@@ -65,6 +65,8 @@ export function IntroView() {
       <h1 className="sr-only">Absolute Connections Contractor Orientation</h1>
 
       <IntroCardFrame
+        index={index}
+        clock={clock}
         card={card}
         shownChars={shownChars}
         art={artFor(index)}

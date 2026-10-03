@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { IDENT_CARD } from "./script";
 import {
   initialIntroState,
   stepIntro,
@@ -58,7 +59,21 @@ function shownOf(state: IntroState, whole: boolean): Shown {
 
 const sameShown = (a: Shown, b: Shown) => a.phase === b.phase && a.card === b.card && a.shownChars === b.shownChars;
 
+/** Where the screen is on a card's own clock. */
+export interface CardClock {
+  /** The card the time belongs to: a screen still showing another card holds its picture. */
+  readonly card: number;
+  readonly ms: number;
+}
+
 export interface IntroTimeline extends Shown {
+  /**
+   * The clock the screen paints from, read every frame rather than rendered. While a card plays it
+   * is the timeline's own, so the picture keeps step with the caption: it stops while the page is
+   * hidden and loses what a stalled frame loses, as the caption does. The idents, which nothing
+   * cues, run on it at the gate and at the end too, by the same frames.
+   */
+  readonly clock: { readonly current: CardClock };
   readonly reducedMotion: boolean;
   readonly start: () => void;
   readonly skip: () => void;
@@ -99,26 +114,40 @@ export function useIntroTimeline(onEvent?: (event: IntroEvent) => void): IntroTi
     show();
   }, [reducedMotion, show]);
 
+  const clock = useRef<CardClock>({ card: initialIntroState.card, ms: 0 });
+
+  /** The screen's clock moves on: with the timeline while a card plays, by `dtMs` for an ident. */
+  const advanceClock = useCallback((dtMs: number) => {
+    const state = stateRef.current;
+    const timed = state.phase === "playing" && state.card !== IDENT_CARD;
+    const sameCard = state.card === clock.current.card;
+    clock.current = { card: state.card, ms: timed ? state.elapsedMs : sameCard ? clock.current.ms + dtMs : 0 };
+  }, []);
+
   const dispatch = useCallback(
     (action: IntroAction) => {
       const step = stepIntro(stateRef.current, action);
 
       stateRef.current = step.state;
+      // Before React hears of a new card, so the screen never paints one card at another's time.
+      advanceClock(action.type === "tick" ? action.dtMs : 0);
       show();
       for (const event of step.events) onEventRef.current?.(event);
     },
-    [show],
+    [advanceClock, show],
   );
 
+  // The frame clock runs for as long as the video is on screen: the timeline only moves while it
+  // plays, but the idents at the gate and at the end are never still.
   useEffect(() => {
-    if (shown.phase !== "playing") return;
-
     let frame = 0;
     let last: number | undefined;
 
     const loop = (now: number) => {
-      if (last !== undefined) dispatch({ type: "tick", dtMs: Math.min(now - last, MAX_FRAME_MS) });
+      const dtMs = last === undefined ? 0 : Math.min(now - last, MAX_FRAME_MS);
       last = now;
+      if (stateRef.current.phase === "playing" && dtMs > 0) dispatch({ type: "tick", dtMs });
+      else advanceClock(dtMs);
       frame = requestAnimationFrame(loop);
     };
 
@@ -133,13 +162,14 @@ export function useIntroTimeline(onEvent?: (event: IntroEvent) => void): IntroTi
       cancelAnimationFrame(frame);
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
-  }, [shown.phase, dispatch]);
+  }, [dispatch, advanceClock]);
 
   const start = useCallback(() => dispatch({ type: "start" }), [dispatch]);
   const skip = useCallback(() => dispatch({ type: "skip" }), [dispatch]);
 
   return {
     ...shown,
+    clock,
     reducedMotion,
     start,
     skip,
