@@ -359,6 +359,42 @@ describe("the music", () => {
     expect(audio.calls).toEqual(["start"]);
   });
 
+  it("works the music out ahead while the gate waits, not inside the key press", () => {
+    const prepare = vi.fn();
+    render(<IntroView openAudio={recordingIntroAudio} prepareAudio={prepare} />);
+    expect(prepare).not.toHaveBeenCalled();
+
+    advance(FRAMES);
+    expect(prepare).toHaveBeenCalledTimes(1);
+
+    fireEvent.keyDown(window, { key: "a" });
+    advance(FRAMES);
+    expect(prepare).toHaveBeenCalledTimes(1);
+  });
+
+  it("works nothing out for an intro that has already left the screen", () => {
+    const prepare = vi.fn();
+    const view = render(<IntroView openAudio={recordingIntroAudio} prepareAudio={prepare} />);
+
+    view.unmount();
+    advance(FRAMES);
+
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
+  it("plays on when working the music out ahead fails", () => {
+    const audio = recordingIntroAudio();
+    const broken = () => {
+      throw new Error("RangeError");
+    };
+    render(<IntroView openAudio={() => audio} prepareAudio={broken} />);
+
+    advance(FRAMES);
+    fireEvent.keyDown(window, { key: "a" });
+
+    expect(audio.calls).toEqual(["start"]);
+  });
+
   it("starts on a click too", () => {
     const { audio } = playWithMusic();
 

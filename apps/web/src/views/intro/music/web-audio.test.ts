@@ -1,6 +1,6 @@
 import { silentIntroAudio } from "./intro-audio";
 import type { Tune } from "./synth";
-import { openIntroAudio, webIntroAudio } from "./web-audio";
+import { openIntroAudio, renderedTune, webIntroAudio } from "./web-audio";
 
 const TUNE: Tune = {
   bpm: 120,
@@ -18,7 +18,7 @@ const TUNE: Tune = {
 
 /** Just enough of Web Audio to see what the intro builds with it: no sound, only the graph. */
 class FakeSource {
-  buffer: { length: number } | null = null;
+  buffer: { length: number; samples?: Float32Array } | null = null;
   loop = false;
   startedAt: number | undefined;
   stopped = false;
@@ -54,7 +54,12 @@ class FakeContext {
   closed = false;
 
   createBuffer(_channels: number, length: number) {
-    return { length, copyToChannel: () => {} };
+    const buffer = {
+      length,
+      samples: undefined as Float32Array | undefined,
+      copyToChannel: (samples: Float32Array) => void (buffer.samples = samples),
+    };
+    return buffer;
   }
   createBufferSource() {
     const source = new FakeSource();
@@ -255,6 +260,18 @@ describe("webIntroAudio", () => {
     audio.stop();
 
     expect(context.sources).toHaveLength(0);
+  });
+});
+
+describe("renderedTune", () => {
+  it("renders a tune once, and the music plays those very samples", () => {
+    const samples = renderedTune(TUNE);
+    const { context, audio } = play();
+
+    audio.start();
+
+    expect(renderedTune(TUNE)).toBe(samples);
+    expect(context.sources[0]!.buffer!.samples).toBe(samples);
   });
 });
 

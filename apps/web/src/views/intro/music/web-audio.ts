@@ -26,6 +26,28 @@ interface Playing {
   readonly gain: GainNode;
 }
 
+/**
+ * Each tune's samples, rendered once for the page's life. They need no `AudioContext`, so
+ * `prepareIntroAudio` can work them out ahead, and Module 2's restart never pays for them again.
+ */
+const rendered = new WeakMap<Tune, Float32Array<ArrayBuffer>>();
+
+/** A tune's samples: rendered now if nothing has rendered them yet. */
+export function renderedTune(tune: Tune): Float32Array<ArrayBuffer> {
+  let samples = rendered.get(tune);
+  if (!samples) rendered.set(tune, (samples = renderTune(tune)));
+  return samples;
+}
+
+/**
+ * Works the tune out ahead, so the gate's key press only has to copy it into a buffer. Rendering
+ * the loop takes tens of milliseconds, too long to spend inside the handler, where it would hold
+ * up the first frame. Where there is no Web Audio, nobody will hear it, so nothing is rendered.
+ */
+export function prepareIntroAudio(tune: Tune): void {
+  if (typeof AudioContext !== "undefined") renderedTune(tune);
+}
+
 function bufferOf(context: BaseAudioContext, samples: Float32Array<ArrayBuffer>): AudioBuffer {
   const buffer = context.createBuffer(1, samples.length, SAMPLE_RATE);
   buffer.copyToChannel(samples, 0);
@@ -38,7 +60,7 @@ export function webIntroAudio(context: AudioContext, tune: Tune): IntroAudio {
   // must not then play over Module 2's music.
   let snore: Playing | undefined;
   let closed = false;
-  // The loop is rendered once: Module 2's ident starts it again, and must not pay for it twice.
+  // The loop's buffer, made once: Module 2's ident starts it again from the same one.
   let loop: AudioBuffer | undefined;
 
   const play = (buffer: AudioBuffer, options: { loop: boolean; at: number }): Playing => {
@@ -67,7 +89,7 @@ export function webIntroAudio(context: AudioContext, tune: Tune): IntroAudio {
     start: () => {
       if (music || closed) return;
 
-      loop ??= bufferOf(context, renderTune(tune));
+      loop ??= bufferOf(context, renderedTune(tune));
       music = play(loop, { loop: true, at: 0 });
     },
     dropOut: () => gainTo(0),

@@ -5,7 +5,7 @@ import { artFor } from "./art";
 import { IntroCardFrame } from "./intro-card-frame";
 import type { IntroAudio } from "./music/intro-audio";
 import { ORIENTATION_TUNE } from "./music/tune";
-import { openIntroAudio } from "./music/web-audio";
+import { openIntroAudio, prepareIntroAudio } from "./music/web-audio";
 import { canvasDraws } from "./screen/canvas";
 import { INTRO_CARDS, captionText } from "./script";
 import { useIntroMusic } from "./use-intro-music";
@@ -25,9 +25,14 @@ const PROMPTS = {
 /** The orientation music through Web Audio, or silence where the browser has none to give. */
 const openOrientationAudio = () => openIntroAudio(ORIENTATION_TUNE);
 
+/** Renders the orientation music while the gate waits, so the key press need not. */
+const prepareOrientationAudio = () => prepareIntroAudio(ORIENTATION_TUNE);
+
 export interface IntroViewProps {
   /** Opens the music, from inside the gate's key or click handler. Tests pass a recording one. */
   readonly openAudio?: () => IntroAudio;
+  /** Works out ahead, in idle time, what opening the music would otherwise have to. */
+  readonly prepareAudio?: () => void;
 }
 
 /**
@@ -39,8 +44,9 @@ export interface IntroViewProps {
  * until the user has pressed or clicked something, so the gate is where the music gets
  * permission to play.
  */
-export function IntroView({ openAudio = openOrientationAudio }: IntroViewProps = {}) {
-  const { phase, card: index, shownChars, clock, reducedMotion, start, skip } = useIntroTimeline(useIntroMusic(openAudio));
+export function IntroView({ openAudio = openOrientationAudio, prepareAudio = prepareOrientationAudio }: IntroViewProps = {}) {
+  const music = useIntroMusic(openAudio, prepareAudio);
+  const { phase, card: index, shownChars, clock, reducedMotion, start, skip } = useIntroTimeline(music);
   const card = INTRO_CARDS[index]!;
   const prompt = PROMPTS[phase];
   const mainRef = useRef<HTMLElement>(null);

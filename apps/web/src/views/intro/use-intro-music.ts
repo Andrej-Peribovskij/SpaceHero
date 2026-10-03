@@ -29,22 +29,53 @@ function cue(audio: IntroAudio, event: IntroEvent): void {
 }
 
 /**
+ * Runs `task` when the browser next has time to spare, and returns a way to call it off. Safari
+ * has no `requestIdleCallback`, so there it waits for the current task to finish instead.
+ */
+function whenIdle(task: () => void): () => void {
+  if (typeof requestIdleCallback === "function") {
+    const id = requestIdleCallback(task, { timeout: 2000 });
+    return () => cancelIdleCallback(id);
+  }
+
+  const id = setTimeout(task, 0);
+  return () => clearTimeout(id);
+}
+
+/**
  * The music, listening to the timeline: hand what this returns to `useIntroTimeline`.
  *
  * The audio is opened on `started`, which the timeline fires synchronously from inside the gate's
  * key or click handler. That is the one moment a browser lets sound begin, so `open` must create
  * and resume its `AudioContext` there and then, not later.
  *
+ * Whatever `open` would have to work out first, `prepare` works out ahead, while the gate waits:
+ * it runs once, when the browser is next idle, so the key press is left only the quick part.
+ *
  * Sound never stops the video. If opening or playing throws, the music goes silent for the rest
  * of the video and every card plays on.
  */
-export function useIntroMusic(open: () => IntroAudio): (event: IntroEvent) => void {
+export function useIntroMusic(open: () => IntroAudio, prepare?: () => void): (event: IntroEvent) => void {
   const audio = useRef<IntroAudio>(silentIntroAudio);
   const openRef = useRef(open);
+  const prepareRef = useRef(prepare);
 
   useEffect(() => {
     openRef.current = open;
-  }, [open]);
+    prepareRef.current = prepare;
+  }, [open, prepare]);
+
+  useEffect(
+    () =>
+      whenIdle(() => {
+        try {
+          prepareRef.current?.();
+        } catch {
+          // Nothing lost: opening the music works it out instead, or finds it cannot.
+        }
+      }),
+    [],
+  );
 
   /**
    * Lets go of the audio for good. Closed, not just dropped: a loop left playing by a cue that

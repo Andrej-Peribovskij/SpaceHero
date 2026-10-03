@@ -60,18 +60,22 @@ export function waveAt(wave: Wave, phase: number): number {
   return phase < wave.duty ? 1 : -wave.duty / (1 - wave.duty);
 }
 
-/** A note's loudness `ms` after it starts, when it is let go after `heldMs`. */
-export function envelopeAt(envelope: Envelope, ms: number, heldMs: number): number {
-  const level = (at: number) => {
-    if (at < envelope.attackMs) return at / envelope.attackMs;
-    const decayed = (at - envelope.attackMs) / envelope.decayMs;
-    return decayed >= 1 ? envelope.sustain : 1 - (1 - envelope.sustain) * decayed;
-  };
+/** A held note's loudness `ms` after it starts: up, then down to the sustain. */
+function heldLevel(envelope: Envelope, ms: number): number {
+  if (ms < envelope.attackMs) return ms / envelope.attackMs;
+  const decayed = (ms - envelope.attackMs) / envelope.decayMs;
+  return decayed >= 1 ? envelope.sustain : 1 - (1 - envelope.sustain) * decayed;
+}
 
-  if (ms < heldMs) return level(ms);
+/**
+ * A note's loudness `ms` after it starts, when it is let go after `heldMs`. Called for every
+ * sample of every note, so it allocates nothing.
+ */
+export function envelopeAt(envelope: Envelope, ms: number, heldMs: number): number {
+  if (ms < heldMs) return heldLevel(envelope, ms);
 
   const released = (ms - heldMs) / envelope.releaseMs;
-  return released >= 1 ? 0 : level(heldMs) * (1 - released);
+  return released >= 1 ? 0 : heldLevel(envelope, heldMs) * (1 - released);
 }
 
 /** How many steps the tune lasts. Every voice must last as long as the others. */
