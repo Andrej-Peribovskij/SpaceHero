@@ -46,24 +46,31 @@ export function useIntroMusic(open: () => IntroAudio): (event: IntroEvent) => vo
     openRef.current = open;
   }, [open]);
 
-  useEffect(
-    () => () => {
-      try {
-        audio.current.close();
-      } catch {
-        // Leaving the screen anyway: nothing left to keep quiet for.
-      }
-      audio.current = silentIntroAudio;
-    },
-    [],
-  );
-
-  return useCallback((event: IntroEvent) => {
+  /**
+   * Lets go of the audio for good. Closed, not just dropped: a loop left playing by a cue that
+   * threw would otherwise play on, with nothing left holding it to stop it.
+   */
+  const silence = useCallback(() => {
+    const playing = audio.current;
+    audio.current = silentIntroAudio;
     try {
-      if (event.type === "started") audio.current = openRef.current();
-      cue(audio.current, event);
+      playing.close();
     } catch {
-      audio.current = silentIntroAudio;
+      // Broken already, or leaving the screen: there is nothing more to ask of it.
     }
   }, []);
+
+  useEffect(() => silence, [silence]);
+
+  return useCallback(
+    (event: IntroEvent) => {
+      try {
+        if (event.type === "started") audio.current = openRef.current();
+        cue(audio.current, event);
+      } catch {
+        silence();
+      }
+    },
+    [silence],
+  );
 }

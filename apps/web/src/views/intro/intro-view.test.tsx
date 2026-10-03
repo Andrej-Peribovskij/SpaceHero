@@ -480,7 +480,7 @@ describe("the music", () => {
       playsEveryCard();
     });
 
-    it("plays every card, and stays silent after, when the music breaks partway", () => {
+    it("plays every card, and lets go of the music for good, when it breaks partway", () => {
       const error = vi.spyOn(console, "error").mockImplementation(() => {});
       const audio = recordingIntroAudio();
       const broken = {
@@ -493,7 +493,8 @@ describe("the music", () => {
 
       playsEveryCard();
 
-      expect(audio.calls).toEqual(["start"]);
+      // Closed the moment it broke, so the loop it had started cannot play on; nothing after.
+      expect(audio.calls).toEqual(["start", "close"]);
       expect(error).not.toHaveBeenCalled();
     });
   });
