@@ -90,8 +90,19 @@ reuse of the motif outside the intro.
    caption, the prompt, the skip control and the background.
 
 5. **Web Audio synth behind a port.** `IntroAudio` exposes `start`, `dropOut`,
-   `resume`, `stop` and `snore`. The Web Audio implementation plays square and
-   triangle voices from a note table, with a noise burst for the snore. A no-op
+   `resume`, `stop` and `snore`, and `close` to release the `AudioContext` when
+   the intro unmounts. The synth computes the samples itself in plain
+   arithmetic: square and triangle voices from a note table, and a noise burst
+   for the snore, from a shift register like a console's noise channel. Web
+   Audio only plays the result. The loop runs through one gain, which the glitch
+   closes and opens, and the snore is played once. Computing the samples rather
+   than using Web Audio's oscillators makes the music a pure function: the same
+   numbers in every browser, in tests, and in a WAV the preview tool writes for
+   listening (`pnpm run intro:render-music`). Rendering the loop happens inside
+   the gate's handler: about 90 ms the first time in Node, 40 ms warm, so the
+   logo may skip one 12-fps frame at the key press. If that shows when the intro
+   is played end to end, the samples can be rendered ahead in idle time, since
+   they need no `AudioContext`. A no-op
    implementation is used when `AudioContext` is missing or throws, and tests
    use a recording fake. Browsers only let audio start after a user gesture.
    So the `AudioContext` is created and resumed inside the gate's key or click
@@ -176,8 +187,9 @@ reuse of the motif outside the intro.
 - [The UDS Button looks corporate in an 8-bit frame] → In-world that is
   fitting, since the corporation owns the video. If it jars, record tech debt.
   Do not hand-roll a button.
-- [Audio differs across browsers] → Keep only oscillator and gain nodes.
-  Specs never assert on sound, only on port calls.
+- [Audio differs across browsers] → The synth computes every sample, so Web
+  Audio only plays buffers, through buffer source and gain nodes. Specs never
+  assert on sound, only on port calls.
 - [Moving widgets off `/` breaks routing tests and E2E] → Update them in the
   same slice to target `/widgets` for the Example flow and `/` for the intro.
 
