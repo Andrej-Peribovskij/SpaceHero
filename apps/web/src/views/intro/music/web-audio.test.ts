@@ -119,15 +119,32 @@ describe("webIntroAudio", () => {
     expect(context.sources[0]!.stopped).toBe(false);
   });
 
-  it("stops for good: a start after the stop plays nothing", () => {
+  it("starts the loop again from the top after a stop, at full volume, from the loop it already rendered", () => {
     const { context, audio } = play();
+    const createBuffer = vi.spyOn(context, "createBuffer");
     audio.start();
+    audio.dropOut();
 
     audio.stop();
     audio.start();
 
-    expect(context.sources[0]!.stopped).toBe(true);
-    expect(context.sources).toHaveLength(1);
+    const [first, again] = context.sources;
+    expect(first!.stopped).toBe(true);
+    expect(again!.stopped).toBe(false);
+    expect(again!.loop).toBe(true);
+    expect(again!.buffer).toBe(first!.buffer);
+    expect(again!.connectedTo).toBe(context.gains[1]);
+    expect(context.gains[1]!.gain.target).toBe(1);
+    expect(createBuffer).toHaveBeenCalledTimes(1);
+  });
+
+  it("starts nothing once closed", () => {
+    const { context, audio } = play();
+
+    audio.close();
+    audio.start();
+
+    expect(context.sources).toHaveLength(0);
   });
 
   it("snores once, straight to the speakers, after a beat of silence", () => {

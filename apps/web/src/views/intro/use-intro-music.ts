@@ -21,6 +21,10 @@ function cue(audio: IntroAudio, event: IntroEvent): void {
       return;
     case "skipped":
       return audio.stop();
+    case "ended":
+      // Module 2's ident starts the loop again from the top, and it plays while the ident waits:
+      // in beat 1, it is what wakes Joe. Skipped or played through, Module 1 is over.
+      return audio.start();
   }
 }
 

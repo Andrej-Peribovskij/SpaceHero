@@ -103,7 +103,12 @@ function durationOf(index: number): number {
   if (index === IDENT_CARD) return IDENT_HOLD_MS;
   if (index === END_CARD) return 0;
 
-  return msToType(card, captionText(card).length) + HOLD_MS;
+  return captionMs(card) + HOLD_MS;
+}
+
+/** How long a caption takes, every pause included: a pause after its last character holds the card. */
+function captionMs(card: IntroCard): number {
+  return card.caption.reduce((ms, segment) => ms + segment.text.length * MS_PER_CHAR + (segment.pauseAfterMs ?? 0), 0);
 }
 
 export interface VisibleCharsOptions {

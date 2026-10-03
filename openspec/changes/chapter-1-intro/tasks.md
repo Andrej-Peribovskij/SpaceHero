@@ -72,8 +72,8 @@ Story note (the ending):
 - [x] 3.2 Add the Web Audio implementation: square and triangle voices from a note table, gain envelopes, and a noise-burst snore, computed as samples and played as buffers; no dependency
 - [x] 3.3 Write the gloomy, mysterious chiptune loop as a note table in `views/intro/music/`
 - [x] 3.4 Create and resume the `AudioContext` inside the gate's input handler. Fall back to the no-op when it is missing or throws
-- [x] 3.5 Wire the timeline events to the port: start at the gate; drop out, then resume, at the glitch; stop and snore at card 10; stop on skip
-- [x] 3.6 Tests against the recording fake: nothing plays before the gate; drop-out on the Ganymede line, including under reduced motion; stop plus snore at the end; stop on skip; close on unmount
+- [x] 3.5 Wire the timeline events to the port: start at the gate; drop out, then resume, at the glitch; stop and snore at card 10; stop on skip; start again from the top on card 11
+- [x] 3.6 Tests against the recording fake: nothing plays before the gate; drop-out on the Ganymede line, including under reduced motion; stop plus snore, then a restart on card 11, after the snore; stop then restart on skip; close on unmount
 - [x] 3.7 Test that a throwing `AudioContext` still plays every card, silently and with no error shown
 - [ ] 3.8 Gate: `pnpm run verify` and `pnpm run test:e2e` pass
 

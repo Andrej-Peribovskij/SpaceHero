@@ -162,8 +162,8 @@ disagree, so the two cannot drift apart unnoticed.
 ### Listening to the Intro Music
 
 `pnpm run intro:render-music` writes the orientation music to
-`.cache/intro-previews/music.wav`: the loop twice, then the pause and the
-snore that close card 10. These are the same samples the browser plays,
+`.cache/intro-previews/music.wav`: the loop twice, then card 10's stop, pause,
+snore and silence, and Module 2's ident starting the loop again. These are the same samples the browser plays,
 because the synth in `apps/web/src/views/intro/music/` computes every one and
 Web Audio only loops the buffer. The glitch's drop-out is not in the file,
 because the browser does it with a gain. Change the note table in

@@ -30,16 +30,19 @@ function bufferOf(context: BaseAudioContext, samples: Float32Array<ArrayBuffer>)
 
 export function webIntroAudio(context: AudioContext, tune: Tune): IntroAudio {
   let music: Playing | undefined;
-  let stopped = false;
+  let closed = false;
+  // The loop is rendered once: Module 2's ident starts it again, and must not pay for it twice.
+  let loop: AudioBuffer | undefined;
 
   const gainTo = (level: number) => music?.gain.gain.setTargetAtTime(level, context.currentTime, CUT_S);
 
   return {
     start: () => {
-      if (music || stopped) return;
+      if (music || closed) return;
 
+      loop ??= bufferOf(context, renderTune(tune));
       const source = context.createBufferSource();
-      source.buffer = bufferOf(context, renderTune(tune));
+      source.buffer = loop;
       source.loop = true;
       const gain = context.createGain();
       source.connect(gain).connect(context.destination);
@@ -49,7 +52,6 @@ export function webIntroAudio(context: AudioContext, tune: Tune): IntroAudio {
     dropOut: () => gainTo(0),
     resume: () => gainTo(1),
     stop: () => {
-      stopped = true;
       music?.source.stop();
       music = undefined;
     },
@@ -60,6 +62,7 @@ export function webIntroAudio(context: AudioContext, tune: Tune): IntroAudio {
       source.start(context.currentTime + SNORE_PAUSE_S);
     },
     close: () => {
+      closed = true;
       music?.source.stop();
       music = undefined;
       context.close().catch(() => {});

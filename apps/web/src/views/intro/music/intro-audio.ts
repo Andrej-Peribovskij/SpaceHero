@@ -8,13 +8,16 @@
  * what was asked of the music rather than on what came out of a speaker.
  */
 export interface IntroAudio {
-  /** The loop begins. Called from inside the gate's key or click handler: see `useIntroMusic`. */
+  /**
+   * The loop begins, from the top. The first start comes from inside the gate's key or click
+   * handler: see `useIntroMusic`. After a stop, a start begins the loop again.
+   */
   readonly start: () => void;
   /** The music cuts out, mid-bar, as if the signal had been lost. The loop runs on, unheard. */
   readonly dropOut: () => void;
   /** The music is back, where the loop has got to by now, as if nothing had happened. */
   readonly resume: () => void;
-  /** The music ends, for good. */
+  /** The music ends: Module 1 is over. */
   readonly stop: () => void;
   /** Someone in the room is asleep. */
   readonly snore: () => void;

@@ -95,7 +95,10 @@ reuse of the motif outside the intro.
    arithmetic: square and triangle voices from a note table, and a noise burst
    for the snore, from a shift register like a console's noise channel. Web
    Audio only plays the result. The loop runs through one gain, which the glitch
-   closes and opens, and the snore is played once. Computing the samples rather
+   closes and opens, and the snore is played once. The music stops on card 10
+   and starts again from the top on card 11, Module 2's ident: the snore needs
+   the silence, and the music coming back is what wakes Joe in beat 1. The
+   loop is rendered once and kept for the restart. Computing the samples rather
    than using Web Audio's oscillators makes the music a pure function: the same
    numbers in every browser, in tests, and in a WAV the preview tool writes for
    listening (`pnpm run intro:render-music`). Rendering the loop happens inside
@@ -127,8 +130,9 @@ reuse of the motif outside the intro.
    canvas, for the same reason.
 
 8. **Skip is a design-system `Button`.** It is reachable by Tab, and Escape is
-   a shortcut for it. It dispatches `skip` and calls `audio.stop()`, and
-   nothing else. The spec forbids any request or storage write.
+   a shortcut for it. It dispatches `skip`, which stops Module 1's music,
+   and nothing else; the end state then starts Module 2's, as it does when the
+   video plays through. The spec forbids any request or storage write.
 
 9. **A pixel font of our own** (superseding "no pixel font", see §10). A
    third-party pixel font would need licence review. This one is drawn for the
