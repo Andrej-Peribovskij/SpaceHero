@@ -433,6 +433,16 @@ describe("the music", () => {
     expect(audio.calls).toEqual(["start", "stop", "start"]);
   });
 
+  it("on skip during the snore, stops it before Module 2's music starts", () => {
+    const { audio } = playWithMusic();
+    fireEvent.keyDown(window, { key: "a" });
+    advance(cardStartMs(SNORE_CARD) + FRAMES);
+
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    expect(audio.calls.slice(-3)).toEqual(["snore", "stop", "start"]);
+  });
+
   it("lets go of the audio when the intro leaves the screen", () => {
     const { audio, view } = playWithMusic();
     fireEvent.keyDown(window, { key: "a" });

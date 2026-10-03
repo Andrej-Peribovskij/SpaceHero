@@ -158,6 +158,30 @@ describe("webIntroAudio", () => {
     expect(snore!.startedAt).toBeGreaterThan(context.currentTime);
   });
 
+  it("stops a snore on a stop, even one still waiting out its beat of silence", () => {
+    const { context, audio } = play();
+    audio.start();
+    audio.stop();
+    audio.snore();
+
+    // A skip on the black card: the snore must not play over Module 2's music.
+    audio.stop();
+    audio.start();
+
+    const [, snore, again] = context.sources;
+    expect(snore!.stopped).toBe(true);
+    expect(again!.stopped).toBe(false);
+  });
+
+  it("snores nothing once closed", () => {
+    const { context, audio } = play();
+
+    audio.close();
+    audio.snore();
+
+    expect(context.sources).toHaveLength(0);
+  });
+
   it("closes the context, stopping the music if it still plays", () => {
     const { context, audio } = play();
     audio.start();

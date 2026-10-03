@@ -30,6 +30,9 @@ function bufferOf(context: BaseAudioContext, samples: Float32Array<ArrayBuffer>)
 
 export function webIntroAudio(context: AudioContext, tune: Tune): IntroAudio {
   let music: Playing | undefined;
+  // Kept so a skip on the black card can stop it: the snore waits a beat before it starts, and
+  // must not then play over Module 2's music.
+  let snore: AudioBufferSourceNode | undefined;
   let closed = false;
   // The loop is rendered once: Module 2's ident starts it again, and must not pay for it twice.
   let loop: AudioBuffer | undefined;
@@ -54,17 +57,23 @@ export function webIntroAudio(context: AudioContext, tune: Tune): IntroAudio {
     stop: () => {
       music?.source.stop();
       music = undefined;
+      snore?.stop();
+      snore = undefined;
     },
     snore: () => {
-      const source = context.createBufferSource();
-      source.buffer = bufferOf(context, renderSnore());
-      source.connect(context.destination);
-      source.start(context.currentTime + SNORE_PAUSE_S);
+      if (closed) return;
+
+      snore = context.createBufferSource();
+      snore.buffer = bufferOf(context, renderSnore());
+      snore.connect(context.destination);
+      snore.start(context.currentTime + SNORE_PAUSE_S);
     },
     close: () => {
       closed = true;
       music?.source.stop();
       music = undefined;
+      snore?.stop();
+      snore = undefined;
       context.close().catch(() => {});
     },
   };
