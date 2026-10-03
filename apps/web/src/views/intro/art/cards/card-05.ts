@@ -961,7 +961,7 @@ const SUN_X = -26;
 const SUN_Y = 90;
 const SUN_RADIUS = 34;
 const MAP_MARS = { x: 70, y: 104 } as const;
-const MAP_JUPITER = { x: 352, y: 64 } as const;
+export const MAP_JUPITER = { x: 352, y: 64, radius: 11 } as const;
 const BELT_RADIUS = 206;
 const BELT_WIDTH = 26;
 
@@ -1024,7 +1024,7 @@ function paintCorridor(canvas: Canvas, t: number): void {
   for (const speck of MAP_BELT) canvas.set(speck.x, speck.y, speck.colour);
   paintMarsDisc(canvas, MAP_MARS.x, MAP_MARS.y, 4, SUN, t, 0);
   canvas.set(MAP_MARS.x + 6, MAP_MARS.y - 5, "g");
-  paintJupiter(canvas, MAP_JUPITER.x, MAP_JUPITER.y, 11);
+  paintJupiter(canvas, MAP_JUPITER.x, MAP_JUPITER.y, MAP_JUPITER.radius);
 
   const corridorFrom = CORRIDOR_MS + MAP_STATIONS.length * CORRIDOR_STEP_MS;
   const pulse = t >= corridorFrom ? fraction((t - corridorFrom) / PULSE_MS) * (MAP_STATIONS.length + 3) - 1 : -10;

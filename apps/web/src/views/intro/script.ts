@@ -99,8 +99,14 @@ export const INTRO_CARDS: readonly IntroCard[] = [
     ],
   },
   {
-    image: "Jupiter. Its moons light up one by one. One stays dark.",
-    caption: [{ text: CARD_6_LEAD, pauseAfterMs: 400 }, { text: GANYMEDE_LINE }],
+    image:
+      "Jupiter's dot on the Corridor, dived into, down into the Great Red Spot until the storm fills the frame; then back out to Jupiter, a giant behind four dark moons. The moons light up one by one as the line of light reaches them: Callisto, Europa, Io. One stays dark: Ganymede.",
+    caption: [
+      // The caption waits while the picture dives from card 5's map into Jupiter's spot and back out.
+      { text: "", pauseAfterMs: 2400 },
+      { text: CARD_6_LEAD, pauseAfterMs: 400 },
+      { text: GANYMEDE_LINE },
+    ],
     glitchAtChar: CARD_6_LEAD.length + GANYMEDE_LINE.length,
   },
   {
