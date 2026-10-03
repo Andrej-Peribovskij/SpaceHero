@@ -69,7 +69,7 @@ const LIGHTS_AFTER_MS = 120;
 const SPARK_FRAMES = 2;
 /** The pull-out to the whole Corridor lands as "A corridor of light" starts typing. */
 export const CORRIDOR_FROM_MS = cue("A corridor");
-const PULL_FROM_MS = CORRIDOR_FROM_MS - 600;
+export const PULL_FROM_MS = CORRIDOR_FROM_MS - 600;
 /** "corridor of light": the stations come on in turn, then a pulse runs along them, again and again. */
 export const CORRIDOR_MS = cue("corridor of light");
 const CORRIDOR_STEP_MS = 45;
@@ -877,14 +877,20 @@ function paintHandStation(canvas: Canvas, t: number): void {
   if (t < STEADY_HAND_MS + LIGHTS_AFTER_MS + SPARK_FRAMES * FRAME_MS && lit) paintSpark(canvas, HAND_X, HAND_Y - 39);
 }
 
-/** Steady Hand, the first station beyond the belt, the belt behind us and Jupiter ahead. */
-function paintSteadyHand(canvas: Canvas, t: number): void {
+/** Jupiter ahead of Steady Hand: far off, so the pull-out barely changes it (`paintPull`). */
+const HAND_JUPITER = { x: 336, y: 44, radius: 15 } as const;
+
+/**
+ * Steady Hand, the first station beyond the belt, the belt behind us and Jupiter ahead. The
+ * pull-out paints Jupiter itself: it must not shrink away with the station.
+ */
+function paintSteadyHand(canvas: Canvas, t: number, withJupiter = true): void {
   paintSky(canvas, HAND_STARS);
   for (const [index, speck] of BELT_BEHIND.entries()) {
     if (speck.rock) paintRock(canvas, speck.x, speck.y, 2 + noise(index, 175) * 2, index + 60);
     else canvas.set(speck.x, speck.y, speck.colour);
   }
-  paintJupiter(canvas, 336, 44, 15);
+  if (withJupiter) paintJupiter(canvas, HAND_JUPITER.x, HAND_JUPITER.y, HAND_JUPITER.radius);
   paintHandStation(canvas, t);
 }
 
@@ -953,13 +959,13 @@ function paintMapNamed(canvas: Canvas, x: number, y: number): void {
  * between them the line of stations. Steady Foot and Steady Hand are lit already; on "A corridor
  * of light" every other station comes on in turn, from Mars out, and a pulse runs along them.
  */
-function paintCorridor(canvas: Canvas, t: number): void {
+function paintCorridor(canvas: Canvas, t: number, withJupiter = true): void {
   paintSky(canvas, MAP_STARS);
   paintSun(canvas);
   for (const speck of MAP_BELT) canvas.set(speck.x, speck.y, speck.colour);
   paintMarsDisc(canvas, MAP_MARS.x, MAP_MARS.y, 4, SUN, t, 0);
   canvas.set(MAP_MARS.x + 6, MAP_MARS.y - 5, "g");
-  paintJupiter(canvas, MAP_JUPITER.x, MAP_JUPITER.y, MAP_JUPITER.radius);
+  if (withJupiter) paintJupiter(canvas, MAP_JUPITER.x, MAP_JUPITER.y, MAP_JUPITER.radius);
 
   const corridorFrom = CORRIDOR_MS + MAP_STATIONS.length * CORRIDOR_STEP_MS;
   const pulse = t >= corridorFrom ? fraction((t - corridorFrom) / PULSE_MS) * (MAP_STATIONS.length + 3) - 1 : -10;
@@ -985,18 +991,32 @@ function paintCorridor(canvas: Canvas, t: number): void {
 
 /**
  * The pull-out from Steady Hand to the map: the close shot shrinks away into the station's own dot
- * on the Corridor, the map already round it.
+ * on the Corridor, the map already round it. Jupiter does not shrink with it. Far off, it barely
+ * changes as the camera pulls back, and glides the short way from where it hung ahead of the
+ * station to its place on the map.
  */
 const PULL_TO_SCALE = 0.03;
 
+const pullProgress = (t: number) => (t - PULL_FROM_MS) / (CORRIDOR_FROM_MS - PULL_FROM_MS);
+
+/** Where Jupiter is at `t` during the pull-out. */
+export function pullingJupiter(t: number): { readonly x: number; readonly y: number; readonly radius: number } {
+  const glide = (from: number, to: number) => from + (to - from) * ease(pullProgress(t));
+  return {
+    x: glide(HAND_JUPITER.x, MAP_JUPITER.x),
+    y: glide(HAND_JUPITER.y, MAP_JUPITER.y),
+    radius: glide(HAND_JUPITER.radius, MAP_JUPITER.radius),
+  };
+}
+
 function paintPull(canvas: Canvas, t: number): void {
-  const progress = (t - PULL_FROM_MS) / (CORRIDOR_FROM_MS - PULL_FROM_MS);
-  paintCorridor(canvas, t);
+  const progress = pullProgress(t);
+  paintCorridor(canvas, t, false);
   const scale = PULL_TO_SCALE ** progress;
   const [mapX, mapY] = MAP_STATIONS[MAP_STEADY_HAND]!;
   const anchorX = HAND_X + (mapX - HAND_X) * ease(progress);
   const anchorY = HAND_Y + (mapY - HAND_Y) * ease(progress);
-  const hand = offscreen(canvas.timeMs, (buffer) => paintSteadyHand(buffer, t));
+  const hand = offscreen(canvas.timeMs, (buffer) => paintSteadyHand(buffer, t, false));
 
   for (let y = 0; y < VISIBLE; y += 1) {
     for (let x = 0; x < FRAME_WIDTH; x += 1) {
@@ -1006,6 +1026,9 @@ function paintPull(canvas: Canvas, t: number): void {
       canvas.set(x, y, pick(hand, u, v));
     }
   }
+
+  const jupiter = pullingJupiter(t);
+  paintJupiter(canvas, jupiter.x, jupiter.y, jupiter.radius);
 }
 
 // ═══ the card ═══

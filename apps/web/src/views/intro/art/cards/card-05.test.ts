@@ -26,6 +26,9 @@ import {
   MARS_RADIUS,
   MARS_X,
   MARS_Y,
+  MAP_JUPITER,
+  PULL_FROM_MS,
+  pullingJupiter,
   STEADY_FOOT_LIT_MS,
   STEADY_FOOT_MS,
   STEADY_HAND_LIT_MS,
@@ -146,6 +149,22 @@ describe("card 5: Mars and Deimos, and the Corridor", () => {
     expect(mapStation(map, MAP_STEADY_FOOT)).toBe("w");
     expect(mapStation(map, MAP_STEADY_HAND)).toBe("w");
     expect(MAP_STATIONS.filter((_station, index) => mapStation(map, index) === "b")).toHaveLength(MAP_STATIONS.length - 2);
+  });
+
+  it("keeps Jupiter far off through the pull-out: one Jupiter, gliding to its place on the map, not shrinking away with the station", () => {
+    const jupiterAt = (time: number) => {
+      const { x, y, radius } = pullingJupiter(time);
+      const half = Math.floor(radius / 2);
+      return count(region(frameAt(time), Math.round(x) - half, Math.round(y) - half, Math.round(x) + half, Math.round(y) + half), "m", "o", "a", "y");
+    };
+    const moments = [0.1, 0.3, 0.5, 0.7, 0.9].map((share) => PULL_FROM_MS + share * (CORRIDOR_FROM_MS - PULL_FROM_MS));
+
+    for (const time of moments) expect(jupiterAt(time)).toBeGreaterThan(20);
+    // It ends where the map has it, a little smaller than ahead of the station, and gets there steadily.
+    const end = pullingJupiter(CORRIDOR_FROM_MS - 1);
+    expect([end.x, end.y, end.radius].map(Math.round)).toEqual([MAP_JUPITER.x, MAP_JUPITER.y, MAP_JUPITER.radius]);
+    const radii = moments.map((time) => pullingJupiter(time).radius);
+    expect(radii).toEqual([...radii].sort((a, b) => b - a));
   });
 
   it("puts the belt between the steadies, far from Mars", () => {
