@@ -81,4 +81,5 @@ Story note (the ending):
 ## 4. Final verification
 
 - [ ] 4.1 Play the intro in a browser end to end, by ear and eye, then tune timings and the tune
+- [x] 4.1a A debugging jump for tuning, in the dev server only (design.md §12): a `seek` action on the timeline; → and ← once playing; `?card=N` starts there once the gate opens; the music restarts from the top on a jump; tests for each, and for its absence in production
 - [ ] 4.2 `pnpm run spec:validate chapter-1-intro` passes and every task above matches the implementation

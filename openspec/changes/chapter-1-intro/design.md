@@ -192,6 +192,24 @@ reuse of the motif outside the intro.
    - Image files from a pixel editor: the best drawing tools, but binary, and
      cannot be reviewed.
 
+12. **A debugging jump, in the dev server only** (2026-10-03, for task 4.1).
+   Tuning a card meant watching up to 80 seconds to reach it. The timeline
+   now has a `seek` action: it goes to the start of a card and fires
+   `seeked`, then that card's `card` event. Everything cued from the card's
+   clock works as on arrival, such as card 6's glitch and card 10's snore.
+   On `seeked` the music stops and starts the loop again from the top. That
+   ends any dropout or snore. The loop is not tied to the cards, so no
+   position in it would be more right than another.
+   `useDebugSeek` gives it a keyboard: → and ← once the video plays. The card
+   jumped to goes into the address as `?card=N`. An address carrying it
+   starts there once the gate opens, so a reload after an edit lands on the
+   card being tuned. The gate still waits for a key, because only a key press
+   lets the music start.
+   `IntroView`'s `debugSeek` defaults to `import.meta.env.DEV`. A production
+   build has no jump, and the player can still only skip, which is recorded.
+   Alternative considered: a card picker drawn on the screen. That puts
+   debugging controls inside the picture, and a URL and two keys do the job.
+
 ## Risks / Trade-offs
 
 - [Hand-drawing 11 grids of 96×54 is laborious] → Draw silhouettes first and
