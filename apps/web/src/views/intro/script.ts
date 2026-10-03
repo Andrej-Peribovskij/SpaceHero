@@ -133,11 +133,15 @@ export const INTRO_CARDS: readonly IntroCard[] = [
     ],
   },
   {
-    image: "The Martian surface. A dome. One lit window.",
+    image:
+      "Card 8's light goes out. Out of the dark, stars, and the camera tilts down to the Martian surface at dusk, the sunset blue, Deimos high up with Externa's lights, shuttles climbing to it from a far port. On the plain, a dome half sunk in the dunes, a small ship by it, a ring of dark windows, and one lit. Close: through that window, a dark room, its walls lit only by the flicker of this video, playing on a screen out of sight. Above the dome, Externa's beacon blinks teal.",
     caption: [
-      {
-        text: "158 years later, the Corridor carries us all — and it is carried by contractors like you. Your assignment awaits at Externa Prima.",
-      },
+      // The caption waits while card 8's glare goes out and the camera tilts down from Mars's sky,
+      // and again while it closes in on the window.
+      { text: "", pauseAfterMs: 1900 },
+      { text: "158 years later, ", pauseAfterMs: 700 },
+      { text: "the Corridor carries us all — and it is carried by contractors like you. ", pauseAfterMs: 900 },
+      { text: "Your assignment awaits at Externa Prima." },
     ],
   },
   {
