@@ -9,14 +9,14 @@ import { CARD_06_ART } from "./cards/card-06";
 import { CARD_07_ART } from "./cards/card-07";
 import { CARD_08_ART } from "./cards/card-08";
 import { CARD_09_ART } from "./cards/card-09";
+import { CARD_10_ART } from "./cards/card-10";
 import type { CardArt } from "./render";
 
 /**
  * Which art each card shows, by the script's card number.
  *
  * Card 11 is Module 2's ident and mirrors card 0 on purpose, so it shares card 0's art rather
- * than a copy of it. A card with no art yet shows the flat placeholder; the test that every
- * card has art lands once all twelve are drawn (tasks.md, slice 2).
+ * than a copy of it. Every card of the script has art; `index.test.ts` holds that true.
  */
 const CARD_ART: ReadonlyMap<number, CardArt> = new Map([
   [IDENT_CARD, CARD_00_ART],
@@ -29,6 +29,7 @@ const CARD_ART: ReadonlyMap<number, CardArt> = new Map([
   [7, CARD_07_ART],
   [8, CARD_08_ART],
   [9, CARD_09_ART],
+  [10, CARD_10_ART],
   [END_CARD, CARD_00_ART],
 ]);
 
