@@ -6,9 +6,9 @@ import {
   visibleChars,
   type IntroAction,
   type IntroEvent,
+  type IntroPhase,
   type IntroState,
 } from "./intro-timeline";
-import { INTRO_CARDS, captionText } from "./script";
 
 /**
  * The longest step one animation frame may take — a backstop, not the pause mechanism.
@@ -44,10 +44,21 @@ function usePrefersReducedMotion(): boolean {
   return reduced;
 }
 
-export interface IntroTimeline {
-  readonly state: IntroState;
+/** What the view shows of the timeline: it re-renders when one of these changes, and only then. */
+interface Shown {
+  readonly phase: IntroPhase;
+  readonly card: number;
   /** How much of the current caption to show: all of it when the player prefers reduced motion. */
   readonly shownChars: number;
+}
+
+function shownOf(state: IntroState, whole: boolean): Shown {
+  return { phase: state.phase, card: state.card, shownChars: visibleChars(state, { whole }) };
+}
+
+const sameShown = (a: Shown, b: Shown) => a.phase === b.phase && a.card === b.card && a.shownChars === b.shownChars;
+
+export interface IntroTimeline extends Shown {
   readonly reducedMotion: boolean;
   readonly start: () => void;
   readonly skip: () => void;
@@ -62,25 +73,45 @@ export interface IntroTimeline {
  * music while the gesture is still on the stack.
  */
 export function useIntroTimeline(onEvent?: (event: IntroEvent) => void): IntroTimeline {
-  const [state, setState] = useState(initialIntroState);
-  const stateRef = useRef(state);
-  const onEventRef = useRef(onEvent);
   const reducedMotion = usePrefersReducedMotion();
+  const [shown, setShown] = useState(() => shownOf(initialIntroState, reducedMotion));
+  // The timeline itself moves on every frame; React hears of it only when what is shown changes.
+  const stateRef = useRef(initialIntroState);
+  const wholeRef = useRef(reducedMotion);
+  const onEventRef = useRef(onEvent);
 
   useEffect(() => {
     onEventRef.current = onEvent;
   }, [onEvent]);
 
-  const dispatch = useCallback((action: IntroAction) => {
-    const step = stepIntro(stateRef.current, action);
-
-    stateRef.current = step.state;
-    setState(step.state);
-    for (const event of step.events) onEventRef.current?.(event);
+  // Compared here, not in a state updater: an update React has to check can still cost a render.
+  const shownRef = useRef(shown);
+  const show = useCallback(() => {
+    const next = shownOf(stateRef.current, wholeRef.current);
+    if (sameShown(shownRef.current, next)) return;
+    shownRef.current = next;
+    setShown(next);
   }, []);
 
+  // The setting can change mid-caption: show the caption whole, or typed, from now on.
   useEffect(() => {
-    if (state.phase !== "playing") return;
+    wholeRef.current = reducedMotion;
+    show();
+  }, [reducedMotion, show]);
+
+  const dispatch = useCallback(
+    (action: IntroAction) => {
+      const step = stepIntro(stateRef.current, action);
+
+      stateRef.current = step.state;
+      show();
+      for (const event of step.events) onEventRef.current?.(event);
+    },
+    [show],
+  );
+
+  useEffect(() => {
+    if (shown.phase !== "playing") return;
 
     let frame = 0;
     let last: number | undefined;
@@ -102,14 +133,13 @@ export function useIntroTimeline(onEvent?: (event: IntroEvent) => void): IntroTi
       cancelAnimationFrame(frame);
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
-  }, [state.phase, dispatch]);
+  }, [shown.phase, dispatch]);
 
   const start = useCallback(() => dispatch({ type: "start" }), [dispatch]);
   const skip = useCallback(() => dispatch({ type: "skip" }), [dispatch]);
 
   return {
-    state,
-    shownChars: reducedMotion ? captionText(INTRO_CARDS[state.card]!).length : visibleChars(state),
+    ...shown,
     reducedMotion,
     start,
     skip,

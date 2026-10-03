@@ -27,32 +27,32 @@ const PROMPTS = {
  * permission to play.
  */
 export function IntroView() {
-  const { state, shownChars, reducedMotion, start, skip } = useIntroTimeline();
-  const card = INTRO_CARDS[state.card]!;
-  const prompt = PROMPTS[state.phase];
+  const { phase, card: index, shownChars, reducedMotion, start, skip } = useIntroTimeline();
+  const card = INTRO_CARDS[index]!;
+  const prompt = PROMPTS[phase];
   const mainRef = useRef<HTMLElement>(null);
 
   // Ending unmounts the skip button. If it had focus, the browser drops focus to the top of the
   // document and a keyboard or screen-reader user loses their place; keep them on the video.
   useEffect(() => {
     const focusLost = document.activeElement === null || document.activeElement === document.body;
-    if (state.phase === "ended" && focusLost) mainRef.current?.focus();
-  }, [state.phase]);
+    if (phase === "ended" && focusLost) mainRef.current?.focus();
+  }, [phase]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (state.phase === "gate") {
+      if (phase === "gate") {
         // Escape and modifier or shortcut presses are not user activation: starting on them
         // would leave the music (slice 3) unable to play.
         const modifierOnly = ["Shift", "Control", "Alt", "Meta"].includes(event.key);
         if (event.key === "Escape" || modifierOnly || event.ctrlKey || event.metaKey || event.altKey) return;
         start();
-      } else if (state.phase === "playing" && event.key === "Escape") skip();
+      } else if (phase === "playing" && event.key === "Escape") skip();
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [state.phase, start, skip]);
+  }, [phase, start, skip]);
 
   return (
     <main
@@ -60,14 +60,14 @@ export function IntroView() {
       // Focusable from script only, as the landing place when skipping removes the button.
       tabIndex={-1}
       className="flex min-h-screen flex-col items-center justify-center gap-8 bg-[var(--color-black)] p-6 text-[var(--color-white)] outline-none"
-      onClick={state.phase === "gate" ? start : undefined}
+      onClick={phase === "gate" ? start : undefined}
     >
       <h1 className="sr-only">Absolute Connections Contractor Orientation</h1>
 
       <IntroCardFrame
         card={card}
         shownChars={shownChars}
-        art={artFor(state.card)}
+        art={artFor(index)}
         prompt={prompt}
         still={reducedMotion}
       />
@@ -81,7 +81,7 @@ export function IntroView() {
       {prompt && <p className="sr-only">{prompt}</p>}
 
       {/* No variant: the portable call, as in WidgetsView. Skipping records nothing. */}
-      {state.phase === "playing" && <Button onClick={skip}>Skipping is recorded.</Button>}
+      {phase === "playing" && <Button onClick={skip}>Skipping is recorded.</Button>}
     </main>
   );
 }
