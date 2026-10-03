@@ -13,7 +13,7 @@ import { END_CARD, IDENT_CARD, INTRO_CARDS, captionText, type IntroCard } from "
 /** How long one caption character takes to type. */
 export const MS_PER_CHAR = 40;
 
-/** How long a finished caption stays on screen before the next card. */
+/** How long a finished caption stays on screen before the next card, unless the card says otherwise. */
 export const HOLD_MS = 3000;
 
 /** How long the ident stays once the player has opted in, before card 1. */
@@ -103,12 +103,7 @@ function durationOf(index: number): number {
   if (index === IDENT_CARD) return IDENT_HOLD_MS;
   if (index === END_CARD) return 0;
 
-  return captionMs(card) + HOLD_MS;
-}
-
-/** How long a caption takes, every pause included: a pause after its last character holds the card. */
-function captionMs(card: IntroCard): number {
-  return card.caption.reduce((ms, segment) => ms + segment.text.length * MS_PER_CHAR + (segment.pauseAfterMs ?? 0), 0);
+  return msToType(card, captionText(card).length) + (card.holdMs ?? HOLD_MS);
 }
 
 export interface VisibleCharsOptions {

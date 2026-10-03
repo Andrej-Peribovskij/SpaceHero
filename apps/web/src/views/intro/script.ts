@@ -26,6 +26,11 @@ export interface IntroCard {
   readonly image: string;
   readonly caption: readonly CaptionSegment[];
   /**
+   * How long the card stays once its caption is typed, if not the usual hold: a card whose sound
+   * needs more time than its caption gives it.
+   */
+  readonly holdMs?: number;
+  /**
    * The character count at which the Ganymede glitch fires, counted across the whole caption.
    * Set on card 6 only: the one place the video visibly hides something.
    */
@@ -145,10 +150,11 @@ export const INTRO_CARDS: readonly IntroCard[] = [
     ],
   },
   {
-    // No caption: the snore is the whole card. It holds a beat longer than a caption would, so the
-    // snore ends in silence before Module 2 starts the music again.
+    // No caption: the snore is the whole card. It holds a second longer than a caption's hold, so
+    // the snore ends in silence before Module 2 starts the music again.
     image: "Black. The music stops. A snore. A beat of silence.",
-    caption: [{ text: "", pauseAfterMs: 1000 }],
+    caption: [],
+    holdMs: 4000,
   },
   {
     // The next module's ident, mirroring card 0: one module down, thirteen to go. It waits for a

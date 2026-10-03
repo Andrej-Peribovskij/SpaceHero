@@ -168,13 +168,13 @@ describe("the end", () => {
     expect(events.slice(-2)).toEqual([{ type: "card", index: END_CARD }, { type: "ended" }]);
   });
 
-  it("has a captionless card before the end, the snore, held a beat longer than a hold", () => {
-    expect(captionText(INTRO_CARDS[SNORE_CARD]!)).toBe("");
-    expect(cardDurationMs(SNORE_CARD)).toBe(HOLD_MS + 1000);
+  it("has a captionless card before the end, the snore, held for its own hold rather than a caption's", () => {
+    expect(INTRO_CARDS[SNORE_CARD]!.caption).toEqual([]);
+    expect(cardDurationMs(SNORE_CARD)).toBe(INTRO_CARDS[SNORE_CARD]!.holdMs);
+    expect(cardDurationMs(SNORE_CARD)).toBeGreaterThan(HOLD_MS);
   });
 
-  it("counts a pause after a caption's last character in the card's time", () => {
-    // Card 1 ends on its last character: typed, then held, and nothing else.
+  it("holds every other card for the usual hold once its caption is typed", () => {
     expect(cardDurationMs(1)).toBe(captionText(INTRO_CARDS[1]!).length * MS_PER_CHAR + HOLD_MS);
   });
 });
