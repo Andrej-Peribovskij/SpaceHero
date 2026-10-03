@@ -336,12 +336,22 @@ const SHOT_LIGHTS: readonly (readonly PaletteChar[])[] = [
   [".", "d", "m", "r"],
 ];
 
+interface VideoLight {
+  readonly ladder: readonly PaletteChar[];
+  readonly level: number;
+}
+
+/** The last moment's light: every pixel the video lights asks for it, and it changes once a frame. */
+let lastLight: { readonly t: number; readonly light: VideoLight } | undefined;
+
 /** The video's light at a moment: the shot's colours, and how bright, flickering frame to frame. */
-function videoLight(t: number): { readonly ladder: readonly PaletteChar[]; readonly level: number } {
+function videoLight(t: number): VideoLight {
+  if (lastLight?.t === t) return lastLight.light;
   const shot = Math.floor(t / SHOT_MS);
   const ladder = SHOT_LIGHTS[Math.floor(noise(shot, 21) * SHOT_LIGHTS.length)]!;
   const level = 0.55 + noise(shot, 22) * 0.35 + (noise(frameOf(t), 23) - 0.5) * 0.16;
-  return { ladder, level };
+  lastLight = { t, light: { ladder, level } };
+  return lastLight.light;
 }
 
 // ═══ the close shot ═══

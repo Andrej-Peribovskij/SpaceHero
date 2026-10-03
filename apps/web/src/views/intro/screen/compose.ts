@@ -77,13 +77,25 @@ function bandHeight(lines: readonly CaptionLine[], prompt: string | undefined): 
   return BAND_PADDING_TOP + lines.length * LINE_HEIGHT + promptHeight + BAND_PADDING_BOTTOM;
 }
 
+/**
+ * Each caption's lines, laid out once: a card's caption never changes, and the screen repaints it
+ * twelve times a second.
+ */
+const layouts = new WeakMap<readonly CaptionSegment[], readonly CaptionLine[]>();
+
+function linesOf(caption: readonly CaptionSegment[]): readonly CaptionLine[] {
+  let lines = layouts.get(caption);
+  if (!lines) layouts.set(caption, (lines = layoutCaption(caption, CAPTION_COLUMNS)));
+  return lines;
+}
+
 export function composeScreen(content: ScreenContent): PaletteChar[] {
   const frame = content.art
     ? renderFrame(content.art, content.timeMs, { still: content.still })
     : new Array<PaletteChar>(FRAME_WIDTH * FRAME_HEIGHT).fill(".");
 
   // Laid out whole, before typing, so the band's height and every line stay put as it types.
-  const lines = layoutCaption(content.caption, CAPTION_COLUMNS);
+  const lines = linesOf(content.caption);
   const top = FRAME_HEIGHT - bandHeight(lines, content.prompt);
 
   frame.fill(".", top * FRAME_WIDTH);
