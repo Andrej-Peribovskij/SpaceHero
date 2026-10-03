@@ -5,6 +5,8 @@ import { FRAME_MS, renderFrame } from "../render";
 import { VISIBLE } from "./card-05";
 import {
   CARD_07_ART,
+  DIVE_FROM_MS,
+  DIVED_MS,
   EARTH_RADIUS,
   EARTH_X,
   EARTH_Y,
@@ -17,7 +19,6 @@ import {
   RIVERS,
   SKY_FULL_MS,
   TILT_FROM_MS,
-  WHITE_FROM_MS,
   YEAR_ZERO_MS,
 } from "./card-07";
 
@@ -98,11 +99,16 @@ describe("card 7: the Diaspora", () => {
     expect(count(region(shot, MARS_X - 14, MARS_Y - 4, MARS_X - 4, MARS_Y + 14), ...SHIPS)).toBeGreaterThan(2);
   });
 
-  it("holds on \"Year Zero\", then bleeds to white before the card ends, for card 8", () => {
+  it("holds on \"Year Zero\", then dives into the Earth until its ground fills the frame, for card 8", () => {
     expect(upcoming(YEAR_ZERO_MS)).toMatch(/^Year Zero/);
-    expect(WHITE_FROM_MS - YEAR_ZERO_MS).toBeGreaterThan(1500);
-    expect(visible(frameAt(WHITE_FROM_MS - 1)).every((pixel) => pixel === "w")).toBe(false);
-    expect(visible(frameAt(END_MS)).every((pixel) => pixel === "w")).toBe(true);
+    expect(DIVE_FROM_MS - YEAR_ZERO_MS).toBeGreaterThan(1500);
+    expect(DIVED_MS).toBeLessThanOrEqual(END_MS);
+
+    // Before the dive, space round the Earth; at the end, nothing but ground: no black, no ships.
+    expect(count(visible(frameAt(DIVE_FROM_MS - 1)), ".")).toBeGreaterThan(VISIBLE * FRAME_WIDTH * 0.4);
+    const ground = visible(frameAt(END_MS));
+    expect(count(ground, ".", "Y", "o")).toBe(0);
+    expect(count(ground, "y", "p", "w")).toBeGreaterThan(ground.length * 0.6);
   });
 
   it("keeps every shot moving", () => {
@@ -111,10 +117,10 @@ describe("card 7: the Diaspora", () => {
     }
   });
 
-  it("under reduced motion, holds a still for each beat: the field, the sky full, the rivers", () => {
+  it("under reduced motion, holds a still for each beat: the field, the sky full, the rivers, the ground", () => {
     expect(count(visible(frameAt(LAUNCH_MS + 300, true)), ...FLAMES)).toBe(0);
     expect(count(sky(frameAt(SKY_FULL_MS + 300, true)), "g")).toBeGreaterThan(1500);
     expect(count(region(frameAt(PULLED_MS + 300, true), EARTH_X + EARTH_RADIUS + 10, 10, MARS_X - 10, EARTH_Y), ...SHIPS)).toBeGreaterThan(300);
-    expect(visible(frameAt(END_MS, true)).every((pixel) => pixel === "w")).toBe(true);
+    expect(count(visible(frameAt(END_MS, true)), ".")).toBe(0);
   });
 });

@@ -111,7 +111,7 @@ export const INTRO_CARDS: readonly IntroCard[] = [
   },
   {
     image:
-      "White; out of it, a launch field on a bleached white Earth under a white sky, the great ships dark on their pads. They light one after another, and the sky fills with ships rising on columns of smoke. The camera climbs with them into the black. From orbit: the white Earth, its ships gathering into rivers of light, a few ending at Mars and Deimos, most streaming on past Mars, bound for the stations beyond. Then white again.",
+      "White; out of it, a launch field on a bleached white Earth under a white sky, the great ships dark on their pads. They light one after another, and the sky fills with ships rising on columns of smoke. The camera climbs with them into the black. From orbit: the white Earth, its ships gathering into rivers of light, a few ending at Mars and Deimos, most streaming on past Mars, bound for the stations beyond. Then the camera dives into the Earth, down to its cracked ground.",
     caption: [
       // The caption waits while the launch field comes out of the white, while the ships rise, and
       // while the camera climbs with them into orbit.

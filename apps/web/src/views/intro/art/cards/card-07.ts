@@ -17,8 +17,9 @@ import { VISIBLE } from "./card-05";
  * Then, from orbit: the white Earth, huge, and as the camera pulls back, ships rising off it
  * everywhere and gathering into rivers of light: a smaller one ending at a small red Mars and at
  * Deimos beside it, and the great ones running on past Mars and out of the frame, bound for the
- * stations beyond. On "Year Zero" it holds; then the picture bleeds back to white, a
- * page with nothing on it yet, which card 8 opens on.
+ * stations beyond. On "Year Zero" it holds; then the camera dives into the Earth's day side, the
+ * rivers rushing out of the frame, until its bleached ground fills the frame — where card 8 goes
+ * on down, to the ones who stayed.
  *
  * A serious card: no corporate touch. The music carries it.
  *
@@ -50,10 +51,11 @@ export const ORBIT_MS = TILT_FROM_MS + TILT_MS;
 /** The pull-back from the Earth's edge to the whole of it, its ships streaming away. */
 const PULL_MS = 2100;
 export const PULLED_MS = ORBIT_MS + PULL_MS;
-/** "Year Zero": the picture holds, then bleeds to white, done before the card ends. */
+/** "Year Zero": the picture holds, then dives into the Earth, done just before the card ends. */
 export const YEAR_ZERO_MS = cue("Year Zero");
-const FADE_OUT_STEP_MS = 140;
-export const WHITE_FROM_MS = cardDurationMs(7) - 200 - STEPS_TO_WHITE * FADE_OUT_STEP_MS;
+const DIVE_MS = 1500;
+export const DIVE_FROM_MS = cardDurationMs(7) - 200 - DIVE_MS;
+export const DIVED_MS = DIVE_FROM_MS + DIVE_MS;
 
 // ── the launch field ──
 /** Where the ground meets the sky, before the camera tilts. */
@@ -383,6 +385,10 @@ function unit(x: number, y: number, z: number): readonly [number, number, number
   return [x / length, y / length, z / length];
 }
 
+/** Where the dive goes in, on the pulled-back Earth: land on its day side. And how far it magnifies. */
+const DIVE_TO = { x: 84, y: 114 } as const;
+const DIVE_SCALE = 110;
+
 /** The Sun: up and to the left, huge and white now. */
 const SUN = unit(-0.55, -0.45, 0.7);
 
@@ -392,7 +398,13 @@ function earthAt(t: number): { readonly x: number; readonly y: number; readonly 
   const radius = Math.exp(Math.log(EARTH_START_RADIUS) + (Math.log(EARTH_RADIUS) - Math.log(EARTH_START_RADIUS)) * p);
   const topX = EARTH_START_TOP.x + (EARTH_X - EARTH_START_TOP.x) * p;
   const topY = EARTH_START_TOP.y + (EARTH_Y - EARTH_RADIUS - EARTH_START_TOP.y) * p;
-  return { x: topX, y: topY + radius, radius };
+
+  // The dive: faster and faster, so card 8 can carry on falling, into a point of the day side.
+  const d = clamp01((t - DIVE_FROM_MS) / DIVE_MS) ** 2;
+  if (d === 0) return { x: topX, y: topY + radius, radius };
+  const zoom = DIVE_SCALE ** d;
+  const [focusX, focusY] = [DIVE_TO.x + (FRAME_WIDTH / 2 - DIVE_TO.x) * d, DIVE_TO.y + (VISIBLE / 2 - DIVE_TO.y) * d];
+  return { x: focusX + (topX - DIVE_TO.x) * zoom, y: focusY + (topY + radius - DIVE_TO.y) * zoom, radius: radius * zoom };
 }
 
 /** The white Earth: bleached ground and cloud, its seas gone grey, a few cities lit on its night side. */
@@ -421,7 +433,12 @@ function paintEarth(canvas: Canvas, cx: number, cy: number, radius: number): voi
       const land = smoothNoise(longitude * 3 + 9, latitude * 3) > 0.55;
       const cloud = smoothNoise(longitude * 7 + 2, latitude * 9 + 3);
       const ladder = land && cloud < 0.6 ? LAND_LADDER : EARTH_LADDER;
-      canvas.set(x, y, rungOf(ladder, light * (0.85 + cloud * 0.2), x, y));
+      // Close up, the dive shows ground: blotches and the cracks of a dried-out land.
+      const close = radius > 300 ? (smoothNoise(longitude * 70, latitude * 70) - 0.5) * 0.3 : 0;
+      const crack = radius > 1500 && Math.abs(smoothNoise(longitude * 420, latitude * 420) - 0.5) < 0.025;
+      const glare = radius > 600 ? 0.8 : 1;
+      if (crack) canvas.set(x, y, ladder === LAND_LADDER ? "g" : "b");
+      else canvas.set(x, y, rungOf(ladder, light * (0.85 + cloud * 0.2 + close) * glare, x, y));
       // Night side: the cities that are left.
       if (light < 0.06 && land && noise(Math.floor(longitude * 90), Math.floor(latitude * 90)) < 0.05) canvas.set(x, y, "a");
     }
@@ -647,9 +664,10 @@ export const SKY_FULL_MS = TILT_FROM_MS - 100;
 
 /**
  * Under reduced motion: the launch field on its pads, then the sky full of ships, then the Earth
- * from orbit with its rivers of ships, to Mars and beyond; the fades to and from white step on cue as they do in motion.
+ * from orbit with its rivers of ships, to Mars and beyond, then its ground close up; the fade out
+ * of white steps on cue as it does in motion.
  */
 export const CARD_07_ART: CardArt = {
-  scenes: [beat(0), beat(SKY_FULL_MS), beat(PULLED_MS)],
-  fade: [...fadeRamp(0, FADE_IN_STEP_MS, STEPS_TO_WHITE, 0), ...fadeRamp(WHITE_FROM_MS, FADE_OUT_STEP_MS, 1, STEPS_TO_WHITE)],
+  scenes: [beat(0), beat(SKY_FULL_MS), beat(PULLED_MS), beat(DIVED_MS)],
+  fade: fadeRamp(0, FADE_IN_STEP_MS, STEPS_TO_WHITE, 0),
 };
