@@ -1,6 +1,7 @@
-import { parsePicture, type Picture } from "../grid";
-import type { PaletteChar } from "../palette";
 import { cardDurationMs } from "../../intro-timeline";
+import { parsePicture, type Picture } from "../grid";
+import { frameOf, noise } from "../paint";
+import type { PaletteChar } from "../palette";
 import { FRAME_MS, closeToBlack, type Canvas, type CardArt, type Scene } from "../render";
 import { SQUARE } from "./card-00";
 
@@ -117,15 +118,7 @@ const LOWEST_FLOOR = 20;
 const LOGO_TURNS_PER_SECOND = -1.25 / 6;
 const LOGO_STEPS = 64;
 
-/** A stable pseudo-random number for a pixel: the same every frame, so nothing shimmers by accident. */
-function noise(x: number, y: number): number {
-  let h = Math.imul(x, 374761393) + Math.imul(y, 668265263);
-  h = Math.imul(h ^ (h >>> 13), 1274126177);
-  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
-}
-
 const checker = (x: number, y: number) => ((x + y) & 1) === 0;
-const frameOf = (timeMs: number) => Math.floor(timeMs / FRAME_MS);
 
 /** A canvas shifted by some pixels: the whole picture, shaking. */
 function shifted(canvas: Canvas, dx: number, dy: number): Canvas {

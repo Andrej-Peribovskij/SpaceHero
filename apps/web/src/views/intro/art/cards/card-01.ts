@@ -1,4 +1,5 @@
 import { parsePicture, type Picture } from "../grid";
+import { noise } from "../paint";
 import { STEPS_TO_WHITE, type CycleChar } from "../palette";
 import { fadeRamp, type Canvas, type CardArt } from "../render";
 
@@ -45,13 +46,6 @@ const GROUND = 151;
 /** Where the light comes from: off the frame, upper right. */
 const LIGHT_X = 420;
 const LIGHT_Y = -60;
-
-/** A stable pseudo-random number for a pixel: the same every frame, so nothing shimmers by accident. */
-function noise(x: number, y: number): number {
-  let h = Math.imul(x, 374761393) + Math.imul(y, 668265263);
-  h = Math.imul(h ^ (h >>> 13), 1274126177);
-  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
-}
 
 const STARS = Array.from({ length: 140 }, (_, index) => ({
   x: Math.floor(noise(index, 1) * 384),

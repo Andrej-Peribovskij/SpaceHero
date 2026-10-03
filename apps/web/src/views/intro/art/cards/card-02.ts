@@ -1,4 +1,5 @@
 import { parsePicture, type Picture } from "../grid";
+import { noise } from "../paint";
 import { STEPS_TO_WHITE, type CycleChar, type PaletteChar } from "../palette";
 import { fadeRamp, type Canvas, type CardArt, type FadeKey, type Scene } from "../render";
 
@@ -128,13 +129,6 @@ const SWAY_MS = 900;
 /** A falling flag ends tilted this far over, its bearer this much lower. */
 const FALLEN_TILT = (62 * Math.PI) / 180;
 const FALL_DROP = 34;
-
-/** A stable pseudo-random number for a pixel: the same every frame, so nothing shimmers by accident. */
-function noise(x: number, y: number): number {
-  let h = Math.imul(x, 374761393) + Math.imul(y, 668265263);
-  h = Math.imul(h ^ (h >>> 13), 1274126177);
-  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
-}
 
 const FIRE: readonly CycleChar[] = ["7", "8", "9"];
 const fireAt = (x: number, y: number): CycleChar => FIRE[Math.floor(noise(y, x) * FIRE.length)]!;

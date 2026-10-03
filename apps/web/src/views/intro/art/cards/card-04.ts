@@ -1,6 +1,7 @@
 import { msToType } from "../../intro-timeline";
 import { INTRO_CARDS, captionText } from "../../script";
 import { FRAME_WIDTH } from "../grid";
+import { fraction, frameOf, noise } from "../paint";
 import type { CycleChar, PaletteChar } from "../palette";
 import { FRAME_MS, ditherAt, type Canvas, type CardArt, type Scene } from "../render";
 
@@ -123,16 +124,6 @@ const STATION_GAP = 12;
 const DASH = 3;
 
 const FLICKER: readonly CycleChar[] = ["7", "8", "9"];
-
-/** A stable pseudo-random number for a pixel: the same every frame, so nothing shimmers by accident. */
-function noise(x: number, y: number): number {
-  let h = Math.imul(x, 374761393) + Math.imul(y, 668265263);
-  h = Math.imul(h ^ (h >>> 13), 1274126177);
-  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
-}
-
-const frameOf = (timeMs: number) => Math.floor(timeMs / FRAME_MS);
-const fraction = (value: number) => value - Math.floor(value);
 
 /** Where a planet sits on screen. */
 function planetAt(orbit: Orbit): readonly [number, number] {

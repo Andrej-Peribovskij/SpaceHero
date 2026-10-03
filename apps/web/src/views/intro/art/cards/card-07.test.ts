@@ -1,8 +1,8 @@
 import { cardDurationMs, typedCharsAt } from "../../intro-timeline";
 import { INTRO_CARDS, captionText } from "../../script";
 import { FRAME_WIDTH } from "../grid";
+import { VISIBLE } from "../paint";
 import { FRAME_MS, renderFrame } from "../render";
-import { VISIBLE } from "./card-05";
 import {
   CARD_07_ART,
   DIVE_FROM_MS,

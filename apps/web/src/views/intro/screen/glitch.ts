@@ -1,4 +1,5 @@
 import { FRAME_HEIGHT, FRAME_WIDTH } from "../art/grid";
+import { noise } from "../art/paint";
 import type { PaletteChar } from "../art/palette";
 import { FRAME_MS } from "../art/render";
 
@@ -48,13 +49,6 @@ const SWAPPED: Readonly<Record<PaletteChar, PaletteChar>> = {
   a: "k",
   k: "o",
 };
-
-/** A stable pseudo-random number: the same for the same arguments, every time. */
-function noise(x: number, y: number): number {
-  let h = Math.imul(x, 374761393) + Math.imul(y, 668265263);
-  h = Math.imul(h ^ (h >>> 13), 1274126177);
-  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
-}
 
 /**
  * The screen torn: cut into bands of rows, each band shown as it is, thrown sideways (wrapping

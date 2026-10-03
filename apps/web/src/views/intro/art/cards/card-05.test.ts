@@ -1,6 +1,7 @@
 import { cardDurationMs, typedCharsAt } from "../../intro-timeline";
 import { INTRO_CARDS, captionText } from "../../script";
 import { FRAME_WIDTH } from "../grid";
+import { VISIBLE } from "../paint";
 import { FRAME_MS, frameTime, renderFrame } from "../render";
 import { CARD_04_ART } from "./card-04";
 import {
@@ -29,7 +30,6 @@ import {
   STEADY_FOOT_MS,
   STEADY_HAND_LIT_MS,
   STEADY_HAND_MS,
-  VISIBLE,
   ZOOM_MS,
 } from "./card-05";
 

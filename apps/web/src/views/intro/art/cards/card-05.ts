@@ -1,8 +1,7 @@
-import { cardDurationMs, msToType } from "../../intro-timeline";
-import { INTRO_CARDS, captionText } from "../../script";
 import { FRAME_WIDTH, parsePicture, type Picture } from "../grid";
-import { STEPS_TO_BLACK, colourAt, darker, type CycleChar, type PaletteChar } from "../palette";
-import { FRAME_MS, ditherAt, frameTime, renderFrame, type Canvas, type CardArt, type Scene } from "../render";
+import { VISIBLE, cueOn, ease, fraction, frameOf, lastFrameOf, noise, offscreen, paintPicture, rungOf, smoothNoise } from "../paint";
+import { STEPS_TO_BLACK, darker, type CycleChar, type PaletteChar } from "../palette";
+import { FRAME_MS, ditherAt, type Canvas, type CardArt, type Scene } from "../render";
 import { CARD_04_ART, LIGHT_X, LIGHT_Y, ORBITS } from "./card-04";
 
 /**
@@ -33,15 +32,8 @@ import { CARD_04_ART, LIGHT_X, LIGHT_Y, ORBITS } from "./card-04";
  * The scenery is code (design.md §11); the numbers worth tweaking are named below.
  */
 
-const CARD = INTRO_CARDS[5]!;
-const CAPTION = captionText(CARD);
-
 /** When the first letter of `words` appears, on the card's clock: the beats follow the caption. */
-function cue(words: string): number {
-  const at = CAPTION.indexOf(words);
-  if (at < 0) throw new Error(`card 5: the caption has no "${words}"`);
-  return msToType(CARD, at + 1);
-}
+const cue = cueOn(5);
 
 // ── timings, on the card's clock ──
 /** The zoom from card 4's Plan onto Mars and Deimos. The caption waits for it (script.ts). */
@@ -85,8 +77,6 @@ const PULSE_MS = 1300;
 const MAP_STATION_GAP = 11;
 
 // ── the frame ──
-/** The bottom of the visible picture: the caption band covers what is below. */
-export const VISIBLE = 178;
 
 /** Where Mars sits in card 4's Plan: the middle of its three-pixel cross, which the zoom starts from. */
 const FROM_X = Math.floor(LIGHT_X + ORBITS[1]!.rx * Math.cos(ORBITS[1]!.at)) + 0.5;
@@ -124,31 +114,6 @@ const ROCK_LADDER: readonly PaletteChar[] = [".", "d", "g", "p"];
 const TWINKLE: readonly CycleChar[] = ["1", "2", "3", "4", "5", "6"];
 const FLICKER: readonly CycleChar[] = ["7", "8", "9"];
 
-/** A stable pseudo-random number for a pixel: the same every frame, so nothing shimmers by accident. */
-function noise(x: number, y: number): number {
-  let h = Math.imul(x, 374761393) + Math.imul(y, 668265263);
-  h = Math.imul(h ^ (h >>> 13), 1274126177);
-  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
-}
-
-/** Noise that varies smoothly: blotches rather than grain. Wraps every `period` cells across. */
-function smoothNoise(x: number, y: number, period: number): number {
-  const x0 = Math.floor(x);
-  const y0 = Math.floor(y);
-  const ease = (f: number) => f * f * (3 - 2 * f);
-  const fx = ease(x - x0);
-  const fy = ease(y - y0);
-  const at = (u: number, v: number) => noise((((x0 + u) % period) + period) % period, y0 + v);
-  const top = at(0, 0) + (at(1, 0) - at(0, 0)) * fx;
-  const bottom = at(0, 1) + (at(1, 1) - at(0, 1)) * fx;
-  return top + (bottom - top) * fy;
-}
-
-const frameOf = (timeMs: number) => Math.floor(timeMs / FRAME_MS);
-const fraction = (value: number) => value - Math.floor(value);
-const rungOf = (ladder: readonly PaletteChar[], light: number, x: number, y: number) =>
-  ladder[Math.max(0, Math.min(ladder.length - 1, Math.floor(light * (ladder.length - 1) + ditherAt(x, y))))]!;
-
 // ═══ the zoom ═══
 
 /**
@@ -182,11 +147,7 @@ function view(camera: Camera, x: number, y: number): readonly [number, number] {
 }
 
 /** Card 4's last frame, worked out once: the picture the zoom starts from. */
-let card4End: readonly PaletteChar[] | undefined;
-function card4Frame(): readonly PaletteChar[] {
-  card4End ??= renderFrame(CARD_04_ART, frameTime(cardDurationMs(4) - 1));
-  return card4End;
-}
+const card4Frame = () => lastFrameOf(4, CARD_04_ART);
 
 /** How many shades darker something is that sinks between two points of the zoom. */
 function sinkAt(camera: Camera, [from, to]: readonly [number, number]): number {
@@ -440,29 +401,9 @@ function paintShuttles(canvas: Canvas, t: number): void {
 
 // ═══ painting off the frame ═══
 
-/**
- * A shot painted into a picture of its own rather than onto the frame, so that a transition can
- * move it, magnify it or shrink it. Black is left as black: a transition can treat it as see-through.
- */
-function offscreen(timeMs: number, paint: (canvas: Canvas) => void): PaletteChar[] {
-  const frame = new Array<PaletteChar>(FRAME_WIDTH * VISIBLE).fill(".");
-  paint({
-    timeMs,
-    set(x, y, pixel) {
-      if (x >= 0 && y >= 0 && x < FRAME_WIDTH && y < VISIBLE) frame[Math.floor(y) * FRAME_WIDTH + Math.floor(x)] = colourAt(pixel, timeMs);
-    },
-    get(x, y) {
-      return x >= 0 && y >= 0 && x < FRAME_WIDTH && y < VISIBLE ? frame[y * FRAME_WIDTH + x]! : ".";
-    },
-  });
-  return frame;
-}
-
 function pick(frame: readonly PaletteChar[], u: number, v: number): PaletteChar {
   return u >= 0 && v >= 0 && u < FRAME_WIDTH && v < VISIBLE ? frame[Math.floor(v) * FRAME_WIDTH + Math.floor(u)]! : ".";
 }
-
-const ease = (p: number) => p * p * (3 - 2 * p);
 
 /** A field of stars for a shot, its own, so each place has its own sky. */
 function starsOf(seed: number, count: number) {
@@ -704,12 +645,6 @@ function paintCloseShuttles(canvas: Canvas, t: number): void {
   const y = 10 + down * (groundAt(334) - 18);
   paintPicture(canvas, SHUTTLE, Math.round(x), Math.round(y));
   if (frameOf(t) % 2 === 0) canvas.set(Math.round(x) + 2, Math.round(y) + SHUTTLE.height, "o");
-}
-
-function paintPicture(canvas: Canvas, picture: Picture, left: number, top: number): void {
-  picture.pixels.forEach((pixel, index) => {
-    if (pixel) canvas.set(left + (index % picture.width), top + Math.floor(index / picture.width), pixel);
-  });
 }
 
 /**

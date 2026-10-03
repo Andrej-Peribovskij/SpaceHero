@@ -1,9 +1,8 @@
-import { cardDurationMs, msToType } from "../../intro-timeline";
-import { INTRO_CARDS, captionText } from "../../script";
 import { FRAME_WIDTH } from "../grid";
+import { VISIBLE, clamp01, cueOn, ease, fraction, lastFrameOf, noise, rungOf, smoothNoise } from "../paint";
 import { STEPS_TO_BLACK, darker, type CycleChar, type PaletteChar } from "../palette";
-import { ditherAt, frameTime, renderFrame, type Canvas, type CardArt, type Scene } from "../render";
-import { CARD_05_ART, MAP_JUPITER, VISIBLE } from "./card-05";
+import { ditherAt, type Canvas, type CardArt, type Scene } from "../render";
+import { CARD_05_ART, MAP_JUPITER } from "./card-05";
 
 /**
  * Card 6: Jupiter and its moons.
@@ -26,15 +25,8 @@ import { CARD_05_ART, MAP_JUPITER, VISIBLE } from "./card-05";
  * The scenery is code (design.md §11); the numbers worth tweaking are named below.
  */
 
-const CARD = INTRO_CARDS[6]!;
-const CAPTION = captionText(CARD);
-
 /** When the first letter of `words` appears, on the card's clock: the beats follow the caption. */
-function cue(words: string): number {
-  const at = CAPTION.indexOf(words);
-  if (at < 0) throw new Error(`card 6: the caption has no "${words}"`);
-  return msToType(CARD, at + 1);
-}
+const cue = cueOn(6);
 
 // ── timings, on the card's clock ──
 /** The dive from card 5's map into Jupiter's spot, until the storm fills the screen. */
@@ -106,32 +98,6 @@ const sunlight = (nx: number, ny: number, nz: number, sun = SUN) => nx * sun[0] 
 
 const TWINKLE: readonly CycleChar[] = ["1", "2", "3", "4", "5", "6"];
 
-/** A stable pseudo-random number for a pixel: the same every frame, so nothing shimmers by accident. */
-function noise(x: number, y: number): number {
-  let h = Math.imul(x, 374761393) + Math.imul(y, 668265263);
-  h = Math.imul(h ^ (h >>> 13), 1274126177);
-  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
-}
-
-/** Noise that varies smoothly: blotches rather than grain. With a `period`, it wraps that often across. */
-function smoothNoise(x: number, y: number, period = 0): number {
-  const x0 = Math.floor(x);
-  const y0 = Math.floor(y);
-  const ease = (f: number) => f * f * (3 - 2 * f);
-  const fx = ease(x - x0);
-  const fy = ease(y - y0);
-  const at = (u: number, v: number) => noise(period ? (((x0 + u) % period) + period) % period : x0 + u, y0 + v);
-  const top = at(0, 0) + (at(1, 0) - at(0, 0)) * fx;
-  const bottom = at(0, 1) + (at(1, 1) - at(0, 1)) * fx;
-  return top + (bottom - top) * fy;
-}
-
-const ease = (p: number) => p * p * (3 - 2 * p);
-const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
-const fraction = (value: number) => value - Math.floor(value);
-const rungOf = (ladder: readonly PaletteChar[], light: number, x: number, y: number) =>
-  ladder[Math.max(0, Math.min(ladder.length - 1, Math.floor(light * (ladder.length - 1) + ditherAt(x, y))))]!;
-
 // ═══ the camera ═══
 
 /**
@@ -190,11 +156,7 @@ function view(camera: Camera, x: number, y: number): readonly [number, number] {
 
 // ═══ card 5's map, sinking ═══
 
-let card5End: readonly PaletteChar[] | undefined;
-function card5Frame(): readonly PaletteChar[] {
-  card5End ??= renderFrame(CARD_05_ART, frameTime(cardDurationMs(5) - 1));
-  return card5End;
-}
+const card5Frame = () => lastFrameOf(5, CARD_05_ART);
 
 /** Card 5's last frame, magnified pixel by pixel about Jupiter and sinking into black as it grows. */
 function paintMap(canvas: Canvas, camera: Camera, t: number): void {

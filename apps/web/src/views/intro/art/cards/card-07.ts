@@ -1,9 +1,8 @@
-import { cardDurationMs, msToType } from "../../intro-timeline";
-import { INTRO_CARDS, captionText } from "../../script";
+import { cardDurationMs } from "../../intro-timeline";
 import { FRAME_WIDTH } from "../grid";
-import { STEPS_TO_WHITE, colourAt, type CycleChar, type PaletteChar } from "../palette";
-import { FRAME_MS, ditherAt, fadeRamp, type Canvas, type CardArt, type Scene } from "../render";
-import { VISIBLE } from "./card-05";
+import { VISIBLE, clamp01, cueOn, ease, frameOf, noise, offscreen, rungOf, smoothNoise } from "../paint";
+import { STEPS_TO_WHITE, type CycleChar, type PaletteChar } from "../palette";
+import { ditherAt, fadeRamp, type Canvas, type CardArt, type Scene } from "../render";
 
 /**
  * Card 7: the Diaspora.
@@ -26,15 +25,8 @@ import { VISIBLE } from "./card-05";
  * The scenery is code (design.md §11); the numbers worth tweaking are named below.
  */
 
-const CARD = INTRO_CARDS[7]!;
-const CAPTION = captionText(CARD);
-
 /** When the first letter of `words` appears, on the card's clock: the beats follow the caption. */
-function cue(words: string): number {
-  const at = CAPTION.indexOf(words);
-  if (at < 0) throw new Error(`card 7: the caption has no "${words}"`);
-  return msToType(CARD, at + 1);
-}
+const cue = cueOn(7);
 
 // ── timings, on the card's clock ──
 /** The launch field comes out of the white, a step at a time. */
@@ -70,31 +62,6 @@ const SKY: readonly PaletteChar[] = ["w", "y", "p", "s", "b", "n", "."];
 const SKY_DEPTH = 820;
 
 const TWINKLE: readonly CycleChar[] = ["1", "2", "3", "4", "5", "6"];
-
-/** A stable pseudo-random number for a pixel: the same every frame, so nothing shimmers by accident. */
-function noise(x: number, y: number): number {
-  let h = Math.imul(x, 374761393) + Math.imul(y, 668265263);
-  h = Math.imul(h ^ (h >>> 13), 1274126177);
-  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
-}
-
-/** Noise that varies smoothly: blotches rather than grain. */
-function smoothNoise(x: number, y: number): number {
-  const x0 = Math.floor(x);
-  const y0 = Math.floor(y);
-  const ease = (f: number) => f * f * (3 - 2 * f);
-  const fx = ease(x - x0);
-  const fy = ease(y - y0);
-  const top = noise(x0, y0) + (noise(x0 + 1, y0) - noise(x0, y0)) * fx;
-  const bottom = noise(x0, y0 + 1) + (noise(x0 + 1, y0 + 1) - noise(x0, y0 + 1)) * fx;
-  return top + (bottom - top) * fy;
-}
-
-const ease = (p: number) => p * p * (3 - 2 * p);
-const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
-const frameOf = (timeMs: number) => Math.floor(timeMs / FRAME_MS);
-const rungOf = (ladder: readonly PaletteChar[], light: number, x: number, y: number) =>
-  ladder[Math.max(0, Math.min(ladder.length - 1, Math.floor(light * (ladder.length - 1) + ditherAt(x, y))))]!;
 
 /** How far the camera has tilted up, in pixels of sky: eased in and out. */
 function tiltAt(t: number): number {
@@ -622,21 +589,6 @@ function paintOrbit(canvas: Canvas, t: number): void {
 }
 
 // ═══ the card ═══
-
-/** A shot painted into a picture of its own, so a dissolve can mix two of them. */
-function offscreen(timeMs: number, paint: (canvas: Canvas) => void): PaletteChar[] {
-  const frame = new Array<PaletteChar>(FRAME_WIDTH * VISIBLE).fill(".");
-  paint({
-    timeMs,
-    set(x, y, pixel) {
-      if (x >= 0 && y >= 0 && x < FRAME_WIDTH && y < VISIBLE) frame[Math.floor(y) * FRAME_WIDTH + Math.floor(x)] = colourAt(pixel, timeMs);
-    },
-    get(x, y) {
-      return x >= 0 && y >= 0 && x < FRAME_WIDTH && y < VISIBLE ? frame[y * FRAME_WIDTH + x]! : ".";
-    },
-  });
-  return frame;
-}
 
 function paintCard(canvas: Canvas, t: number): void {
   const dissolveFrom = ORBIT_MS - DISSOLVE_MS;
