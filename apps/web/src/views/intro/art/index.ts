@@ -4,6 +4,7 @@ import { CARD_01_ART } from "./cards/card-01";
 import { CARD_02_ART } from "./cards/card-02";
 import { CARD_03_ART } from "./cards/card-03";
 import { CARD_04_ART } from "./cards/card-04";
+import { CARD_05_ART } from "./cards/card-05";
 import type { CardArt } from "./render";
 
 /**
@@ -19,6 +20,7 @@ const CARD_ART: ReadonlyMap<number, CardArt> = new Map([
   [2, CARD_02_ART],
   [3, CARD_03_ART],
   [4, CARD_04_ART],
+  [5, CARD_05_ART],
   [END_CARD, CARD_00_ART],
 ]);
 

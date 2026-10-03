@@ -14,7 +14,10 @@
 export interface CaptionSegment {
   readonly text: string;
   readonly emphasis?: boolean;
-  /** A beat of silence once this run is typed, before the next one starts. */
+  /**
+   * A beat of silence once this run is typed, before the next one starts. An empty run with a
+   * pause holds the whole caption back: the picture has something to show first.
+   */
   readonly pauseAfterMs?: number;
 }
 
@@ -83,11 +86,16 @@ export const INTRO_CARDS: readonly IntroCard[] = [
     ],
   },
   {
-    image: "Mars and Deimos; a dotted line of stations reaching into the dark.",
+    image:
+      "The Plan, zoomed into along Mars's orbit until Mars and Deimos fill the frame; Externa's lights come on across Deimos. Close: Externa Prima on Deimos's horizon, Mars dark above it, its cities lit. Jumps along the Corridor: to Steady Foot among Mars's trojans, then through the belt to Steady Hand, Jupiter ahead. Pulled out: the Sun, Mars, the belt, Jupiter, and between them a dotted line of stations lighting up, a corridor of light.",
     caption: [
-      {
-        text: "Externa, 2312. Steady Foot, 2389. Steady Hand, 2427. A corridor of light across the dark.",
-      },
+      // The caption waits while the picture zooms from card 4's Plan onto Mars and Deimos, and
+      // after each place while the picture closes in on it or jumps on to the next.
+      { text: "", pauseAfterMs: 1700 },
+      { text: "Externa, 2312. ", pauseAfterMs: 3200 },
+      { text: "Steady Foot, 2389. ", pauseAfterMs: 1300 },
+      { text: "Steady Hand, 2427. ", pauseAfterMs: 1300 },
+      { text: "A corridor of light across the dark." },
     ],
   },
   {
