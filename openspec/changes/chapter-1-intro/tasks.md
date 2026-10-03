@@ -64,7 +64,7 @@ Story note (the ending):
 - [x] 2.11 Glitch tests: two corrupted frames then normal; no corruption under reduced motion; card 7 keeps its normal timing
 - [x] 2.12 Replace the slice 1 placeholders with the canvas (done with 2.7a: every card draws on the one pixel screen; a card without art would show black)
 - [x] 2.13 Review follow-ups from PR #8: set React state only when the rendered projection changes; precompute card timings once; one "whole caption" rule in `visibleChars`
-- [ ] 2.14 Gate: `pnpm run verify` and `pnpm run test:e2e` pass
+- [x] 2.14 Gate: `pnpm run verify` and `pnpm run test:e2e` pass
 
 ## 3. Slice 3: the orientation music
 
