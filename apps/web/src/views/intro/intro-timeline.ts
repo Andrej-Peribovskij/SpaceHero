@@ -37,7 +37,9 @@ export interface IntroState {
 export type IntroAction =
   | { readonly type: "start" }
   | { readonly type: "tick"; readonly dtMs: number }
-  | { readonly type: "skip" };
+  | { readonly type: "skip" }
+  /** Jump to the start of a card: a debugging aid, never the player's. See `useDebugSeek`. */
+  | { readonly type: "seek"; readonly card: number };
 
 export type IntroEvent =
   | { readonly type: "started" }
@@ -45,6 +47,8 @@ export type IntroEvent =
   | { readonly type: "glitch" }
   | { readonly type: "glitch-end" }
   | { readonly type: "skipped" }
+  /** The video jumped. The `card` event for where it landed follows. */
+  | { readonly type: "seeked" }
   | { readonly type: "ended" };
 
 export interface IntroStep {
@@ -187,9 +191,28 @@ export function stepIntro(state: IntroState, action: IntroAction): IntroStep {
 
       return { state: ENDED, events: [{ type: "skipped" }, { type: "ended" }] };
 
+    case "seek":
+      return seek(state, action.card);
+
     case "tick":
       return tick(state, action.dtMs);
   }
+}
+
+/**
+ * Go to the start of a card, clamped to the cards there are, and play on from there. Allowed once
+ * the player has opted in, and from the end too, which then plays again. Seeking to the last card
+ * ends the video in the next tick, as arriving there would.
+ */
+function seek(state: IntroState, card: number): IntroStep {
+  if (state.phase === "gate") return { state, events: [] };
+
+  const index = Math.min(Math.max(Math.trunc(card), IDENT_CARD), END_CARD);
+
+  return {
+    state: { phase: "playing", card: index, elapsedMs: 0 },
+    events: [{ type: "seeked" }, { type: "card", index }],
+  };
 }
 
 /**

@@ -610,3 +610,87 @@ describe("without a canvas to paint on", () => {
     expect(document.querySelector("[aria-live]")).toHaveClass("sr-only");
   });
 });
+
+describe("jumping card by card, in the dev server only", () => {
+  /** Where a test puts the page: an address with or without `?card=N`. */
+  function at(search: string): void {
+    window.history.replaceState(null, "", `/${search}`);
+  }
+
+  afterEach(() => at(""));
+
+  it("jumps to the next card on →, back on ←, and keeps the card in the address", () => {
+    render(<IntroView debugSeek />);
+    fireEvent.keyDown(window, { key: "a" });
+
+    fireEvent.keyDown(window, { key: "ArrowRight" });
+    fireEvent.keyDown(window, { key: "ArrowRight" });
+    expect(showsCard(2)).toBe(true);
+    expect(window.location.search).toBe("?card=2");
+
+    fireEvent.keyDown(window, { key: "ArrowLeft" });
+    expect(showsCard(1)).toBe(true);
+    expect(window.location.search).toBe("?card=1");
+
+    // From the start of the card: it plays on to the next one in its own time.
+    advance(cardDurationMs(1) + 100);
+    expect(showsCard(2)).toBe(true);
+  });
+
+  it("starts at the card the address names, once a key opens the gate", () => {
+    at("?card=6");
+    const audio = recordingIntroAudio();
+    render(<IntroView debugSeek openAudio={() => audio} />);
+
+    expect(showsCard(0)).toBe(true);
+    expect(screen.getByText(PROMPT)).toBeInTheDocument();
+
+    fireEvent.keyDown(window, { key: "a" });
+    expect(showsCard(6)).toBe(true);
+    expect(audio.calls).toEqual(["start", "stop", "start"]);
+  });
+
+  it.each(["?card=0", "?card=99", "?card=six"])("starts at the beginning for %s, a card that is not one to jump to", (search) => {
+    at(search);
+    render(<IntroView debugSeek />);
+    fireEvent.keyDown(window, { key: "a" });
+
+    expect(showsCard(0)).toBe(true);
+  });
+
+  it("restarts the music from the top on a jump, and a jump off the black card cuts the snore", () => {
+    at(`?card=${SNORE_CARD}`);
+    const audio = recordingIntroAudio();
+    render(<IntroView debugSeek openAudio={() => audio} />);
+    fireEvent.keyDown(window, { key: "a" });
+    expect(audio.calls).toEqual(["start", "stop", "start", "stop", "snore"]);
+
+    fireEvent.keyDown(window, { key: "ArrowLeft" });
+    expect(showsCard(SNORE_CARD - 1)).toBe(true);
+    expect(audio.calls.slice(-2)).toEqual(["stop", "start"]);
+  });
+
+  it("goes back from Module 2's ident to the black card, and no further forward", () => {
+    render(<IntroView debugSeek />);
+    fireEvent.keyDown(window, { key: "a" });
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(atTheEnd()).toBe(true);
+
+    fireEvent.keyDown(window, { key: "ArrowRight" });
+    expect(atTheEnd()).toBe(true);
+
+    fireEvent.keyDown(window, { key: "ArrowLeft" });
+    expect(showsCard(SNORE_CARD)).toBe(true);
+  });
+
+  it("is not there at all outside the dev server: arrows do nothing, and the address is not read", () => {
+    at("?card=6");
+    render(<IntroView debugSeek={false} />);
+    fireEvent.keyDown(window, { key: "a" });
+    expect(showsCard(0)).toBe(true);
+
+    fireEvent.keyDown(window, { key: "ArrowRight" });
+    expect(showsCard(0)).toBe(true);
+    expect(window.location.search).toBe("?card=6");
+  });
+});

@@ -77,6 +77,8 @@ export interface IntroTimeline extends Shown {
   readonly reducedMotion: boolean;
   readonly start: () => void;
   readonly skip: () => void;
+  /** Jumps to the start of a card: a debugging aid, never the player's. See `useDebugSeek`. */
+  readonly seek: (card: number) => void;
 }
 
 /**
@@ -166,6 +168,7 @@ export function useIntroTimeline(onEvent?: (event: IntroEvent) => void): IntroTi
 
   const start = useCallback(() => dispatch({ type: "start" }), [dispatch]);
   const skip = useCallback(() => dispatch({ type: "skip" }), [dispatch]);
+  const seek = useCallback((card: number) => dispatch({ type: "seek", card }), [dispatch]);
 
   return {
     ...shown,
@@ -173,5 +176,6 @@ export function useIntroTimeline(onEvent?: (event: IntroEvent) => void): IntroTi
     reducedMotion,
     start,
     skip,
+    seek,
   };
 }

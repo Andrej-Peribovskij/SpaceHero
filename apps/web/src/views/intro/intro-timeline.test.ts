@@ -148,6 +148,54 @@ describe("skip", () => {
   });
 });
 
+describe("seek, the debugging jump", () => {
+  it("does nothing before the player opts in", () => {
+    expect(play({ type: "seek", card: 5 })).toEqual({ state: initialIntroState, events: [] });
+  });
+
+  it("goes to the start of a card, says so, and plays on from there", () => {
+    const { state, events } = play({ type: "start" }, { type: "tick", dtMs: 1000 }, { type: "seek", card: 5 });
+
+    expect(state).toEqual({ phase: "playing", card: 5, elapsedMs: 0 });
+    expect(events.slice(-2)).toEqual([{ type: "seeked" }, { type: "card", index: 5 }]);
+
+    const after = stepIntro(state, { type: "tick", dtMs: cardDurationMs(5) });
+    expect(after.state).toEqual({ phase: "playing", card: 6, elapsedMs: 0 });
+  });
+
+  it("goes back as readily as forward, to the start of a card already seen", () => {
+    const { state } = play({ type: "start" }, { type: "tick", dtMs: cardDurationMs(0) + 500 }, { type: "seek", card: 0 });
+
+    expect(state).toEqual({ phase: "playing", card: 0, elapsedMs: 0 });
+  });
+
+  it("keeps to the cards there are", () => {
+    expect(play({ type: "start" }, { type: "seek", card: -3 }).state.card).toBe(0);
+    expect(play({ type: "start" }, { type: "seek", card: 99 }).state.card).toBe(END_CARD);
+  });
+
+  it("lands on card 6 before its glitch, which then fires on time", () => {
+    const { events } = play({ type: "start" }, { type: "seek", card: 6 }, ...frames(cardDurationMs(6)));
+
+    expect(events.filter((event) => event.type === "glitch")).toHaveLength(1);
+    expect(events.filter((event) => event.type === "glitch-end")).toHaveLength(1);
+  });
+
+  it("plays again from the end, back onto the snore card", () => {
+    const { state, events } = play({ type: "start" }, { type: "tick", dtMs: TOTAL_MS }, { type: "seek", card: SNORE_CARD });
+
+    expect(state).toEqual({ phase: "playing", card: SNORE_CARD, elapsedMs: 0 });
+    expect(events.slice(-2)).toEqual([{ type: "seeked" }, { type: "card", index: SNORE_CARD }]);
+  });
+
+  it("onto the last card, ends in the next tick, as arriving there would", () => {
+    const { state, events } = play({ type: "start" }, { type: "seek", card: END_CARD }, { type: "tick", dtMs: 16 });
+
+    expect(state.phase).toBe("ended");
+    expect(events.slice(-1)).toEqual([{ type: "ended" }]);
+  });
+});
+
 describe("the end", () => {
   it("holds on Module 2's ident, whole, indefinitely", () => {
     const { state } = play({ type: "start" }, { type: "tick", dtMs: TOTAL_MS });

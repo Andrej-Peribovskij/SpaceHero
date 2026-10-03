@@ -1,5 +1,5 @@
 import { Button } from "@space-hero/design-system";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { artFor } from "./art";
 import { IntroCardFrame } from "./intro-card-frame";
@@ -8,6 +8,7 @@ import { ORIENTATION_TUNE } from "./music/tune";
 import { openIntroAudio, prepareIntroAudio } from "./music/web-audio";
 import { canvasDraws } from "./screen/canvas";
 import { INTRO_CARDS, captionText } from "./script";
+import { useDebugSeek } from "./use-debug-seek";
 import { useIntroMusic } from "./use-intro-music";
 import { useIntroTimeline } from "./use-intro-timeline";
 
@@ -33,6 +34,8 @@ export interface IntroViewProps {
   readonly openAudio?: () => IntroAudio;
   /** Works out ahead, in idle time, what opening the music would otherwise have to. */
   readonly prepareAudio?: () => void;
+  /** Arrow keys and `?card=N` jump between cards, for tuning: on in the dev server only. */
+  readonly debugSeek?: boolean;
 }
 
 /**
@@ -44,9 +47,19 @@ export interface IntroViewProps {
  * until the user has pressed or clicked something, so the gate is where the music gets
  * permission to play.
  */
-export function IntroView({ openAudio = openOrientationAudio, prepareAudio = prepareOrientationAudio }: IntroViewProps = {}) {
+export function IntroView({
+  openAudio = openOrientationAudio,
+  prepareAudio = prepareOrientationAudio,
+  debugSeek = import.meta.env.DEV,
+}: IntroViewProps = {}) {
   const music = useIntroMusic(openAudio, prepareAudio);
-  const { phase, card: index, shownChars, clock, reducedMotion, start, skip } = useIntroTimeline(music);
+  const { phase, card: index, shownChars, clock, reducedMotion, start, skip, seek } = useIntroTimeline(music);
+  const startCard = useDebugSeek({ enabled: debugSeek, phase, card: index, seek });
+  // Opening the gate, then — while debugging, with `?card=N` — jumping on, inside the same gesture.
+  const begin = useCallback(() => {
+    start();
+    if (startCard !== undefined) seek(startCard);
+  }, [start, seek, startCard]);
   const card = INTRO_CARDS[index]!;
   const prompt = PROMPTS[phase];
   const mainRef = useRef<HTMLElement>(null);
@@ -69,13 +82,13 @@ export function IntroView({ openAudio = openOrientationAudio, prepareAudio = pre
         // would leave the music unable to play.
         const modifierOnly = ["Shift", "Control", "Alt", "Meta"].includes(event.key);
         if (event.key === "Escape" || modifierOnly || event.ctrlKey || event.metaKey || event.altKey) return;
-        start();
+        begin();
       } else if (phase === "playing" && event.key === "Escape") skip();
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [phase, start, skip]);
+  }, [phase, begin, skip]);
 
   return (
     <main
@@ -83,7 +96,7 @@ export function IntroView({ openAudio = openOrientationAudio, prepareAudio = pre
       // Focusable from script only, as the landing place when skipping removes the button.
       tabIndex={-1}
       className="flex min-h-screen flex-col items-center justify-center gap-8 bg-[var(--color-black)] p-6 text-[var(--color-white)] outline-none"
-      onClick={phase === "gate" ? start : undefined}
+      onClick={phase === "gate" ? begin : undefined}
     >
       <h1 className="sr-only">Absolute Connections Contractor Orientation</h1>
 

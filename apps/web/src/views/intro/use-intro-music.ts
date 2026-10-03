@@ -21,6 +21,11 @@ function cue(audio: IntroAudio, event: IntroEvent): void {
       return;
     case "skipped":
       return audio.stop();
+    case "seeked":
+      // A jump, while debugging: the loop starts again from the top, out of whatever it was in —
+      // the glitch's silence, or the snore, which the stop cancels. The card landed on comes next.
+      audio.stop();
+      return audio.start();
     case "ended":
       // Module 2's ident starts the loop again from the top, and it plays while the ident waits:
       // in beat 1, it is what wakes Joe. Skipped or played through, Module 1 is over.
