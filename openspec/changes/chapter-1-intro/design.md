@@ -95,10 +95,11 @@ reuse of the motif outside the intro.
    computes the samples itself in plain
    arithmetic: square and triangle voices from a note table, and for the snore
    the soft palate flapping in the airflow, as a real snore is made. That
-   means knocks about thirty a second and never quite even, plus the rush of
+   means knocks about twenty a second and never quite even, plus the rush of
    air as noise from a shift register like a console's noise channel. Both
-   ring through resonances like a throat's. The first snore, noise with an
-   even wobble, sounded like a hiss rather than a sleeper (task 4.1). Web
+   ring through low resonances like a throat's, around 110 and 300 Hz. The
+   first snore, noise with an even wobble, sounded like a hiss rather than a
+   sleeper (task 4.1). Web
    Audio only plays the result. Each sound plays through a gain of its own: the
    loop's is closed and opened by the glitch, and every stop fades a gain out
    over a few milliseconds before the source stops, since a source cut mid-wave
