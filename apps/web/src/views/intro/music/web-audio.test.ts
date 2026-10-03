@@ -22,6 +22,7 @@ class FakeSource {
   loop = false;
   startedAt: number | undefined;
   stopped = false;
+  stoppedAt: number | undefined;
   connectedTo: unknown;
   connect<T>(node: T): T {
     this.connectedTo = node;
@@ -30,8 +31,9 @@ class FakeSource {
   start(when = 0) {
     this.startedAt = when;
   }
-  stop() {
+  stop(when = 0) {
     this.stopped = true;
+    this.stoppedAt = when;
   }
 }
 
@@ -80,6 +82,7 @@ function play() {
 }
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllGlobals();
 });
 
@@ -147,15 +150,30 @@ describe("webIntroAudio", () => {
     expect(context.sources).toHaveLength(0);
   });
 
-  it("snores once, straight to the speakers, after a beat of silence", () => {
+  it("snores once, through a gain of its own, after a beat of silence", () => {
     const { context, audio } = play();
 
     audio.snore();
 
     const [snore] = context.sources;
     expect(snore!.loop).toBe(false);
-    expect(snore!.connectedTo).toBe(context.destination);
+    expect(snore!.connectedTo).toBe(context.gains[0]);
+    expect(context.gains[0]!.connectedTo).toBe(context.destination);
     expect(snore!.startedAt).toBeGreaterThan(context.currentTime);
+  });
+
+  it("fades the music and the snore out on a stop, rather than cutting them mid-wave", () => {
+    const { context, audio } = play();
+    audio.start();
+    audio.snore();
+
+    audio.stop();
+
+    for (const [index, source] of context.sources.entries()) {
+      expect(context.gains[index]!.gain.target).toBe(0);
+      expect(source.stoppedAt).toBeGreaterThan(context.currentTime);
+      expect(source.stoppedAt).toBeLessThan(context.currentTime + 0.1);
+    }
   });
 
   it("stops a snore on a stop, even one still waiting out its beat of silence", () => {
@@ -182,13 +200,18 @@ describe("webIntroAudio", () => {
     expect(context.sources).toHaveLength(0);
   });
 
-  it("closes the context, stopping the music if it still plays", () => {
+  it("closes the context, stopping the music if it still plays, once the music has faded", () => {
+    vi.useFakeTimers();
     const { context, audio } = play();
     audio.start();
 
     audio.close();
 
     expect(context.sources[0]!.stopped).toBe(true);
+    expect(context.gains[0]!.gain.target).toBe(0);
+    expect(context.closed).toBe(false);
+
+    vi.advanceTimersByTime(100);
     expect(context.closed).toBe(true);
   });
 

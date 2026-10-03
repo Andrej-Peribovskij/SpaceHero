@@ -4,15 +4,19 @@ import { SAMPLE_RATE, renderTune, type Tune } from "./synth";
 
 /**
  * The intro's music through Web Audio. The synth has already worked out every sample, so this
- * only plays buffers: the tune looping through one gain, which the glitch closes and opens, and
- * the snore once. Two node types, buffer source and gain, which every browser with Web Audio has.
+ * only plays buffers, each through a gain of its own: the tune looping, its gain closed and opened
+ * by the glitch, and the snore once. Two node types, buffer source and gain, which every browser
+ * with Web Audio has.
  */
 
 /**
- * How fast the gain moves when the music drops out or comes back, as a time constant: a cut to
- * the ear, but not an instant one, which would click.
+ * How fast a gain moves when the music drops out, comes back or stops, as a time constant: a cut
+ * to the ear, but not an instant one, which would click.
  */
 const CUT_S = 0.005;
+
+/** How long a sound is let fade before it is stopped: five time constants is under 1% left. */
+const FADE_S = 5 * CUT_S;
 
 /** The beat of silence on the black card between the music stopping and the snore. */
 export const SNORE_PAUSE_S = 0.6;
@@ -32,49 +36,55 @@ export function webIntroAudio(context: AudioContext, tune: Tune): IntroAudio {
   let music: Playing | undefined;
   // Kept so a skip on the black card can stop it: the snore waits a beat before it starts, and
   // must not then play over Module 2's music.
-  let snore: AudioBufferSourceNode | undefined;
+  let snore: Playing | undefined;
   let closed = false;
   // The loop is rendered once: Module 2's ident starts it again, and must not pay for it twice.
   let loop: AudioBuffer | undefined;
 
+  const play = (buffer: AudioBuffer, options: { loop: boolean; at: number }): Playing => {
+    const source = context.createBufferSource();
+    source.buffer = buffer;
+    source.loop = options.loop;
+    const gain = context.createGain();
+    source.connect(gain).connect(context.destination);
+    source.start(options.at);
+    return { source, gain };
+  };
+
   const gainTo = (level: number) => music?.gain.gain.setTargetAtTime(level, context.currentTime, CUT_S);
+
+  /** Both sounds faded out and stopped: a source stopped mid-wave clicks. */
+  const stopAll = () => {
+    for (const playing of [music, snore]) {
+      playing?.gain.gain.setTargetAtTime(0, context.currentTime, CUT_S);
+      playing?.source.stop(context.currentTime + FADE_S);
+    }
+    music = undefined;
+    snore = undefined;
+  };
 
   return {
     start: () => {
       if (music || closed) return;
 
       loop ??= bufferOf(context, renderTune(tune));
-      const source = context.createBufferSource();
-      source.buffer = loop;
-      source.loop = true;
-      const gain = context.createGain();
-      source.connect(gain).connect(context.destination);
-      source.start();
-      music = { source, gain };
+      music = play(loop, { loop: true, at: 0 });
     },
     dropOut: () => gainTo(0),
     resume: () => gainTo(1),
-    stop: () => {
-      music?.source.stop();
-      music = undefined;
-      snore?.stop();
-      snore = undefined;
-    },
+    stop: stopAll,
     snore: () => {
       if (closed) return;
 
-      snore = context.createBufferSource();
-      snore.buffer = bufferOf(context, renderSnore());
-      snore.connect(context.destination);
-      snore.start(context.currentTime + SNORE_PAUSE_S);
+      snore = play(bufferOf(context, renderSnore()), { loop: false, at: context.currentTime + SNORE_PAUSE_S });
     },
     close: () => {
+      if (closed) return;
+
       closed = true;
-      music?.source.stop();
-      music = undefined;
-      snore?.stop();
-      snore = undefined;
-      context.close().catch(() => {});
+      stopAll();
+      // Closing the context silences it at once, so it waits out the fade.
+      setTimeout(() => void context.close().catch(() => {}), FADE_S * 1000);
     },
   };
 }
