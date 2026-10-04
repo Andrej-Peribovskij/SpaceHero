@@ -10,14 +10,14 @@ referenced below.
 - [x] 1.3 Update `tests/e2e/flows/widgets.spec.ts` to use `/widgets`, and `routing.spec.ts` and `design-preview/administrator-mounts.spec.ts` to expect the intro at `/`
 - [x] 1.4 Add `views/intro/script.ts`: the 11 cards' captions word for word from `docs/story/chapter-01-intro.md`, plus the index of the Ganymede line
 - [x] 1.5 Add the pure reducer `views/intro/intro-timeline.ts`: gate → card(n, typedChars) → end, with skip and a glitch event (design §2)
-- [x] 1.6 Unit-test the reducer: gate holds without input; cards 1–10 in order; skip from any card reaches end; the countdown holds on "4…"; the glitch event fires once on the Ganymede line
+- [x] 1.6 Unit-test the reducer: gate holds without input; cards 1–10 in order; skip from any card reaches end; the countdown holds on "4…"; the glitch event fires once on the Ganymede line — the countdown went with 1.24, and the ending is Joe's punch since 4.1d
 - [x] 1.7 Add `views/intro/use-intro-timeline.ts`: one clock driving the reducer, which also reads `prefers-reduced-motion` and then reveals captions whole
 - [x] 1.8 Add presentational components for the ident with its **PRESS ANY KEY TO BEGIN ORIENTATION** prompt, the card frame with a placeholder image, the caption, and the end card
 - [x] 1.9 Gate input: any key, click or tap starts the sequence; after that, keys other than Escape do nothing
 - [x] 1.10 Skip: a design-system `Button` reading **Skipping is recorded.**, with Escape as its shortcut (design §8)
 - [x] 1.11 Captions: typed text `aria-hidden`, the full caption in a polite live region, set once per card (design §7)
 - [x] 1.12 View tests with fake timers and MSW: the start gate (both scenarios); card order and caption text; skip sends no request and writes no storage; the end state; reduced motion shows captions whole
-- [x] 1.13 Add an E2E flow `tests/e2e/flows/intro.spec.ts`: open `/`, press a key, see card 1, skip, see the end card
+- [x] 1.13 Add an E2E flow `tests/e2e/flows/intro.spec.ts`: open `/`, press a key, see card 1, skip, see the end card — since 4.1d it also waits for Joe's punch to end the video
 - [x] 1.14 `docs/frontend.apps.md`: one sentence saying pixel-art palettes are artwork data, outside the hardcoded-hex rule (design §4)
 - [x] 1.15 `docs/glossary.md`: add Beat, Card and Motif
 - [x] 1.16 Add a `docs/product-debt/intro-hand-off-to-beat-1.md` record: the intro holds on card 10 until beat 1 exists — since 4.1d and 4.1e it ends on black, on card 10
@@ -39,7 +39,7 @@ Story note (the ending):
 ## 2. Slice 2: animated pixel art and the Ganymede glitch
 
 - [x] 2.1 Add `views/intro/art/palette.ts`: one shared palette of 16 colours or fewer, written as hex, plus the twinkle cycles (design §3, §4)
-- [x] 2.2 Add the grid parser: 96×54 backgrounds, square sprites (`_` transparent) and flipbooks of same-size frames, only palette or cycle characters, with an error naming the art and row
+- [x] 2.2 Add the grid parser: 96×54 backgrounds, square sprites (`_` transparent) and flipbooks of same-size frames, only palette or cycle characters, with an error naming the art and row — 384×216 since 2.7a
 - [x] 2.3 Unit-test the parser: a valid grid; a wrong row count; a wrong row width; an unknown character; flipbook frames and a mismatched frame
 - [x] 2.4 Add the pure renderer: background, palette cycling, sprites rotated by stepped nearest-neighbour rotation, flipbooks, and a still frame at time 0
 - [x] 2.5 Unit-test the renderer: a cycle changes colour over time; a sprite is unrotated at time 0 and turned a quarter at a quarter turn; transparent sprite pixels show the background; a flipbook steps, wraps and runs backwards
@@ -49,7 +49,7 @@ Story note (the ending):
 - [x] 2.7b Tests: font coverage of every caption and prompt; caption layout (wrap, forced break, typing order); the band (typed characters only, emphasis, art left alone above it); the screen's 12 fps, immediate repaint on typing, and stillness
 - [x] 2.7c Hybrid art (design §11): scenes with their own clocks, a fade schedule on a brightness ladder, painted layers, rectangular pictures, fire flicker cycles; reduced motion stops movement but keeps cuts and fades
 - [x] 2.7d Draw card 1, the Brightening: the Sun swells and bleeds to white, a hard cut to the child shielding their eyes, the light only rising to white again for card 2
-- [x] 2.8 Draw cards 2–10 as art in `views/intro/art/cards/`, following the script's Image column. Silhouettes first, one card per file
+- [x] 2.8 Draw cards 2–10 as art in `views/intro/art/cards/`, following the script's Image column. Silhouettes first, one card per file — cards 2–9 since 4.1e
 - [x] 2.8a Draw card 2, the wars: out of card 1's white, a dense dark city burning behind two crowds under six different flags; the fire spreads; a white flash cuts to a close shot where the crowds meet on "…and itself" and keep streaming in to the end, piling into one fighting mass under mixed flags
 - [x] 2.8b Draw card 3, the corporations: towers rise out of the ruins with the ground shaking, their shadows swallowing the people; from below, a turning ring of them under one sky, lights coming on floor by floor and flashing together on "Order returned"; on the slogan, the Absolute Connections square appears in that sky, turning against the ring; then card 3 closes to black from the edges in, onto the square
 - [x] 2.8c Draw card 4, Helios: out of that black, a spark on "Helios" grows into a small sun hung in cables halfway down a dark server hall, its warm light spreading from the inside out; on "every corporation" the racks' lights come on in every company's colour and pulses run along the cables into it; on "the Plan" it draws three orbits round itself, and on "Station by station" a dotted line of stations reaches out from Earth, one by one, into the dark
@@ -68,8 +68,8 @@ Story note (the ending):
 
 ## 3. Slice 3: the orientation music
 
-- [x] 3.1 Define the `IntroAudio` port (`start`, `dropOut`, `resume`, `stop`, `snore`, `close`), plus a no-op implementation and a recording fake for tests (design §5)
-- [x] 3.2 Add the Web Audio implementation: square and triangle voices from a note table, gain envelopes, and a noise-burst snore, computed as samples and played as buffers; no dependency
+- [x] 3.1 Define the `IntroAudio` port (`start`, `dropOut`, `resume`, `stop`, `snore`, `close`), plus a no-op implementation and a recording fake for tests (design §5) — since joined by `pause` and `unpause` (3.9), `wake` (4.1c) and `punch` (4.1d)
+- [x] 3.2 Add the Web Audio implementation: square and triangle voices from a note table, gain envelopes, and a noise-burst snore, computed as samples and played as buffers; no dependency — the snore is a CC0 recording since 4.1c
 - [x] 3.3 Write the gloomy, mysterious chiptune loop as a note table in `views/intro/music/`
 - [x] 3.4 Create and resume the `AudioContext` inside the gate's input handler. Fall back to the no-op when it is missing or throws
 - [x] 3.5 Wire the timeline events to the port: start at the gate; drop out, then resume, at the glitch; stop and snore at card 10; stop on skip; start again from the top on card 11 — superseded by 4.1e: the music never stops for the snore, which is a cue on card 9; card 10 cuts the loop to its top
@@ -80,12 +80,12 @@ Story note (the ending):
 
 ## 4. Final verification
 
-- [ ] 4.1 Play the intro in a browser end to end, by ear and eye, then tune timings and the tune
+- [x] 4.1 Play the intro in a browser end to end, by ear and eye, then tune timings and the tune
 - [x] 4.1a A debugging jump for tuning, in the dev server only (design.md §12): a `seek` action on the timeline; → and ← once playing; `?card=N` starts there once the gate opens; the music restarts from the top on a jump; tests for each, and for its absence in production
 - [x] 4.1b From the playthrough: in card 5's pull-out, Jupiter no longer shrinks away with Steady Hand; it glides to its place on the map
-- [ ] 4.1c From the playthrough: a snore that sounds like one. After two computed snores failed, card 9 plays a recording, and card 10 adds a second, Joe waking with a snort a beat after the music returns (CC0-1.0, `music/sounds/README.md`)
-- [ ] 4.1d From the playthrough: the intro ends with Joe. Card 10 asks for a key no key answers; he wakes with a snort on the first phrase's high note, comes round for a couple of seconds, and punches the screen; the music dies with a computed blow, the screen collapses to black, and the video ends there. Skip lands on card 10, which cannot be skipped (design.md §13)
-- [ ] 4.1e From the playthrough: nothing stops for the snore. The black card 10 is gone: someone snores over card 9's last shot of Joe's window and over the music, a beat after its caption, and card 9 holds a second longer for it; Module 2's ident becomes card 10 and cuts the loop back to its top without a silence (design.md §5)
-- [ ] 4.1f From the playthrough: card 9 sends one shuttle up to Deimos, on "the Corridor", rather than a stream of them every 1.7 s
-- [ ] 4.1g From the playthrough: card 5's close shot shows Externa Prima as the focal point it is in the story: a glow and a far skyline across the horizon, zaibatsu towers crowned in their colours and joined by skybridges, Absolute Connections' teal tower far above them with the four-colour square on its face, a low city lit end to end, and a docking spire with berthed freighters where the incoming shuttle docks
-- [ ] 4.2 `pnpm run spec:validate chapter-1-intro` passes and every task above matches the implementation
+- [x] 4.1c From the playthrough: a snore that sounds like one. After two computed snores failed, card 9 plays a recording, and card 10 adds a second, Joe waking with a snort on the first phrase's high note (4.1d) (CC0-1.0, `music/sounds/README.md`)
+- [x] 4.1d From the playthrough: the intro ends with Joe. Card 10 asks for a key no key answers; he wakes with a snort on the first phrase's high note, comes round for a couple of seconds, and punches the screen; the music dies with a computed blow, the screen collapses to black, and the video ends there. Skip lands on card 10, which cannot be skipped (design.md §13)
+- [x] 4.1e From the playthrough: nothing stops for the snore. The black card 10 is gone: someone snores over card 9's last shot of Joe's window and over the music, a beat after its caption, and card 9 holds a second longer for it; Module 2's ident becomes card 10 and cuts the loop back to its top without a silence (design.md §5)
+- [x] 4.1f From the playthrough: card 9 sends one shuttle up to Deimos, on "the Corridor", rather than a stream of them every 1.7 s
+- [x] 4.1g From the playthrough: card 5's close shot shows Externa Prima as the focal point it is in the story: a glow and a far skyline across the horizon, zaibatsu towers crowned in their colours and joined by skybridges, Absolute Connections' teal tower far above them with the four-colour square on its face, a low city lit end to end, and a docking spire with berthed freighters where the incoming shuttle docks
+- [x] 4.2 `pnpm run spec:validate chapter-1-intro` passes and every task above matches the implementation
