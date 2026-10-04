@@ -90,17 +90,26 @@ reuse of the motif outside the intro.
    caption, the prompt, the skip control and the background.
 
 5. **Web Audio synth behind a port.** `IntroAudio` exposes `start`, `dropOut`,
-   `resume`, `stop` and `snore`, `pause` and `unpause` for a hidden page, and
-   `close` to release the `AudioContext` when the intro unmounts. The synth
-   computes the samples itself in plain
-   arithmetic: square and triangle voices from a note table, and for the snore
-   the soft palate flapping in the airflow, as a real snore is made. That
-   means knocks about twenty a second and never quite even, plus the rush of
-   air as noise from a shift register like a console's noise channel. Both
-   ring through low resonances like a throat's, around 110 and 300 Hz. The
-   first snore, noise with an even wobble, sounded like a hiss rather than a
-   sleeper (task 4.1). Web
-   Audio only plays the result. Each sound plays through a gain of its own: the
+   `resume`, `stop`, `snore` and `wake`, `pause` and `unpause` for a hidden
+   page, and `close` to release the `AudioContext` when the intro unmounts.
+   The synth computes the music's samples itself in plain arithmetic: square
+   and triangle voices from a note table. Web Audio only plays the result.
+
+   The snore and the waking snort are recordings, the intro's only ones. Two
+   rounds of a computed snore during task 4.1 sounded like a hiss, then a
+   machine: first noise with an even wobble, then palate knocks through throat
+   resonances. So card 10 plays "Sleep Snorf" and card 11 "Snorf 1", from
+   pauliuw's CC0-1.0 "Action sounds" pack on OpenGameArt. They are converted
+   to mono at the synth's rate and levelled against the music;
+   `music/sounds/README.md` records the source, the checksums and every step.
+   `sounds.ts` fetches them while the gate waits, in the same idle moment the
+   loop is rendered, and reads them into samples with a WAV reader of its own,
+   so they play like the synth's. They are fetched rather than built into the
+   bundle, to keep 145 KB out of the first screen's script. A recording that
+   has not arrived, or failed to, is silence: sound never holds up the video.
+   Skipping still sends nothing, since the fetch happens at the gate.
+
+   Each sound plays through a gain of its own: the
    loop's is closed and opened by the glitch, and every stop fades a gain out
    over a few milliseconds before the source stops, since a source cut mid-wave
    clicks. The snore is played once, and a stop silences it too, even while it
@@ -108,7 +117,9 @@ reuse of the motif outside the intro.
    music. A hidden page suspends the context, as it pauses the timeline (§2),
    and the snore's wait holds with it. The music stops on card 10
    and starts again from the top on card 11, Module 2's ident: the snore needs
-   the silence, and the music coming back is what wakes Joe in beat 1. The
+   the silence, and the music coming back is what wakes Joe, with the snort a
+   beat later. That plays on a skip too: skipped or not, he slept through
+   Module 1. A stop cancels it like the snore. The
    loop is rendered once and kept for the restart. Computing the samples rather
    than using Web Audio's oscillators makes the music a pure function: the same
    numbers in every browser, in tests, and in a WAV the preview tool writes for
