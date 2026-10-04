@@ -37,7 +37,7 @@ describe("powerOffScreen", () => {
     expect(lit(onFrame(6))).toBe(0);
   });
 
-  it("is black for good once the dot is out, inside the time card 11 gives it", () => {
+  it("is black for good once the dot is out, inside the time card 10 gives it", () => {
     expect(lit(powerOffScreen(PICTURE, DEAD_MS))).toBe(0);
     expect(lit(powerOffScreen(PICTURE, 60_000))).toBe(0);
     expect(DEAD_MS).toBeLessThan(POWER_OFF_MS);

@@ -141,7 +141,7 @@ describe("the start gate", () => {
 });
 
 describe("the card sequence", () => {
-  it("plays cards 1 to 11 in order, each announcing its caption word for word", () => {
+  it("plays cards 1 to 10 in order, each announcing its caption word for word", () => {
     render(<IntroView />);
     fireEvent.keyDown(window, { key: "Enter" });
 
