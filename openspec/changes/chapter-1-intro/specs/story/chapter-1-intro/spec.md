@@ -24,19 +24,20 @@ to play sound. No audio SHALL play before the sequence starts.
 - **THEN** the ident and prompt stay on screen, silent, and no card advances
 
 ### Requirement: Card sequence
-After the gate the sequence SHALL show cards 1 to 11 in script order, each with
+After the gate the sequence SHALL show cards 1 to 10 in script order, each with
 its animated 8-bit image and its caption, typed out beneath it. Each card MUST advance
 on its own once its caption is complete and has been held. Caption text MUST
 match the script word for word.
 
 #### Scenario: Cards play in order
 - **WHEN** the sequence runs without input
-- **THEN** cards 1 to 11 appear once each, in order, each caption as scripted
+- **THEN** cards 1 to 10 appear once each, in order, each caption as scripted
 
 ### Requirement: Orientation music
-A single chiptune loop SHALL play from the gate until card 10 or a skip, and
-again, from the top, on card 11. When audio is unavailable, the sequence MUST
-still play in full, silently.
+A single chiptune loop SHALL play from the gate, unbroken, until card 10 or a
+skip, and again, from the top, on card 10. The music MUST NOT fall silent
+between them. When audio is unavailable, the sequence MUST still play in full,
+silently.
 
 #### Scenario: Audio cannot start
 - **WHEN** the browser provides no working audio output
@@ -53,21 +54,23 @@ then carries on as before. No caption SHALL explain the glitch.
   and card 7 follows on its normal timing
 
 ### Requirement: Skip
-Once the sequence has started, and until card 11, a skip control reading
+Once the sequence has started, and until card 10, a skip control reading
 **Skipping is recorded.** SHALL be available, by pointer and by keyboard.
-Skipping MUST jump to the start of card 11, Module 2's ident, from where the
-ending plays out. Card 11 itself MUST NOT be skippable. Skipping MUST NOT send
+Skipping MUST jump to the start of card 10, Module 2's ident, from where the
+ending plays out. Card 10 itself MUST NOT be skippable. Skipping MUST NOT send
 any request or store anything.
 
 #### Scenario: Player skips
 - **WHEN** the player activates skip during card 3
-- **THEN** card 11 is shown from its start, the skip control is gone, and no
+- **THEN** card 10 is shown from its start, the skip control is gone, and no
   network request or storage write occurs
 
 ### Requirement: End state
-Card 10 SHALL be black with no caption: the music stops, a snore plays, and a
-beat of silence follows it. Card 11, the Module 2 ident, SHALL then start the
-music again from the top. It shows card 0's picture and the caption
+A beat after card 9's caption is typed, over its last shot of Joe's window and
+over the music, someone in the room SHALL snore, once; neither the picture nor
+the music stops for it, and it ends before card 9 does. Card 10, the Module 2
+ident, SHALL then start the music again from the top, as the next video would.
+It shows card 0's picture and the caption
 *ABSOLUTE CONNECTIONS · Contractor Orientation · Module 2 of 14: What's the
 Drill*, whole rather than typed, above the prompt **PRESS ANY KEY TO CONTINUE
 ORIENTATION**. No key SHALL answer it. On the high note that ends the tune's
@@ -79,15 +82,16 @@ ends there. Until beat 1 exists, nothing SHALL follow the black and no input
 SHALL move it on.
 
 #### Scenario: Sequence ends
-- **WHEN** card 10 plays through to card 11, and the player presses a key
-  during card 11
-- **THEN** the snore ends before the music starts again, the key changes
-  nothing, the snort follows the tune's first phrase, and after it the punch
-  stops the music and leaves the screen black and silent indefinitely
+- **WHEN** card 9 plays through to card 10, and the player presses a key
+  during card 10
+- **THEN** the snore plays over card 9's picture and music and is over before
+  card 10, the music cuts back to its top without a silence, the key changes
+  nothing, the snort comes on the first phrase's high note, and after it the
+  punch stops the music and leaves the screen black and silent indefinitely
 
 #### Scenario: Skipped to the end
-- **WHEN** the player skips during any card before card 11
-- **THEN** the music stops and starts again from the top on card 11, with no
+- **WHEN** the player skips during any card before card 10
+- **THEN** the music stops and starts again from the top on card 10, with no
   snore, and the snort and the punch follow it as they would have
 
 ### Requirement: Reduced motion
@@ -104,6 +108,6 @@ punch is still heard.
   the music drops out
 
 #### Scenario: Reduced motion at the punch
-- **WHEN** reduced motion is preferred and Joe punches the screen on card 11
+- **WHEN** reduced motion is preferred and Joe punches the screen on card 10
 - **THEN** the screen is black at once, without collapsing or flaring, and the
   music stops with the blow

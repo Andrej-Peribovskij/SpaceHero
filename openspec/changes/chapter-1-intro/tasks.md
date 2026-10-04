@@ -20,7 +20,7 @@ referenced below.
 - [x] 1.13 Add an E2E flow `tests/e2e/flows/intro.spec.ts`: open `/`, press a key, see card 1, skip, see the end card
 - [x] 1.14 `docs/frontend.apps.md`: one sentence saying pixel-art palettes are artwork data, outside the hardcoded-hex rule (design §4)
 - [x] 1.15 `docs/glossary.md`: add Beat, Card and Motif
-- [x] 1.16 Add a `docs/product-debt/intro-hand-off-to-beat-1.md` record: the intro holds on card 10 until beat 1 exists
+- [x] 1.16 Add a `docs/product-debt/intro-hand-off-to-beat-1.md` record: the intro holds on card 10 until beat 1 exists — since 4.1d and 4.1e it ends on black, on card 10
 - [x] 1.17 Gate: `pnpm run verify` and `pnpm run test:e2e` pass
 
 Review fixes (PR #8):
@@ -34,7 +34,7 @@ Review fixes (PR #8):
 
 Story note (the ending):
 
-- [x] 1.24 Card 10 becomes a captionless snore, and card 11 the Module 2 ident (*What's the Drill*), whole, with **PRESS ANY KEY TO CONTINUE ORIENTATION**; the story script, spec, glossary and product-debt record follow
+- [x] 1.24 Card 10 becomes a captionless snore, and card 11 the Module 2 ident (*What's the Drill*), whole, with **PRESS ANY KEY TO CONTINUE ORIENTATION**; the story script, spec, glossary and product-debt record follow — superseded by 4.1e: no black card; the snore is on card 9, and Module 2 is card 10
 
 ## 2. Slice 2: animated pixel art and the Ganymede glitch
 
@@ -44,7 +44,7 @@ Story note (the ending):
 - [x] 2.4 Add the pure renderer: background, palette cycling, sprites rotated by stepped nearest-neighbour rotation, flipbooks, and a still frame at time 0
 - [x] 2.5 Unit-test the renderer: a cycle changes colour over time; a sprite is unrotated at time 0 and turned a quarter at a quarter turn; transparent sprite pixels show the background; a flipbook steps, wraps and runs backwards
 - [x] 2.6 Add the pixel canvas: repaints at 12 fps, smoothing off, `image-rendering: pixelated`, holds still under reduced motion, and keeps the script's image line as its text alternative
-- [x] 2.7 Draw card 0, reused by card 11: twinkling stars, the four-colour square turning clockwise, and the white dial turning anticlockwise as a 16-frame flipbook (1.25×, 64 steps)
+- [x] 2.7 Draw card 0, reused by card 11: twinkling stars, the four-colour square turning clockwise, and the white dial turning anticlockwise as a 16-frame flipbook (1.25×, 64 steps) — card 10 since 4.1e
 - [x] 2.7a One screen (design §10): 384×216, card 0 redrawn at that size, captions and prompts drawn into the canvas in a 7×11 pixel font of our own, the idents' titles on two lines, emphasis in yellow; the prompt blinks, and holds lit under reduced motion
 - [x] 2.7b Tests: font coverage of every caption and prompt; caption layout (wrap, forced break, typing order); the band (typed characters only, emphasis, art left alone above it); the screen's 12 fps, immediate repaint on typing, and stillness
 - [x] 2.7c Hybrid art (design §11): scenes with their own clocks, a fade schedule on a brightness ladder, painted layers, rectangular pictures, fire flicker cycles; reduced motion stops movement but keeps cuts and fades
@@ -58,7 +58,7 @@ Story note (the ending):
 - [x] 2.8f Draw card 7, the Diaspora: a hard cut to white, out of which a launch field on a bleached Earth comes up, the great ships dark on their pads by their gantries; on "Diaspora" they light one after another and the sky fills with ships rising on columns of smoke, near and far; on "and the calendar" the camera tilts up with them through the white sky into the black, past ships at every height, and dissolves to orbit; a pull-back from the Earth's edge to the white Earth, its ships gathering into rivers of light, a smaller one ending at Mars and Deimos and the great ones running on past Mars out of the frame, for the stations beyond; on "Year Zero" it holds, then dives into the Earth's day side down to its cracked ground, for card 8
 - [x] 2.8g Draw card 8, the ones who stayed: opening on card 7's last frame, the fall goes on into the glare until all is white; out of it, a sandstone cliff towering out of the frame, with three caverns in it, under a white sky and a swollen Sun, the rock the only shelter left, with dark mouths, ledges, awnings, fires and small figures in the shade, a toppled ship on the cracked plain, the caption held back until it clears; on "Some chose to stay." a push-in onto one figure at a cave's edge, dissolving to the view from inside the cave: dark rock round the blinding opening, a fire and a cloth, and the figure, cloaked, a hand to the brow, looking up at the white sky where a last ship climbs away; the courtesy in the caption, none in the picture
 - [x] 2.8h Draw card 9, Mars, 158 A.D.: opening on card 8's last frame, the light goes out of it a step at a time; out of the dark, stars, and a tilt down to the Martian horizon at dusk, the sunset blue, Deimos high up with Externa's lights, Phobos crossing, shuttles climbing to Deimos from a far port, one leaving on "the Corridor", the caption held back until the tilt lands; on the plain, a dome half sunk in the dunes, a small ship by it, a ring of dark windows and one lit; on "contractors like you" a push-in onto that window, dissolving to it close: a dark room, its walls lit only by the video playing on a screen out of sight, its light flickering and changing colour at every cut; on "Externa Prima" Externa's beacon above the dome blinks Absolute Connections teal
-- [x] 2.8i Card 10, the snore: black on purpose, an art of its own with nothing painted, and no caption band
+- [x] 2.8i Card 10, the snore: black on purpose, an art of its own with nothing painted, and no caption band — removed by 4.1e
 - [x] 2.9 Add a test that every card's art parses and that every script card has art
 - [x] 2.10 Glitch: exactly two painted frames of deterministic corruption (row shifts and palette swap) on the glitch event, skipped under reduced motion (design §6)
 - [x] 2.11 Glitch tests: two corrupted frames then normal; no corruption under reduced motion; card 7 keeps its normal timing
@@ -72,17 +72,18 @@ Story note (the ending):
 - [x] 3.2 Add the Web Audio implementation: square and triangle voices from a note table, gain envelopes, and a noise-burst snore, computed as samples and played as buffers; no dependency
 - [x] 3.3 Write the gloomy, mysterious chiptune loop as a note table in `views/intro/music/`
 - [x] 3.4 Create and resume the `AudioContext` inside the gate's input handler. Fall back to the no-op when it is missing or throws
-- [x] 3.5 Wire the timeline events to the port: start at the gate; drop out, then resume, at the glitch; stop and snore at card 10; stop on skip; start again from the top on card 11
-- [x] 3.6 Tests against the recording fake: nothing plays before the gate; drop-out on the Ganymede line, including under reduced motion; stop plus snore, then a restart on card 11, after the snore; stop then restart on skip; close on unmount
+- [x] 3.5 Wire the timeline events to the port: start at the gate; drop out, then resume, at the glitch; stop and snore at card 10; stop on skip; start again from the top on card 11 — superseded by 4.1e: the music never stops for the snore, which is a cue on card 9; card 10 cuts the loop to its top
+- [x] 3.6 Tests against the recording fake: nothing plays before the gate; drop-out on the Ganymede line, including under reduced motion; stop plus snore, then a restart on card 11, after the snore; stop then restart on skip; close on unmount — updated by 4.1e to the snore over the music
 - [x] 3.7 Test that a throwing `AudioContext` still plays every card, silently and with no error shown
 - [x] 3.8 Gate: `pnpm run verify` and `pnpm run test:e2e` pass
-- [x] 3.9 Review follow-ups from PR #10: close the audio when a cue breaks; a skip on card 10 stops the snore; fade out on a stop instead of cutting; pause the music with a hidden page (`pause`, `unpause`); render the loop in idle time, not in the key press; card 10's longer hold as `holdMs`, not a caption
+- [x] 3.9 Review follow-ups from PR #10: close the audio when a cue breaks; a skip on card 10 stops the snore; fade out on a stop instead of cutting; pause the music with a hidden page (`pause`, `unpause`); render the loop in idle time, not in the key press; card 10's longer hold as `holdMs`, not a caption — the snore is on card 9 since 4.1e, and a skip still stops it
 
 ## 4. Final verification
 
 - [ ] 4.1 Play the intro in a browser end to end, by ear and eye, then tune timings and the tune
 - [x] 4.1a A debugging jump for tuning, in the dev server only (design.md §12): a `seek` action on the timeline; → and ← once playing; `?card=N` starts there once the gate opens; the music restarts from the top on a jump; tests for each, and for its absence in production
 - [x] 4.1b From the playthrough: in card 5's pull-out, Jupiter no longer shrinks away with Steady Hand; it glides to its place on the map
-- [ ] 4.1c From the playthrough: a snore that sounds like one. After two computed snores failed, card 10 plays a recording, and card 11 adds a second, Joe waking with a snort a beat after the music returns (CC0-1.0, `music/sounds/README.md`)
-- [ ] 4.1d From the playthrough: the intro ends with Joe. Card 11 asks for a key no key answers; he wakes with a snort on the first phrase's high note, comes round for a couple of seconds, and punches the screen; the music dies with a computed blow, the screen collapses to black, and the video ends there. Skip lands on card 11, which cannot be skipped (design.md §13)
+- [ ] 4.1c From the playthrough: a snore that sounds like one. After two computed snores failed, card 9 plays a recording, and card 10 adds a second, Joe waking with a snort a beat after the music returns (CC0-1.0, `music/sounds/README.md`)
+- [ ] 4.1d From the playthrough: the intro ends with Joe. Card 10 asks for a key no key answers; he wakes with a snort on the first phrase's high note, comes round for a couple of seconds, and punches the screen; the music dies with a computed blow, the screen collapses to black, and the video ends there. Skip lands on card 10, which cannot be skipped (design.md §13)
+- [ ] 4.1e From the playthrough: nothing stops for the snore. The black card 10 is gone: someone snores over card 9's last shot of Joe's window and over the music, a beat after its caption, and card 9 holds a second longer for it; Module 2's ident becomes card 10 and cuts the loop back to its top without a silence (design.md §5)
 - [ ] 4.2 `pnpm run spec:validate chapter-1-intro` passes and every task above matches the implementation
