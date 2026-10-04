@@ -142,15 +142,20 @@ export function useIntroTimeline(onEvent?: (event: IntroEvent) => void): IntroTi
     [advanceClock, show],
   );
 
+  /** When the frame clock last counted to: the last frame, or a key press since it. */
+  const counted = useRef<number | undefined>(undefined);
+
   // The frame clock runs for as long as the video is on screen: the timeline only moves while it
   // plays, but the ident at the gate is never still.
   useEffect(() => {
     let frame = 0;
-    let last: number | undefined;
 
     const loop = (now: number) => {
-      const dtMs = last === undefined ? 0 : Math.min(now - last, MAX_FRAME_MS);
-      last = now;
+      const last = counted.current;
+      const dtMs = last === undefined ? 0 : Math.min(Math.max(0, now - last), MAX_FRAME_MS);
+      // A frame is stamped with when it was due. One held up by a slow key press is stamped before
+      // the press ended, and must not wind the clock back to before it.
+      counted.current = last === undefined ? now : Math.max(now, last);
       if (stateRef.current.phase === "playing" && dtMs > 0) dispatch({ type: "tick", dtMs });
       else advanceClock(dtMs);
       frame = requestAnimationFrame(loop);
@@ -158,7 +163,7 @@ export function useIntroTimeline(onEvent?: (event: IntroEvent) => void): IntroTi
 
     // Hidden, the video pauses: the next frame after coming back starts a fresh clock.
     const onVisibilityChange = () => {
-      if (document.visibilityState === "hidden") last = undefined;
+      if (document.visibilityState === "hidden") counted.current = undefined;
     };
 
     frame = requestAnimationFrame(loop);
@@ -169,9 +174,22 @@ export function useIntroTimeline(onEvent?: (event: IntroEvent) => void): IntroTi
     };
   }, [dispatch, advanceClock]);
 
-  const start = useCallback(() => dispatch({ type: "start" }), [dispatch]);
-  const skip = useCallback(() => dispatch({ type: "skip" }), [dispatch]);
-  const seek = useCallback((card: number) => dispatch({ type: "seek", card }), [dispatch]);
+  /**
+   * An action from the player, between two frames: what it starts is timed from now, not from the
+   * frame before it. A frame can be a third of a second apart in a throttled tab, and the next tick
+   * would otherwise hand the new card time that passed before the key was pressed.
+   */
+  const byPlayer = useCallback(
+    (action: IntroAction) => {
+      dispatch(action);
+      if (counted.current !== undefined) counted.current = performance.now();
+    },
+    [dispatch],
+  );
+
+  const start = useCallback(() => byPlayer({ type: "start" }), [byPlayer]);
+  const skip = useCallback(() => byPlayer({ type: "skip" }), [byPlayer]);
+  const seek = useCallback((card: number) => byPlayer({ type: "seek", card }), [byPlayer]);
 
   return {
     ...shown,
