@@ -18,8 +18,10 @@ Example widgets screen.
 - The Ganymede glitch on card 6: two frames of visual corruption and the
   music drops out.
 - A skip control reading **Skipping is recorded.**, which records nothing.
-- The sequence ends on a snore, then on the Module 2 ident, waiting on **PRESS
-  ANY KEY TO CONTINUE ORIENTATION**. The hand-off to beat 1 is deferred.
+- The sequence ends on a snore, then on the Module 2 ident, asking **PRESS ANY
+  KEY TO CONTINUE ORIENTATION**. Its music wakes Joe, who punches the screen
+  dead, and the intro ends on black. Beat 1, which opens in that dark, is
+  deferred.
 - The Example widgets screen moves from `/` to `/widgets`.
 
 ## Capabilities

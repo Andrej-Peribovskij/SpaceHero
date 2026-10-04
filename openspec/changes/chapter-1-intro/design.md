@@ -117,9 +117,12 @@ reuse of the motif outside the intro.
    music. A hidden page suspends the context, as it pauses the timeline (§2),
    and the snore's wait holds with it. The music stops on card 10
    and starts again from the top on card 11, Module 2's ident: the snore needs
-   the silence, and the music coming back is what wakes Joe, with the snort a
-   beat later. That plays on a skip too: skipped or not, he slept through
-   Module 1. A stop cancels it like the snore. The
+   the silence, and the music coming back is what wakes Joe, with the snort as
+   its first phrase ends. Then he punches the set (§13): `punch` stops every
+   sound at once and plays the blow, which is computed like the music, since
+   a thump is simple enough to compute. The timeline cues both, so they pause
+   with a hidden page like everything else. That plays on a skip too: skipped
+   or not, he slept through Module 1. The
    loop is rendered once and kept for the restart. Computing the samples rather
    than using Web Audio's oscillators makes the music a pure function: the same
    numbers in every browser, in tests, and in a WAV the preview tool writes for
@@ -154,9 +157,11 @@ reuse of the motif outside the intro.
    canvas, for the same reason.
 
 8. **Skip is a design-system `Button`.** It is reachable by Tab, and Escape is
-   a shortcut for it. It dispatches `skip`, which stops Module 1's music,
-   and nothing else; the end state then starts Module 2's, as it does when the
-   video plays through. The spec forbids any request or storage write.
+   a shortcut for it. It dispatches `skip`, which stops Module 1's music and
+   jumps to the start of card 11. Card 11 then starts Module 2's music, as it
+   does when the video plays through, and the ending plays out: a skip skips
+   Module 1, not Joe's punch. Card 11 has no skip, since it is the ending and
+   lasts under nine seconds. The spec forbids any request or storage write.
 
 9. **A pixel font of our own** (superseding "no pixel font", see §10). A
    third-party pixel font would need licence review. This one is drawn for the
@@ -225,6 +230,30 @@ reuse of the motif outside the intro.
    build has no jump, and the player can still only skip, which is recorded.
    Alternative considered: a card picker drawn on the screen. That puts
    debugging controls inside the picture, and a URL and two keys do the job.
+
+13. **Joe's punch ends the video** (2026-10-04, from the playthrough). The
+   intro used to end holding on Module 2's ident, waiting for a key that beat
+   1 would answer with Joe's slap. Most players press at once, so the slap
+   would have come before the music had woken him. Now the video plays its
+   own ending, so the comic timing is ours. Card 11 asks for a key that no key
+   answers. Its music wakes Joe as the tune's first phrase ends, two bars in
+   at 6.67 s. The punch comes at 8 s, once the snort is over. Both are cues on
+   card 11's own clock (`wakeAtMs`, `punchAtMs` in `script.ts`), like the
+   glitch: the timeline fires `wake` and `punch`, and the music listens.
+   The screen dies like a cathode-ray tube, two 12-fps frames per step. The
+   picture squeezes to a line, flaring towards white, the line shrinks to a
+   dot, and the dot goes out. It is applied to the whole composed screen, as
+   the glitch is, because the set is switched off, not the picture. Card 11
+   lasts 600 ms past the punch and the video ends; once ended, the screen's
+   clock holds there, so the black stays. Under reduced motion the punch cuts
+   straight to black.
+   The end is now black and silent, with nothing after it. That is still
+   product debt until beat 1 exists (`docs/product-debt/intro-hand-off-to-beat-1.md`):
+   beat 1 opens in that dark.
+   Alternatives considered: the punch after the tune's peak, bar 6, about
+   17 s in. That is a fuller build, but long to sit through for a joke. And a
+   key press as the punch, as the hand-off had it, which hands the timing back
+   to a player who presses at once.
 
 ## Risks / Trade-offs
 

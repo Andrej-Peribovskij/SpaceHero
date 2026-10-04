@@ -53,42 +53,56 @@ then carries on as before. No caption SHALL explain the glitch.
   and card 7 follows on its normal timing
 
 ### Requirement: Skip
-Once the sequence has started, a skip control reading **Skipping is recorded.**
-SHALL be available, by pointer and by keyboard. Skipping MUST jump to the end
-state. It MUST NOT send any request or store anything.
+Once the sequence has started, and until card 11, a skip control reading
+**Skipping is recorded.** SHALL be available, by pointer and by keyboard.
+Skipping MUST jump to the start of card 11, Module 2's ident, from where the
+ending plays out. Card 11 itself MUST NOT be skippable. Skipping MUST NOT send
+any request or store anything.
 
 #### Scenario: Player skips
 - **WHEN** the player activates skip during card 3
-- **THEN** the end state is shown and no network request or storage write occurs
+- **THEN** card 11 is shown from its start, the skip control is gone, and no
+  network request or storage write occurs
 
 ### Requirement: End state
 Card 10 SHALL be black with no caption: the music stops, a snore plays, and a
-beat of silence follows it. The sequence SHALL then end on card 11, the Module
-2 ident, which starts the music again from the top; a beat later, someone in
-the dark wakes with a snort, once. Card 11 shows card 0's
-picture and the caption *ABSOLUTE CONNECTIONS · Contractor Orientation · Module
-2 of 14: What's the Drill*, whole rather than typed, above the prompt **PRESS
-ANY KEY TO CONTINUE ORIENTATION**. Until beat 1 exists, no input SHALL move it
-on, and nothing SHALL follow automatically.
+beat of silence follows it. Card 11, the Module 2 ident, SHALL then start the
+music again from the top. It shows card 0's picture and the caption
+*ABSOLUTE CONNECTIONS · Contractor Orientation · Module 2 of 14: What's the
+Drill*, whole rather than typed, above the prompt **PRESS ANY KEY TO CONTINUE
+ORIENTATION**. No key SHALL answer it. As the tune's first phrase ends, someone
+in the dark SHALL wake with a snort, once. When the snort is over, they punch
+the screen: the music MUST stop at once, a blow SHALL sound, and the whole
+screen, caption and prompt included, SHALL collapse to black. The sequence
+ends there. Until beat 1 exists, nothing SHALL follow the black and no input
+SHALL move it on.
 
 #### Scenario: Sequence ends
-- **WHEN** card 10 plays through to card 11, and the player then presses a key
-- **THEN** the snore ends before the music starts again, the snort follows the
-  music, and the ident and prompt hold indefinitely with the music looping
+- **WHEN** card 10 plays through to card 11, and the player presses a key
+  during card 11
+- **THEN** the snore ends before the music starts again, the key changes
+  nothing, the snort follows the tune's first phrase, and after it the punch
+  stops the music and leaves the screen black and silent indefinitely
 
 #### Scenario: Skipped to the end
-- **WHEN** the player skips during any card
+- **WHEN** the player skips during any card before card 11
 - **THEN** the music stops and starts again from the top on card 11, with no
-  snore, and the snort follows it
+  snore, and the snort and the punch follow it as they would have
 
 ### Requirement: Reduced motion
 When the player prefers reduced motion, captions SHALL appear whole instead of
 typed, nothing in the card art SHALL move, the prompt SHALL NOT blink, and the
-glitch MUST NOT flash. A card's pictures SHALL still change on cue, so the story
-is the same. The music still drops out, so the clue
-survives.
+glitch MUST NOT flash. The punch MUST NOT collapse or flare the screen: it
+SHALL cut to black at once. A card's pictures SHALL still change on cue, so the
+story is the same. The music still drops out, so the clue survives, and the
+punch is still heard.
 
 #### Scenario: Reduced motion on card 6
 - **WHEN** reduced motion is preferred and card 6 reaches the Ganymede line
 - **THEN** the image neither moves nor flashes, the caption is shown whole, and
   the music drops out
+
+#### Scenario: Reduced motion at the punch
+- **WHEN** reduced motion is preferred and Joe punches the screen on card 11
+- **THEN** the screen is black at once, without collapsing or flaring, and the
+  music stops with the blow
