@@ -505,26 +505,254 @@ const HORIZON = 128;
 const HORIZON_CURVE = 2400;
 const groundAt = (x: number) => HORIZON + ((x - FRAME_WIDTH / 2) ** 2) / HORIZON_CURVE;
 
-interface Building {
+/** Where something standing `width` wide from `left` meets the curved ground. */
+const baseOf = (left: number, width: number) => Math.ceil(groundAt(left + width / 2)) + 2;
+
+/** How high above the horizon the city's glow reaches. */
+const GLOW_HEIGHT = 48;
+/** The faintest glow drawn at all. */
+const GLOW_FLOOR = 0.07;
+
+/**
+ * The glow of a city too big for the frame: light thrown up off its streets, dithered into the sky
+ * along the horizon and strongest at the middle, behind the towers.
+ */
+function paintCityGlow(canvas: Canvas): void {
+  for (let x = 0; x < FRAME_WIDTH; x += 1) {
+    const middle = 1 - Math.abs(x - FRAME_WIDTH / 2) / (FRAME_WIDTH / 2);
+    const ground = groundAt(x);
+    for (let y = Math.floor(ground - GLOW_HEIGHT); y < ground; y += 1) {
+      // Only behind the city: it fades out well before the frame's edges.
+      const strength = (1 - (ground - y) / GLOW_HEIGHT) ** 1.5 * middle ** 2.5;
+      // The dither's lowest cell is 0: below a minimum, a faint glow would still light it everywhere.
+      const level = strength * 0.4;
+      if (level > GLOW_FLOOR && ditherAt(x, y) < level) canvas.set(x, y, strength > 0.6 && ditherAt(x + 1, y) < 0.3 ? "b" : "k");
+    }
+  }
+}
+
+/** The far city: plain towers right across the horizon, taller towards the middle, a few lights in each. */
+const FAR_TOWERS: readonly { readonly left: number; readonly width: number; readonly height: number }[] = (() => {
+  const towers: { left: number; width: number; height: number }[] = [];
+  for (let left = 4; left < FRAME_WIDTH - 6; ) {
+    const width = 4 + Math.floor(noise(left, 301) * 6);
+    const middle = 1 - Math.abs(left + width / 2 - FRAME_WIDTH / 2) / (FRAME_WIDTH / 2);
+    towers.push({ left, width, height: Math.floor((8 + 40 * middle) * (0.55 + noise(left, 302) * 0.7)) });
+    left += width + (noise(left, 303) < 0.3 ? 1 : 0);
+  }
+  return towers;
+})();
+
+function paintFarCity(canvas: Canvas): void {
+  for (const tower of FAR_TOWERS) {
+    const base = baseOf(tower.left, tower.width);
+    const top = base - tower.height;
+    for (let y = top; y < base; y += 1) {
+      for (let x = tower.left; x < tower.left + tower.width; x += 1) {
+        const lit = (y - top) % 3 === 2 && (x - tower.left) % 2 === 1 && noise(x, y + 7) < 0.22;
+        canvas.set(x, y, lit ? (noise(x, y + 8) < 0.6 ? "a" : "y") : y === top ? "b" : "n");
+      }
+    }
+  }
+}
+
+/** How a tower's top ends: flat under a mast, set back in steps, sloped, or drawn to a spire. */
+type Crown = "mast" | "stepped" | "slant" | "spire";
+
+interface Skyscraper {
   readonly left: number;
   readonly width: number;
   readonly height: number;
-  /** Absolute Connections' tower: teal windows, a teal beacon. */
-  readonly ours?: boolean;
+  readonly crown: Crown;
+  /** A zaibatsu's colour: a lit band under its crown, and its beacon. */
+  readonly accent?: PaletteChar;
 }
 
-const BUILDINGS: readonly Building[] = [
-  { left: 112, width: 10, height: 24 },
-  { left: 124, width: 8, height: 40 },
-  { left: 134, width: 14, height: 56 },
-  { left: 150, width: 9, height: 32 },
-  { left: 162, width: 18, height: 84, ours: true },
-  { left: 183, width: 10, height: 46 },
-  { left: 196, width: 13, height: 64 },
-  { left: 212, width: 8, height: 30 },
-  { left: 223, width: 15, height: 48 },
-  { left: 241, width: 9, height: 22 },
+/** How deep a crown is, in rows: below it, the tower is full width. */
+const CROWN_ROWS = 12;
+
+/** How far in from each side a tower's row `v` (0 at its top) is, for its crown. */
+function insetOf(tower: Skyscraper, v: number): { readonly left: number; readonly right: number } {
+  if (v >= CROWN_ROWS) return { left: 0, right: 0 };
+  switch (tower.crown) {
+    case "mast":
+      return { left: 0, right: 0 };
+    case "stepped": {
+      const step = v < 4 ? 2 : v < 8 ? 1 : 0;
+      return { left: step * 2, right: step * 2 };
+    }
+    case "slant": {
+      const cut = Math.round((1 - v / CROWN_ROWS) * (tower.width - 3));
+      return { left: 0, right: cut };
+    }
+    case "spire": {
+      const half = Math.round((1 - v / CROWN_ROWS) * (tower.width / 2 - 1));
+      return { left: half, right: half };
+    }
+  }
+}
+
+/** The zaibatsu towers, either side of Absolute Connections' own, which stands from 178 to 206. */
+const SKYSCRAPERS: readonly Skyscraper[] = [
+  { left: 90, width: 9, height: 42, crown: "slant" },
+  { left: 101, width: 12, height: 60, crown: "stepped", accent: "r" },
+  { left: 115, width: 8, height: 50, crown: "mast" },
+  { left: 125, width: 14, height: 82, crown: "spire", accent: "Y" },
+  { left: 141, width: 10, height: 56, crown: "stepped" },
+  { left: 153, width: 13, height: 94, crown: "slant", accent: "o" },
+  { left: 168, width: 8, height: 64, crown: "mast" },
+  { left: 208, width: 9, height: 70, crown: "mast" },
+  { left: 219, width: 13, height: 98, crown: "spire", accent: "s" },
+  { left: 234, width: 10, height: 58, crown: "stepped" },
+  { left: 246, width: 14, height: 84, crown: "stepped", accent: "r" },
+  { left: 262, width: 8, height: 46, crown: "slant" },
+  { left: 272, width: 11, height: 66, crown: "spire", accent: "Y" },
+  { left: 285, width: 9, height: 40, crown: "mast" },
+  { left: 296, width: 10, height: 52, crown: "slant", accent: "o" },
 ];
+
+/** Beacons blink each to its own beat, so the skyline never blinks as one. */
+const beaconOf = (t: number, left: number) => beaconLit(t + left * 37);
+
+/** A lit window's colour: mostly amber, some sun yellow, a few pale. */
+const windowColour = (x: number, y: number): PaletteChar => (noise(x + 1, y) < 0.18 ? "p" : noise(x + 2, y) < 0.3 ? "Y" : "a");
+
+function paintSkyscraper(canvas: Canvas, tower: Skyscraper, t: number): void {
+  const base = baseOf(tower.left, tower.width);
+  const top = base - tower.height;
+
+  for (let y = top; y < base; y += 1) {
+    const v = y - top;
+    const inset = insetOf(tower, v);
+    const from = tower.left + inset.left;
+    const to = tower.left + tower.width - inset.right;
+    for (let x = from; x < to; x += 1) {
+      const u = x - tower.left;
+      // The zaibatsu's band, lit under the crown; below it, windows on a 3×3 grid, most of them lit.
+      const band = tower.accent !== undefined && (v === CROWN_ROWS || v === CROWN_ROWS + 1) && x > from && x < to - 1;
+      const window = v > CROWN_ROWS + 2 && v % 3 === 1 && u % 3 === 2 && u < tower.width - 1;
+      const flicker = noise(x * 7 + Math.floor(t / 900), y) < 0.02;
+      if (band) canvas.set(x, y, tower.accent!);
+      else if (window && noise(x, y) < 0.78 && !flicker) canvas.set(x, y, windowColour(x, y));
+      // The face towards the Sun catches its light, and so does the crown's edge.
+      else canvas.set(x, y, x === from || (v < CROWN_ROWS && x === to - 1) ? "g" : u < 2 ? "b" : "n");
+    }
+  }
+
+  const mast = tower.left + Math.floor(tower.width / 2);
+  const mastHeight = tower.crown === "spire" ? 6 : tower.crown === "mast" ? 5 : 3;
+  for (let y = top - mastHeight; y < top; y += 1) canvas.set(mast, y, "g");
+  if (beaconOf(t, tower.left)) canvas.set(mast, top - mastHeight - 1, tower.accent ?? "r");
+}
+
+/**
+ * Absolute Connections' own tower, in the middle of the city and far above it: set back three
+ * times to a spire, its windows teal, teal light running up its edges, and on its face the
+ * four-colour square, lit, under the teal beacon that tops the city.
+ */
+const OURS = { left: 178, width: 28, height: 116 } as const;
+
+/** The logo on the tower's face: the square's four corners in their colours, the dial at its heart. */
+const LOGO: Picture = parsePicture(
+  "card 5 logo",
+  `
+  ttttt___YYYYY
+  ttttt___YYYYY
+  tt_________YY
+  tt___www___YY
+  _____w.w_____
+  ss___www___rr
+  ss_________rr
+  sssss___rrrrr
+  sssss___rrrrr
+`,
+);
+
+function paintOurs(canvas: Canvas, t: number): void {
+  const base = baseOf(OURS.left, OURS.width);
+  const top = base - OURS.height;
+  const centre = OURS.left + OURS.width / 2;
+
+  for (let y = top; y < base; y += 1) {
+    const v = y - top;
+    const step = v < 8 ? 9 : v < 16 ? 6 : v < 24 ? 3 : 0;
+    const from = OURS.left + step;
+    const to = OURS.left + OURS.width - step;
+    for (let x = from; x < to; x += 1) {
+      const u = x - from;
+      const edge = x === from || x === to - 1;
+      // Teal light up its edges and along each setback; windows teal on a 2-wide grid.
+      const ledge = v === 8 || v === 16 || v === 24;
+      const window = !edge && v > 26 && v % 3 === 1 && u % 2 === 1 && noise(x, y) < 0.85;
+      if (edge) canvas.set(x, y, v % 2 === 0 ? "t" : x === from ? "g" : "n");
+      else if (ledge) canvas.set(x, y, "t");
+      else if (window) canvas.set(x, y, noise(x + 5, y) < 0.15 ? "p" : "t");
+      else canvas.set(x, y, x < from + 3 ? "b" : "n");
+    }
+  }
+
+  // The square on its face, on a dark panel so it reads from across the city.
+  const logoLeft = Math.round(centre - LOGO.width / 2);
+  const logoTop = top + 28;
+  for (let y = logoTop - 1; y <= logoTop + LOGO.height; y += 1) {
+    for (let x = logoLeft - 1; x <= logoLeft + LOGO.width; x += 1) canvas.set(x, y, ".");
+  }
+  paintPicture(canvas, LOGO, logoLeft, logoTop);
+
+  // The spire, and the beacon over the whole city.
+  const spire = Math.floor(centre);
+  for (let y = top - 12; y < top; y += 1) canvas.set(spire, y, y < top - 6 ? "g" : "p");
+  canvas.set(spire - 1, top - 1, "g");
+  canvas.set(spire + 1, top - 1, "g");
+  if (beaconLit(t)) {
+    canvas.set(spire, top - 13, "t");
+    canvas.set(spire - 1, top - 13, "t");
+    canvas.set(spire + 1, top - 13, "t");
+    canvas.set(spire, top - 14, "t");
+  }
+}
+
+/** Skybridges between the towers, lit along their length: drawn behind, so only the spans between show. */
+const BRIDGES: readonly { readonly left: number; readonly right: number; readonly above: number }[] = [
+  { left: 99, right: 182, above: 34 },
+  { left: 130, right: 252, above: 62 },
+  { left: 202, right: 300, above: 40 },
+  { left: 150, right: 232, above: 84 },
+];
+
+function paintBridges(canvas: Canvas): void {
+  for (const bridge of BRIDGES) {
+    const y = Math.round(HORIZON + 2 - bridge.above);
+    for (let x = bridge.left; x <= bridge.right; x += 1) {
+      canvas.set(x, y, "g");
+      canvas.set(x, y + 1, x % 3 === 0 ? "a" : "n");
+    }
+  }
+}
+
+/** The low city at the towers' feet: blocks shoulder to shoulder along the ground, every one lit. */
+const BLOCKS: readonly { readonly left: number; readonly width: number; readonly height: number }[] = (() => {
+  const blocks: { left: number; width: number; height: number }[] = [];
+  for (let left = 74; left < 340; ) {
+    const width = 3 + Math.floor(noise(left, 311) * 5);
+    const middle = 1 - Math.abs(left + width / 2 - FRAME_WIDTH / 2) / (FRAME_WIDTH / 2);
+    blocks.push({ left, width, height: 3 + Math.floor(noise(left, 312) * (3 + 6 * middle)) });
+    left += width;
+  }
+  return blocks;
+})();
+
+function paintLowCity(canvas: Canvas): void {
+  for (const block of BLOCKS) {
+    const base = baseOf(block.left, block.width);
+    for (let y = base - block.height; y < base; y += 1) {
+      for (let x = block.left; x < block.left + block.width; x += 1) {
+        const window = (base - y) % 2 === 0 && noise(x, y + 9) < 0.55;
+        canvas.set(x, y, window ? windowColour(x, y) : y === base - block.height ? "b" : "n");
+      }
+    }
+  }
+}
 
 interface Dome {
   readonly x: number;
@@ -532,51 +760,10 @@ interface Dome {
 }
 
 const DOMES: readonly Dome[] = [
-  { x: 84, radius: 13 },
-  { x: 282, radius: 22 },
-  { x: 318, radius: 11 },
+  { x: 84, radius: 15 },
+  { x: 312, radius: 20 },
+  { x: 366, radius: 10 },
 ];
-
-/** The pads at the docks, where the shuttles lift off and land. */
-const PAD = { left: 18, right: 64 } as const;
-
-/** A shuttle, nose up. */
-const SHUTTLE: Picture = parsePicture(
-  "card 5 shuttle",
-  `
-  __p__
-  _pgp_
-  _pgp_
-  pgggp
-  p_._p
-`,
-);
-
-function paintBuilding(canvas: Canvas, building: Building, t: number): void {
-  const base = Math.ceil(groundAt(building.left + building.width / 2)) + 2;
-  const top = base - building.height;
-  const crown = 5;
-
-  for (let y = top; y < base; y += 1) {
-    const inset = y < top + crown ? 2 : 0;
-    for (let x = building.left + inset; x < building.left + building.width - inset; x += 1) {
-      const u = x - building.left - inset;
-      const v = y - top;
-      // The face towards the Sun catches its light; windows on a 3×3 grid, most of them lit.
-      const sunlit = u < 2;
-      const window = v > crown && v % 3 === 1 && u % 3 === 2 && x < building.left + building.width - 2;
-      const flicker = noise(x * 7 + Math.floor(t / 900), y) < 0.02;
-      if (window && noise(x, y) < 0.8 && !flicker) {
-        canvas.set(x, y, building.ours ? "t" : noise(x + 1, y) < 0.18 ? "p" : noise(x + 2, y) < 0.3 ? "Y" : "a");
-      } else canvas.set(x, y, sunlit ? "g" : "n");
-    }
-  }
-
-  const mast = building.left + Math.floor(building.width / 2);
-  const mastHeight = building.ours ? 10 : 4;
-  for (let y = top - mastHeight; y < top; y += 1) canvas.set(mast, y, "g");
-  if (beaconLit(t)) canvas.set(mast, top - mastHeight - 1, building.ours ? "t" : "r");
-}
 
 function paintDome(canvas: Canvas, dome: Dome): void {
   const base = groundAt(dome.x) + 2;
@@ -592,6 +779,71 @@ function paintDome(canvas: Canvas, dome: Dome): void {
     }
   }
 }
+
+/**
+ * The docking spire: cheap docking is what Externa was founded on. A lattice mast with arms to
+ * the right, freighters berthed on the upper two; the lowest is where the incoming shuttle docks.
+ */
+const SPIRE_X = 336;
+const SPIRE_ARMS = [20, 42, 64] as const;
+
+/** A freighter, berthed side on: a long hull, its running lights. */
+const FREIGHTER: Picture = parsePicture(
+  "card 5 freighter",
+  `
+  _gggggggg__
+  gpgngngngpg
+  _ggggggggr_
+`,
+);
+
+function paintDockingSpire(canvas: Canvas, t: number): void {
+  const base = baseOf(SPIRE_X, 4);
+  const top = base - 76;
+  for (let y = top; y < base; y += 1) {
+    canvas.set(SPIRE_X, y, "g");
+    canvas.set(SPIRE_X + 3, y, "n");
+    if ((y - top) % 5 === 0) for (let x = SPIRE_X; x <= SPIRE_X + 3; x += 1) canvas.set(x, y, "g");
+  }
+  for (const [index, above] of SPIRE_ARMS.entries()) {
+    const y = base - above;
+    for (let x = SPIRE_X + 4; x < SPIRE_X + 26; x += 1) canvas.set(x, y, "g");
+    canvas.set(SPIRE_X + 25, y + 1, beaconOf(t, index * 5) ? "r" : "n");
+    if (index > 0) paintPicture(canvas, FREIGHTER, SPIRE_X + 9, y + 1);
+  }
+  if (beaconOf(t, SPIRE_X)) canvas.set(SPIRE_X + 1, top - 1, "r");
+}
+
+/** Lights crossing between the towers: the city's own traffic, a few at a time. */
+const FLYERS = [
+  { y: 52, from: 96, speed: 38 },
+  { y: 76, from: 300, speed: -30 },
+  { y: 96, from: 120, speed: 52 },
+] as const;
+
+function paintFlyers(canvas: Canvas, t: number): void {
+  for (const flyer of FLYERS) {
+    const x = Math.round(flyer.from + (flyer.speed * Math.max(0, t - CLOSE_MS + 1200)) / 1000);
+    if (x < 80 || x > 310) continue;
+    canvas.set(x, flyer.y, "w");
+    canvas.set(x - Math.sign(flyer.speed), flyer.y, frameOf(t) % 2 === 0 ? "r" : "o");
+  }
+}
+
+/** The pads at the docks, where the shuttles lift off and land. */
+const PAD = { left: 18, right: 64 } as const;
+
+/** A shuttle, nose up. */
+const SHUTTLE: Picture = parsePicture(
+  "card 5 shuttle",
+  `
+  __p__
+  _pgp_
+  _pgp_
+  pgggp
+  p_._p
+`,
+);
 
 /** The ground: grey rock, cratered, lit low from the left, its edge bright against the sky. */
 function paintGround(canvas: Canvas): void {
@@ -627,7 +879,7 @@ function paintDocks(canvas: Canvas, t: number): void {
   for (let x = PAD.right - 14; x <= PAD.right + 6; x += 1) canvas.set(x, pad - 30, "g");
 }
 
-/** The shuttles: one lifting off the pad on a flame, one coming down beyond the city. */
+/** The shuttles: one lifting off the pad on a flame, one coming in to dock on the spire's lowest arm. */
 function paintCloseShuttles(canvas: Canvas, t: number): void {
   const pad = Math.floor(groundAt(PAD.left)) - 2;
   const climb = fraction(Math.max(0, t - CLOSE_MS) / 1900);
@@ -640,23 +892,36 @@ function paintCloseShuttles(canvas: Canvas, t: number): void {
     canvas.set(left + 2, top + SHUTTLE.height + v, flame[Math.min(2, Math.floor(v / 2) + (frameOf(t) % 2))]!);
   }
 
-  const down = fraction(Math.max(0, t - CLOSE_MS + 700) / 2300);
-  const x = 380 - down * 46;
-  const y = 10 + down * (groundAt(334) - 18);
+  const down = ease(Math.min(1, Math.max(0, t - CLOSE_MS + 700) / 2300));
+  const dockX = SPIRE_X + 14;
+  const dockY = baseOf(SPIRE_X, 4) - SPIRE_ARMS[0] - SHUTTLE.height;
+  const x = 380 + (dockX - 380) * down;
+  const y = 10 + (dockY - 10) * down;
   paintPicture(canvas, SHUTTLE, Math.round(x), Math.round(y));
   if (frameOf(t) % 2 === 0) canvas.set(Math.round(x) + 2, Math.round(y) + SHUTTLE.height, "o");
 }
 
 /**
- * Externa Prima, close: the city on Deimos's curved horizon — towers, the tallest Absolute
- * Connections' own in teal, domes of lit streets, the docks with a shuttle lifting off — and in
- * the sky over it, Mars: mostly its night side, a thin crescent of day, its cities lit.
+ * Externa Prima, close: the oldest hub of the Diaspora, a city on Deimos's curved horizon too big
+ * for the frame. Its glow behind it; a far skyline right across the horizon; the zaibatsu towers,
+ * each crowned in its company's colour and joined by skybridges; in the middle and far above them
+ * all, Absolute Connections' own tower, teal, with the square on its face; at their feet a low city
+ * lit end to end, domes of lit streets, the docks with a shuttle lifting off, and the docking spire
+ * with its freighters. In the sky over it, Mars: mostly its night side, a thin crescent of day, its
+ * cities lit.
  */
 function paintCloseUp(canvas: Canvas, t: number): void {
   paintSky(canvas, CLOSE_STARS);
   paintMarsDisc(canvas, CLOSE_MARS.x, CLOSE_MARS.y, CLOSE_MARS.radius, BEHIND_SUN, t, CITIES.length);
+  paintCityGlow(canvas);
+  paintFarCity(canvas);
   for (const dome of DOMES) paintDome(canvas, dome);
-  for (const building of BUILDINGS) paintBuilding(canvas, building, t);
+  paintBridges(canvas);
+  for (const skyscraper of SKYSCRAPERS) paintSkyscraper(canvas, skyscraper, t);
+  paintOurs(canvas, t);
+  paintLowCity(canvas);
+  paintDockingSpire(canvas, t);
+  paintFlyers(canvas, t);
   paintCloseShuttles(canvas, t);
   paintGround(canvas);
   paintDocks(canvas, t);

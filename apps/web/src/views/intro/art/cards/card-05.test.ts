@@ -167,6 +167,22 @@ describe("card 5: Mars and Deimos, and the Corridor", () => {
     expect(radii).toEqual([...radii].sort((a, b) => b - a));
   });
 
+  it("shows Externa Prima as the city it is: a skyline across the horizon, Absolute Connections' tower far above it, the square on its face", () => {
+    const close = frameAt(CLOSE_MS + 300);
+    const firstTeal = close.findIndex((pixel) => pixel === "t");
+    const lightsIn = (left: number, right: number) => lit(region(close, left, 30, right, 135));
+
+    // The teal tower tops the city, high in the frame.
+    expect(Math.floor(firstTeal / FRAME_WIDTH)).toBeLessThan(25);
+    // Thousands of windows: lit from one side of the towers to the other, not a few in the middle.
+    expect(lightsIn(80, 310)).toBeGreaterThan(500);
+    expect(lightsIn(80, 170)).toBeGreaterThan(100);
+    expect(lightsIn(210, 310)).toBeGreaterThan(100);
+    // The four-colour square, near the tower's top.
+    const logo = region(close, 180, 30, 205, 60);
+    for (const corner of ["t", "Y", "r", "s"]) expect(count(logo, corner)).toBeGreaterThanOrEqual(8);
+  });
+
   it("puts the belt between the steadies, far from Mars", () => {
     expect(MAP_STEADY_HAND).toBeGreaterThan(MAP_STEADY_FOOT + 5);
     expect(MAP_STATIONS[MAP_STEADY_HAND]![0] - MAP_STATIONS[MAP_STEADY_FOOT]![0]).toBeGreaterThan(100);
