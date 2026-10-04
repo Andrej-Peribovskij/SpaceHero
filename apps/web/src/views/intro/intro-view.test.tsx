@@ -66,11 +66,21 @@ const PROMPT = "PRESS ANY KEY TO BEGIN ORIENTATION";
 const CONTINUE_PROMPT = "PRESS ANY KEY TO CONTINUE ORIENTATION";
 
 /**
- * On the last card, Module 2's ident. Its picture is card 0's by design, so the picture alone
- * cannot tell the end from the start: the continue prompt and the Module 2 caption can.
+ * On the last card, Module 2's ident, before Joe's punch. Its picture is card 0's by design, so the
+ * picture alone cannot tell the end from the start: the continue prompt and the Module 2 caption
+ * can.
  */
-function atTheEnd(): boolean {
+function onModule2(): boolean {
   return screen.queryByText(CONTINUE_PROMPT) !== null && announced() === captionText(INTRO_CARDS[END_CARD]!);
+}
+
+/** Over: Joe has punched the screen, and the prompt and the skip have gone with it. */
+function over(): boolean {
+  return (
+    showsCard(END_CARD) &&
+    screen.queryByText(CONTINUE_PROMPT) === null &&
+    within(screen.getByRole("main")).queryByRole("button") === null
+  );
 }
 
 describe("the start gate", () => {
@@ -169,7 +179,7 @@ describe("the card sequence", () => {
 });
 
 describe("skip", () => {
-  it("jumps to the end state and records nothing, anywhere", () => {
+  it("jumps to Module 2's ident, where the ending plays, and records nothing, anywhere", () => {
     const setItem = vi.spyOn(Storage.prototype, "setItem");
     render(<IntroView />);
     fireEvent.keyDown(window, { key: "a" });
@@ -178,7 +188,7 @@ describe("skip", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Skipping is recorded." }));
 
-    expect(atTheEnd()).toBe(true);
+    expect(onModule2()).toBe(true);
     expect(requests).toEqual([]);
     expect(setItem).not.toHaveBeenCalled();
     expect(document.cookie).toBe("");
@@ -202,24 +212,42 @@ describe("skip", () => {
 
     fireEvent.keyDown(window, { key: "Escape" });
 
-    expect(atTheEnd()).toBe(true);
+    expect(onModule2()).toBe(true);
   });
 });
 
 describe("the end state", () => {
-  it("holds on Module 2's ident, whole, asking for a key that nothing answers yet", () => {
+  it("shows Module 2's ident whole, asking for a key that no key answers, with nothing left to skip", () => {
     render(<IntroView />);
     fireEvent.keyDown(window, { key: "a" });
     fireEvent.keyDown(window, { key: "Escape" });
-    advance(600_000);
+    advance(1000);
     fireEvent.keyDown(window, { key: "a" });
+    fireEvent.keyDown(window, { key: "Escape" });
     fireEvent.click(screen.getByRole("main"));
 
-    expect(atTheEnd()).toBe(true);
+    expect(onModule2()).toBe(true);
     expect(showsCard(END_CARD)).toBe(true);
     expect(typed()).toBe("ABSOLUTE CONNECTIONS · Contractor Orientation\nModule 2 of 14: What's the Drill");
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
     expect(screen.queryByText(PROMPT)).not.toBeInTheDocument();
+  });
+
+  it("ends once Joe has punched the screen, and holds there, whatever is pressed", () => {
+    render(<IntroView />);
+    fireEvent.keyDown(window, { key: "a" });
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    advance(INTRO_CARDS[END_CARD]!.punchAtMs! - 200);
+    expect(onModule2()).toBe(true);
+
+    advance(cardDurationMs(END_CARD));
+    expect(over()).toBe(true);
+
+    advance(600_000);
+    fireEvent.keyDown(window, { key: "a" });
+    fireEvent.click(screen.getByRole("main"));
+    expect(over()).toBe(true);
   });
 
   it("goes through the captionless snore card before the ident", () => {
@@ -235,10 +263,12 @@ describe("the end state", () => {
   it("is reached on its own when nobody skips", () => {
     render(<IntroView />);
     fireEvent.keyDown(window, { key: "a" });
-    advance(INTRO_CARDS.reduce((sum, _card, index) => sum + cardDurationMs(index), 0) + 1000);
-
-    expect(atTheEnd()).toBe(true);
+    advance(INTRO_CARDS.slice(0, END_CARD).reduce((sum, _card, index) => sum + cardDurationMs(index), 0) + 1000);
+    expect(onModule2()).toBe(true);
     expect(within(screen.getByRole("main")).queryByRole("button")).not.toBeInTheDocument();
+
+    advance(cardDurationMs(END_CARD));
+    expect(over()).toBe(true);
   });
 });
 
@@ -426,8 +456,9 @@ describe("the music", () => {
     expect(audio.calls).toEqual(["start", "dropOut"]);
   });
 
-  it("stops on the black card and snores, then Module 2's ident starts the loop again, Joe wakes to it, and it plays on", () => {
+  it("stops on the black card and snores, then Module 2's ident starts the loop again, Joe wakes to it, and punches it dead", () => {
     const { audio } = playWithMusic();
+    const { wakeAtMs, punchAtMs } = INTRO_CARDS[END_CARD]!;
     fireEvent.keyDown(window, { key: "a" });
 
     advance(cardStartMs(SNORE_CARD) - FRAMES);
@@ -438,18 +469,24 @@ describe("the music", () => {
     expect(audio.calls).toEqual(["start", "dropOut", "resume", "stop", "snore"]);
 
     advance(cardDurationMs(SNORE_CARD));
-    expect(atTheEnd()).toBe(true);
-    expect(audio.calls).toEqual(["start", "dropOut", "resume", "stop", "snore", "start", "wake"]);
+    expect(onModule2()).toBe(true);
+    expect(audio.calls).toEqual(["start", "dropOut", "resume", "stop", "snore", "start"]);
 
-    // Waiting for a key that nothing answers yet, the music plays on, and no input touches it.
+    advance(wakeAtMs!);
+    expect(audio.calls.slice(-1)).toEqual(["wake"]);
+
+    advance(punchAtMs! - wakeAtMs!);
+    expect(audio.calls.slice(-2)).toEqual(["wake", "punch"]);
+
+    // Over, the video holds in silence, and no input touches it.
     advance(600_000);
     fireEvent.keyDown(window, { key: "a" });
     fireEvent.click(screen.getByRole("main"));
 
-    expect(audio.calls).toEqual(["start", "dropOut", "resume", "stop", "snore", "start", "wake"]);
+    expect(audio.calls).toEqual(["start", "dropOut", "resume", "stop", "snore", "start", "wake", "punch"]);
   });
 
-  it("on skip, stops Module 1's music and starts Module 2's from the top, with no snore, and Joe still wakes to it", () => {
+  it("on skip, stops Module 1's music and starts Module 2's from the top, with no snore, and Joe still wakes and punches it", () => {
     const { audio } = playWithMusic();
     fireEvent.keyDown(window, { key: "a" });
     advance(cardStartMs(3) + FRAMES);
@@ -457,7 +494,7 @@ describe("the music", () => {
     fireEvent.click(screen.getByRole("button", { name: "Skipping is recorded." }));
     advance(600_000);
 
-    expect(audio.calls).toEqual(["start", "stop", "start", "wake"]);
+    expect(audio.calls).toEqual(["start", "stop", "start", "wake", "punch"]);
   });
 
   it("on skip during the snore, stops it before Module 2's music starts", () => {
@@ -467,7 +504,7 @@ describe("the music", () => {
 
     fireEvent.keyDown(window, { key: "Escape" });
 
-    expect(audio.calls.slice(-4)).toEqual(["snore", "stop", "start", "wake"]);
+    expect(audio.calls.slice(-3)).toEqual(["snore", "stop", "start"]);
   });
 
   describe("in a hidden tab", () => {
@@ -533,7 +570,7 @@ describe("the music", () => {
         expect(showsCard(index)).toBe(true);
         expect(announced()).toBe(captionText(INTRO_CARDS[index]!));
       }
-      expect(atTheEnd()).toBe(true);
+      expect(onModule2()).toBe(true);
     }
 
     it("plays every card, silently and with no error shown, where AudioContext throws", () => {
@@ -665,10 +702,10 @@ describe("jumping card by card, in the dev server only", () => {
     render(<IntroView debugSeek />);
     fireEvent.keyDown(window, { key: "a" });
     fireEvent.keyDown(window, { key: "Escape" });
-    expect(atTheEnd()).toBe(true);
+    expect(onModule2()).toBe(true);
 
     fireEvent.keyDown(window, { key: "ArrowRight" });
-    expect(atTheEnd()).toBe(true);
+    expect(onModule2()).toBe(true);
 
     fireEvent.keyDown(window, { key: "ArrowLeft" });
     expect(showsCard(SNORE_CARD)).toBe(true);

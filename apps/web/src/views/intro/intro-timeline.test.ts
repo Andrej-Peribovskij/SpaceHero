@@ -2,6 +2,7 @@ import {
   GLITCH_SILENCE_MS,
   HOLD_MS,
   MS_PER_CHAR,
+  POWER_OFF_MS,
   cardDurationMs,
   initialIntroState,
   msToType,
@@ -11,6 +12,7 @@ import {
   type IntroEvent,
   type IntroState,
 } from "./intro-timeline";
+import { ORIENTATION_TUNE } from "./music/tune";
 import { END_CARD, INTRO_CARDS, SNORE_CARD, captionText } from "./script";
 
 /** Run a list of actions from the gate, collecting every event on the way. */
@@ -130,20 +132,25 @@ describe("the Ganymede glitch", () => {
 });
 
 describe("skip", () => {
-  it.each([0, 3, 9])("jumps from card %i straight to the end", (card) => {
+  it.each([0, 3, 9, SNORE_CARD])("jumps from card %i to the start of Module 2's ident, which then plays out", (card) => {
     let state = play({ type: "start" }).state;
     while (state.card < card) state = stepIntro(state, { type: "tick", dtMs: 16 }).state;
 
     const step = stepIntro(state, { type: "skip" });
 
-    expect(step.state.phase).toBe("ended");
-    expect(step.state.card).toBe(END_CARD);
-    expect(step.events).toEqual([{ type: "skipped" }, { type: "ended" }]);
+    expect(step.state).toEqual({ phase: "playing", card: END_CARD, elapsedMs: 0 });
+    expect(step.events).toEqual([{ type: "skipped" }, { type: "card", index: END_CARD }]);
+
+    const rest = stepIntro(step.state, { type: "tick", dtMs: cardDurationMs(END_CARD) });
+    expect(rest.events).toEqual([{ type: "wake" }, { type: "punch" }, { type: "ended" }]);
   });
 
-  it("does nothing once the video has ended", () => {
-    const ended = play({ type: "start" }, { type: "skip" }).state;
+  it("does nothing on Module 2's ident, the ending, nor once the video has ended", () => {
+    const ending = play({ type: "start" }, { type: "skip" }, { type: "tick", dtMs: 1000 }).state;
+    const ended = stepIntro(ending, { type: "tick", dtMs: cardDurationMs(END_CARD) }).state;
 
+    expect(stepIntro(ending, { type: "skip" })).toEqual({ state: ending, events: [] });
+    expect(ended.phase).toBe("ended");
     expect(stepIntro(ended, { type: "skip" })).toEqual({ state: ended, events: [] });
   });
 });
@@ -188,32 +195,54 @@ describe("seek, the debugging jump", () => {
     expect(events.slice(-2)).toEqual([{ type: "seeked" }, { type: "card", index: SNORE_CARD }]);
   });
 
-  it("onto the last card, ends in the next tick, as arriving there would", () => {
-    const { state, events } = play({ type: "start" }, { type: "seek", card: END_CARD }, { type: "tick", dtMs: 16 });
+  it("onto the last card, plays it from the top: Joe wakes and punches the screen again", () => {
+    const { state, events } = play({ type: "start" }, { type: "seek", card: END_CARD }, ...frames(cardDurationMs(END_CARD)));
 
     expect(state.phase).toBe("ended");
-    expect(events.slice(-1)).toEqual([{ type: "ended" }]);
+    expect(events.filter((event) => event.type === "wake" || event.type === "punch")).toEqual([{ type: "wake" }, { type: "punch" }]);
   });
 });
 
 describe("the end", () => {
-  it("holds on Module 2's ident, whole, indefinitely", () => {
+  it("plays Module 2's ident whole, never typed, then wakes Joe, then his punch, then ends", () => {
+    const toLastCard = INTRO_CARDS.slice(0, END_CARD).reduce((sum, _card, index) => sum + cardDurationMs(index), 0);
+    const { state } = play({ type: "start" }, { type: "tick", dtMs: toLastCard + 10 });
+    const { wakeAtMs, punchAtMs } = INTRO_CARDS[END_CARD]!;
+
+    expect(state).toEqual({ phase: "playing", card: END_CARD, elapsedMs: 10 });
+    expect(visibleChars(state)).toBe(captionText(INTRO_CARDS[END_CARD]!).length);
+
+    const atMs = (event: IntroEvent["type"]) => {
+      let clock = state;
+      for (let ms = 10; ms <= cardDurationMs(END_CARD) + 16; ms += 16) {
+        const step = stepIntro(clock, { type: "tick", dtMs: 16 });
+        if (step.events.some((fired) => fired.type === event)) return ms + 16;
+        clock = step.state;
+      }
+      return undefined;
+    };
+    expect(atMs("wake")).toBeGreaterThan(wakeAtMs!);
+    expect(atMs("wake")).toBeLessThanOrEqual(wakeAtMs! + 16);
+    expect(atMs("punch")).toBeGreaterThan(punchAtMs!);
+    expect(atMs("punch")).toBeLessThanOrEqual(punchAtMs! + 16);
+    expect(atMs("ended")).toBeGreaterThan(punchAtMs! + POWER_OFF_MS);
+  });
+
+  it("wakes Joe as the tune's first phrase ends, two bars in, and punches only once the snort has had its moment", () => {
+    const { wakeAtMs, punchAtMs } = INTRO_CARDS[END_CARD]!;
+    const barMs = (4 * 60_000) / ORIENTATION_TUNE.bpm;
+
+    expect(wakeAtMs).toBeCloseTo(2 * barMs, -1);
+    expect(punchAtMs! - wakeAtMs!).toBeGreaterThanOrEqual(1000);
+    expect(punchAtMs! - wakeAtMs!).toBeLessThanOrEqual(2000);
+  });
+
+  it("holds on black once ended, indefinitely, with nothing more to happen", () => {
     const { state } = play({ type: "start" }, { type: "tick", dtMs: TOTAL_MS });
     const later = stepIntro(state, { type: "tick", dtMs: 600_000 });
 
-    expect(state.phase).toBe("ended");
-    expect(visibleChars(state)).toBe(captionText(INTRO_CARDS[END_CARD]!).length);
+    expect(state).toEqual({ phase: "ended", card: END_CARD, elapsedMs: cardDurationMs(END_CARD) });
     expect(later).toEqual({ state, events: [] });
-  });
-
-  it("ends in the same tick that reaches the last card, never showing it as playing", () => {
-    const toLastCard = INTRO_CARDS.slice(0, END_CARD).reduce((sum, _card, index) => sum + cardDurationMs(index), 0);
-
-    // Exactly to the boundary: no time is left over once the last card is entered.
-    const { state, events } = play({ type: "start" }, { type: "tick", dtMs: toLastCard });
-
-    expect(state.phase).toBe("ended");
-    expect(events.slice(-2)).toEqual([{ type: "card", index: END_CARD }, { type: "ended" }]);
   });
 
   it("has a captionless card before the end, the snore, held for its own hold rather than a caption's", () => {

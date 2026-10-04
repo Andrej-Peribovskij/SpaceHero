@@ -22,6 +22,9 @@ export const IDENT_HOLD_MS = 2500;
 /** How long the music stays out after the Ganymede line. Must end inside card 6's hold. */
 export const GLITCH_SILENCE_MS = 1500;
 
+/** How long the punched screen takes to die: to a line, a dot, and black. Card 11 ends with it. */
+export const POWER_OFF_MS = 600;
+
 export type IntroPhase = "gate" | "playing" | "ended";
 
 /**
@@ -46,6 +49,10 @@ export type IntroEvent =
   | { readonly type: "card"; readonly index: number }
   | { readonly type: "glitch" }
   | { readonly type: "glitch-end" }
+  /** Joe wakes, on card 11. */
+  | { readonly type: "wake" }
+  /** Joe punches the screen: the music dies, and the picture with it. */
+  | { readonly type: "punch" }
   | { readonly type: "skipped" }
   /** The video jumped. The `card` event for where it landed follows. */
   | { readonly type: "seeked" }
@@ -94,8 +101,8 @@ export function typedCharsAt(card: IntroCard, ms: number): number {
 
 /**
  * How long a card is on screen. The ident is already whole when the player opts in, so it only
- * holds. The last card — the next module's ident — takes no time at all: it appears whole, as the
- * first one did, and the video ends the moment it is on screen.
+ * holds. The last card — the next module's ident — appears whole, as the first one did, and lasts
+ * until Joe's punch has killed the screen: the video ends on black.
  */
 export function cardDurationMs(index: number): number {
   return TIMINGS[index]!.durationMs;
@@ -105,7 +112,7 @@ function durationOf(index: number): number {
   const card = INTRO_CARDS[index]!;
 
   if (index === IDENT_CARD) return IDENT_HOLD_MS;
-  if (index === END_CARD) return 0;
+  if (card.punchAtMs !== undefined) return card.punchAtMs + POWER_OFF_MS;
 
   return msToType(card, captionText(card).length) + (card.holdMs ?? HOLD_MS);
 }
@@ -138,6 +145,14 @@ function glitchOf(card: IntroCard): number | undefined {
   return card.glitchAtChar === undefined ? undefined : msToType(card, card.glitchAtChar);
 }
 
+/**
+ * When, from the start of a card, Joe's punch kills the screen. One moment for both what reacts to
+ * it, the picture collapsing and the music dying.
+ */
+export function punchMs(index: number): number | undefined {
+  return INTRO_CARDS[index]!.punchAtMs;
+}
+
 interface Cue {
   readonly atMs: number;
   readonly event: IntroEvent;
@@ -145,14 +160,18 @@ interface Cue {
 
 /** The events that fire partway through a card, rather than on entering it. */
 function cuesOf(index: number): readonly Cue[] {
-  const atMs = glitchOf(INTRO_CARDS[index]!);
+  const card = INTRO_CARDS[index]!;
+  const glitchAtMs = glitchOf(card);
+  const cues: Cue[] = [];
 
-  if (atMs === undefined) return [];
+  if (glitchAtMs !== undefined) {
+    cues.push({ atMs: glitchAtMs, event: { type: "glitch" } });
+    cues.push({ atMs: glitchAtMs + GLITCH_SILENCE_MS, event: { type: "glitch-end" } });
+  }
+  if (card.wakeAtMs !== undefined) cues.push({ atMs: card.wakeAtMs, event: { type: "wake" } });
+  if (card.punchAtMs !== undefined) cues.push({ atMs: card.punchAtMs, event: { type: "punch" } });
 
-  return [
-    { atMs, event: { type: "glitch" } },
-    { atMs: atMs + GLITCH_SILENCE_MS, event: { type: "glitch-end" } },
-  ];
+  return cues;
 }
 
 interface CardTiming {
@@ -186,10 +205,15 @@ export function stepIntro(state: IntroState, action: IntroAction): IntroStep {
       };
 
     case "skip":
-      // No skipping before the player has opted in: there is nothing yet to skip.
-      if (state.phase !== "playing") return { state, events: [] };
+      // No skipping before the player has opted in: there is nothing yet to skip. Skipping skips
+      // Module 1, so it lands on Module 2's ident, and Joe still wakes and punches the screen.
+      // There is nothing to skip on that card itself: it is the ending.
+      if (state.phase !== "playing" || state.card === END_CARD) return { state, events: [] };
 
-      return { state: ENDED, events: [{ type: "skipped" }, { type: "ended" }] };
+      return {
+        state: { phase: "playing", card: END_CARD, elapsedMs: 0 },
+        events: [{ type: "skipped" }, { type: "card", index: END_CARD }],
+      };
 
     case "seek":
       return seek(state, action.card);
@@ -202,7 +226,7 @@ export function stepIntro(state: IntroState, action: IntroAction): IntroStep {
 /**
  * Go to the start of a card, clamped to the cards there are, and play on from there. Allowed once
  * the player has opted in, and from the end too, which then plays again. Seeking to the last card
- * ends the video in the next tick, as arriving there would.
+ * plays it from the top: Module 2's music, Joe waking, the punch.
  */
 function seek(state: IntroState, card: number): IntroStep {
   if (state.phase === "gate") return { state, events: [] };
@@ -226,8 +250,8 @@ function tick(state: IntroState, dtMs: number): IntroStep {
   let { card, elapsedMs } = state;
   let remaining = dtMs;
 
-  // Keep going while time is left, or while the card just entered is already used up: the last
-  // card takes no time, and must end the video in the tick that reaches it, not the next one.
+  // Keep going while time is left, or while the card just entered is already used up: a card that
+  // takes no time must pass in the tick that reaches it, not the next one.
   while (remaining > 0 || elapsedMs >= cardDurationMs(card)) {
     const duration = cardDurationMs(card);
     const next = Math.min(duration, elapsedMs + remaining);

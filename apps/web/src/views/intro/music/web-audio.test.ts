@@ -1,7 +1,7 @@
 import { silentIntroAudio } from "./intro-audio";
 import type { Tune } from "./synth";
 import type { RecordedSounds } from "./sounds";
-import { SNORE_PAUSE_S, WAKE_PAUSE_S, openIntroAudio, renderedTune, webIntroAudio } from "./web-audio";
+import { SNORE_PAUSE_S, openIntroAudio, renderedTune, webIntroAudio } from "./web-audio";
 
 const TUNE: Tune = {
   bpm: 120,
@@ -179,7 +179,7 @@ describe("webIntroAudio", () => {
     expect(snore!.startedAt).toBe(context.currentTime + SNORE_PAUSE_S);
   });
 
-  it("wakes with the snort once, a beat after it is asked, alongside the music", () => {
+  it("wakes with the snort once, at once, over the music", () => {
     const { context, audio } = play();
     audio.start();
 
@@ -188,8 +188,35 @@ describe("webIntroAudio", () => {
     const [music, wake] = context.sources;
     expect(wake!.loop).toBe(false);
     expect(wake!.buffer!.samples).toBe(SOUNDS.wake);
-    expect(wake!.startedAt).toBe(context.currentTime + WAKE_PAUSE_S);
+    expect(wake!.startedAt).toBe(context.currentTime);
     expect(music!.stopped).toBe(false);
+  });
+
+  it("on the punch, cuts every sound dead and sounds the blow over the silence, at once", () => {
+    const { context, audio } = play();
+    audio.start();
+    audio.wake();
+
+    audio.punch();
+
+    const [music, wake, thump] = context.sources;
+    for (const [index, source] of [music, wake].entries()) {
+      expect(context.gains[index]!.gain.target).toBe(0);
+      expect(source!.stoppedAt).toBeLessThan(context.currentTime + 0.1);
+    }
+    expect(thump!.loop).toBe(false);
+    expect(thump!.buffer!.length).toBeGreaterThan(0);
+    expect(thump!.startedAt).toBe(context.currentTime);
+    expect(thump!.stopped).toBe(false);
+  });
+
+  it("lets go of the blow too when the intro leaves the screen", () => {
+    const { context, audio } = play();
+    audio.punch();
+
+    audio.close();
+
+    expect(context.sources[0]!.stopped).toBe(true);
   });
 
   it("plays nothing for a recording that never arrived, and carries on", () => {
@@ -214,7 +241,7 @@ describe("webIntroAudio", () => {
     expect(context.sources[0]!.buffer!.samples).toBe(SOUNDS.snore);
   });
 
-  it("cancels a snort still waiting out its beat on a stop", () => {
+  it("stops the snort on a stop", () => {
     const { context, audio } = play();
     audio.start();
     audio.wake();

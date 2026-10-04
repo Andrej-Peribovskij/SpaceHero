@@ -59,6 +59,19 @@ describe("the screen's clock", () => {
 
     expect(hook.result.current.clock.current).toEqual({ card: END_CARD, ms: 0 });
   });
+
+  it("holds where the video stopped once it has ended, so the punched screen stays black", () => {
+    const { hook } = counted();
+    act(() => hook.result.current.start());
+    act(() => hook.result.current.skip());
+    advance(cardDurationMs(END_CARD) + 500);
+
+    expect(hook.result.current.phase).toBe("ended");
+    expect(hook.result.current.clock.current).toEqual({ card: END_CARD, ms: cardDurationMs(END_CARD) });
+
+    advance(60_000);
+    expect(hook.result.current.clock.current).toEqual({ card: END_CARD, ms: cardDurationMs(END_CARD) });
+  });
 });
 
 describe("useIntroTimeline", () => {

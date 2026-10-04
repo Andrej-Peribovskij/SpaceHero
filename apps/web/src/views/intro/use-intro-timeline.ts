@@ -70,8 +70,8 @@ export interface IntroTimeline extends Shown {
   /**
    * The clock the screen paints from, read every frame rather than rendered. While a card plays it
    * is the timeline's own, so the picture keeps step with the caption: it stops while the page is
-   * hidden and loses what a stalled frame loses, as the caption does. The idents, which nothing
-   * cues, run on it at the gate and at the end too, by the same frames.
+   * hidden and loses what a stalled frame loses, as the caption does. The ident at the gate, which
+   * nothing cues, runs on it too, by the same frames.
    */
   readonly clock: { readonly current: CardClock };
   readonly reducedMotion: boolean;
@@ -118,10 +118,13 @@ export function useIntroTimeline(onEvent?: (event: IntroEvent) => void): IntroTi
 
   const clock = useRef<CardClock>({ card: initialIntroState.card, ms: 0 });
 
-  /** The screen's clock moves on: with the timeline while a card plays, by `dtMs` for an ident. */
+  /**
+   * The screen's clock moves on: with the timeline once it has started, by `dtMs` for the ident,
+   * which nothing cues. Ended, it holds where the video stopped: black, after the punch.
+   */
   const advanceClock = useCallback((dtMs: number) => {
     const state = stateRef.current;
-    const timed = state.phase === "playing" && state.card !== IDENT_CARD;
+    const timed = state.phase !== "gate" && state.card !== IDENT_CARD;
     const sameCard = state.card === clock.current.card;
     clock.current = { card: state.card, ms: timed ? state.elapsedMs : sameCard ? clock.current.ms + dtMs : 0 };
   }, []);
@@ -140,7 +143,7 @@ export function useIntroTimeline(onEvent?: (event: IntroEvent) => void): IntroTi
   );
 
   // The frame clock runs for as long as the video is on screen: the timeline only moves while it
-  // plays, but the idents at the gate and at the end are never still.
+  // plays, but the ident at the gate is never still.
   useEffect(() => {
     let frame = 0;
     let last: number | undefined;

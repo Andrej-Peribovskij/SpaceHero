@@ -1,13 +1,13 @@
 import { expect, test } from "@playwright/test";
 
 /**
- * The Chapter 1 intro in a real browser: the gate, the first card, the skip.
+ * The Chapter 1 intro in a real browser: the gate, the first card, the skip, the ending.
  *
  * The component tests play the whole sequence on fake timers. This one is the part they
  * cannot prove — that the real frame clock moves the video on, and that a real key press and
  * a real click drive it — so it walks the shortest honest path through it and stops.
  */
-test("a player opts in, watches the first card, and skips to the end", async ({ page }) => {
+test("a player opts in, watches the first card, skips to Module 2, and Joe ends it", async ({ page }) => {
   await page.goto("/");
 
   await expect(page.getByText("PRESS ANY KEY TO BEGIN ORIENTATION")).toBeVisible();
@@ -20,7 +20,11 @@ test("a player opts in, watches the first card, and skips to the end", async ({ 
 
   await page.getByRole("button", { name: "Skipping is recorded." }).click();
 
-  // The end is Module 2's ident, asking for a key the way the first one did.
+  // A skip lands on Module 2's ident, asking for a key the way the first one did, with nothing
+  // left to skip.
   await expect(page.getByText("PRESS ANY KEY TO CONTINUE ORIENTATION")).toBeVisible();
   await expect(page.getByRole("button", { name: "Skipping is recorded." })).toBeHidden();
+
+  // No key answers it: a real frame clock carries the card to Joe's punch, and the video ends.
+  await expect(page.getByText("PRESS ANY KEY TO CONTINUE ORIENTATION")).toBeHidden({ timeout: 15_000 });
 });

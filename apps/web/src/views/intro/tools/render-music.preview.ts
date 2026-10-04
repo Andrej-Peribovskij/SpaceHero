@@ -1,11 +1,13 @@
 /**
  * Writes the intro's sound to a WAV, for listening to it without playing the video: the loop
  * twice, then card 10 as it sounds — the stop, the pause, the snore and the silence after — and
- * Module 2's ident starting the loop again from the top, with Joe waking to it. Started by
- * `pnpm run intro:render-music`; the file lands in `.cache/intro-previews/`, which git ignores.
+ * card 11: Module 2's ident starting the loop again from the top, Joe waking to it, and his punch
+ * cutting it dead, then the silence the video ends on. Started by `pnpm run intro:render-music`;
+ * the file lands in `.cache/intro-previews/`, which git ignores.
  *
- * These are the very samples the browser plays: the synth computes the music, the snore and the
- * snort are read from their recordings (`music/sounds/`), and Web Audio only plays the buffers.
+ * These are the very samples the browser plays: the synth computes the music and the punch, the
+ * snore and the snort are read from their recordings (`music/sounds/`), and Web Audio only plays
+ * the buffers.
  * What this file cannot reproduce is the glitch's drop-out, which is a gain on the browser's side.
  *
  * A `.preview.ts`, not a test, like `render-card.preview.ts`: only `vitest.preview.config.ts`
@@ -18,11 +20,12 @@ import { fileURLToPath } from "node:url";
 import { it } from "vitest";
 
 import { cardDurationMs } from "../intro-timeline";
+import { renderPunch } from "../music/punch";
 import { decodeWav } from "../music/sounds";
 import { SAMPLE_RATE, renderTune } from "../music/synth";
 import { ORIENTATION_TUNE } from "../music/tune";
-import { SNORE_PAUSE_S, WAKE_PAUSE_S } from "../music/web-audio";
-import { SNORE_CARD } from "../script";
+import { SNORE_PAUSE_S } from "../music/web-audio";
+import { END_CARD, INTRO_CARDS, SNORE_CARD } from "../script";
 import { encodeWav } from "./wav";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -32,8 +35,8 @@ const OUT = resolve(HERE, "../../../../../../.cache/intro-previews/music.wav");
 
 const LOOPS = 2;
 
-/** How much of Module 2's restart to keep: enough to hear it come back, and Joe wake. */
-const RESTART_MS = 8000;
+/** The silence kept after the punch: the video ends on it. */
+const AFTER_MS = 1500;
 
 /** A recording from `music/sounds/`, as samples. */
 function recording(name: string): Float32Array<ArrayBuffer> {
@@ -45,19 +48,24 @@ it("renders the music", () => {
   const loop = renderTune(ORIENTATION_TUNE);
   const snore = recording("snore.wav");
   const wake = recording("wake.wav");
+  const punch = renderPunch();
+  const { wakeAtMs, punchAtMs } = INTRO_CARDS[END_CARD]!;
   const samples = (ms: number) => Math.round((ms * SAMPLE_RATE) / 1000);
   const snoreCard = samples(cardDurationMs(SNORE_CARD));
   const restart = loop.length * LOOPS + snoreCard;
-  const out = new Float32Array(restart + samples(RESTART_MS));
+  const struck = restart + samples(punchAtMs!);
+  const out = new Float32Array(struck + samples(AFTER_MS));
 
   for (let i = 0; i < LOOPS; i += 1) out.set(loop, i * loop.length);
   out.set(snore, loop.length * LOOPS + samples(SNORE_PAUSE_S * 1000));
-  out.set(loop.subarray(0, samples(RESTART_MS)), restart);
+  // Module 2's music, until the punch cuts it dead.
+  out.set(loop.subarray(0, struck - restart), restart);
   // The snort plays over the music, so it is mixed in rather than set.
-  const wakeAt = restart + samples(WAKE_PAUSE_S * 1000);
+  const wakeAt = restart + samples(wakeAtMs!);
   wake.forEach((value, i) => {
-    if (wakeAt + i < out.length) out[wakeAt + i]! += value;
+    if (wakeAt + i < struck) out[wakeAt + i]! += value;
   });
+  out.set(punch, struck);
 
   mkdirSync(dirname(OUT), { recursive: true });
   writeFileSync(OUT, encodeWav(out, SAMPLE_RATE));

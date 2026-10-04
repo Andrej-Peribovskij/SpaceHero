@@ -35,6 +35,13 @@ export interface IntroCard {
    * Set on card 6 only: the one place the video visibly hides something.
    */
   readonly glitchAtChar?: number;
+  /** When, on the card's clock, Joe wakes with a snort. Set on card 11 only. */
+  readonly wakeAtMs?: number;
+  /**
+   * When, on the card's clock, Joe punches the screen: the music dies and the picture collapses to
+   * black. Set on card 11 only, where it ends the video.
+   */
+  readonly punchAtMs?: number;
 }
 
 const GANYMEDE_LINE = "Ganymede was found unsuitable.";
@@ -157,21 +164,28 @@ export const INTRO_CARDS: readonly IntroCard[] = [
     holdMs: 4000,
   },
   {
-    // The next module's ident, mirroring card 0: one module down, thirteen to go. It waits for a
-    // key the way the first one did, but with its music playing, and that music wakes Joe with a
-    // snort. In beat 1 he presses the key, by slapping the screen off.
-    image: `${IDENT_IMAGE} The music starts again, and in the dark someone wakes with a snort.`,
+    // The next module's ident, mirroring card 0: one module down, thirteen to go. It asks for a key
+    // the way the first one did, but nothing answers it: its music wakes Joe with a snort as the
+    // tune's first phrase ends, and he answers it himself, with his fist.
+    image: `${IDENT_IMAGE} The music starts again; at the end of its first phrase, someone in the dark wakes with a snort, and punches the screen: the music dies, and the picture collapses to a line, a dot, and black.`,
     caption: [
       { text: "ABSOLUTE CONNECTIONS · Contractor Orientation\nModule 2 of 14: " },
       { text: "What's the Drill", emphasis: true },
     ],
+    // Two bars of the tune at 72 beats a minute: its first phrase, rising to the high E and back.
+    wakeAtMs: 6667,
+    // The snort is over by now, and the fist follows it at once.
+    punchAtMs: 8000,
   },
 ];
 
 /** The ident: shown at the gate and held briefly once the player opts in. */
 export const IDENT_CARD = 0;
 
-/** The last card — the next module's ident — and the one the sequence ends, or is skipped, onto. */
+/**
+ * The last card — the next module's ident, where Joe wakes and punches the screen — and the one a
+ * skip jumps to.
+ */
 export const END_CARD = INTRO_CARDS.length - 1;
 
 /** Card 10, black and captionless: the music stops on it, and someone snores. */

@@ -3,7 +3,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { cardDurationMs } from "../intro-timeline";
-import { SNORE_CARD } from "../script";
+import { END_CARD, INTRO_CARDS, SNORE_CARD } from "../script";
 import { encodeWav } from "../tools/wav";
 import { decodeWav, soundStore } from "./sounds";
 import { SAMPLE_RATE } from "./synth";
@@ -119,5 +119,14 @@ describe("soundStore", () => {
     await store.load();
 
     expect(store.sounds()).toEqual({});
+  });
+});
+
+describe("the snort and the punch", () => {
+  it("lets the snort finish before Joe's fist lands", () => {
+    const wake = decodeWav(fileBytes("wake.wav"));
+    const { wakeAtMs, punchAtMs } = INTRO_CARDS[END_CARD]!;
+
+    expect(wakeAtMs! + seconds(wake) * 1000).toBeLessThanOrEqual(punchAtMs!);
   });
 });

@@ -99,3 +99,22 @@ describe("the prompt", () => {
     expect([isLit(0), isLit(BLINK_MS - 1), isLit(BLINK_MS), isLit(2 * BLINK_MS)]).toEqual([true, true, false, true]);
   });
 });
+
+describe("Joe's punch", () => {
+  const MODULE_2 = INTRO_CARDS.at(-1)!;
+  const ending = (timeMs: number, still = false) =>
+    screen({ caption: MODULE_2.caption, shownChars: captionText(MODULE_2).length, prompt: PROMPTS[1], timeMs, still, powerOffAtMs: 8000 });
+
+  it("leaves the screen alone until it lands", () => {
+    expect(ending(7999)).toEqual(screen({ caption: MODULE_2.caption, shownChars: captionText(MODULE_2).length, prompt: PROMPTS[1], timeMs: 7999 }));
+  });
+
+  it("kills the whole screen, caption and prompt with it, collapsing it to black", () => {
+    expect(ending(8100)).not.toEqual(ending(7999));
+    expect(coloursIn(ending(9000), 0)).toEqual(new Set(["."]));
+  });
+
+  it("under reduced motion, is black the moment it lands", () => {
+    expect(coloursIn(ending(8000, true), 0)).toEqual(new Set(["."]));
+  });
+});

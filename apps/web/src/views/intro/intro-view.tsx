@@ -7,21 +7,25 @@ import type { IntroAudio } from "./music/intro-audio";
 import { ORIENTATION_TUNE } from "./music/tune";
 import { openIntroAudio, prepareIntroAudio } from "./music/web-audio";
 import { canvasDraws } from "./screen/canvas";
-import { INTRO_CARDS, captionText } from "./script";
+import type { IntroPhase } from "./intro-timeline";
+import { END_CARD, INTRO_CARDS, captionText } from "./script";
 import { useDebugSeek } from "./use-debug-seek";
 import { useIntroMusic } from "./use-intro-music";
 import { useIntroTimeline } from "./use-intro-timeline";
 
+const BEGIN_PROMPT = "PRESS ANY KEY TO BEGIN ORIENTATION";
+
 /**
- * The line under an ident that asks the player for a key, if one is showing. The next module's
- * ident asks the same way the first did, and nothing answers it yet: in beat 1 the key press is
- * Joe slapping the screen off (docs/product-debt/intro-hand-off-to-beat-1.md).
+ * Module 2's ident asks the same way the first did, but no key answers it: Joe does, with his fist,
+ * and the screen dies with the prompt on it.
  */
-const PROMPTS = {
-  gate: "PRESS ANY KEY TO BEGIN ORIENTATION",
-  playing: undefined,
-  ended: "PRESS ANY KEY TO CONTINUE ORIENTATION",
-} as const;
+const CONTINUE_PROMPT = "PRESS ANY KEY TO CONTINUE ORIENTATION";
+
+/** The line under an ident that asks the player for a key, if one is showing. */
+function promptOf(phase: IntroPhase, card: number): string | undefined {
+  if (phase === "gate") return BEGIN_PROMPT;
+  return phase === "playing" && card === END_CARD ? CONTINUE_PROMPT : undefined;
+}
 
 /** The orientation music through Web Audio, or silence where the browser has none to give. */
 const openOrientationAudio = () => openIntroAudio(ORIENTATION_TUNE);
@@ -61,19 +65,22 @@ export function IntroView({
     if (startCard !== undefined) seek(startCard);
   }, [start, seek, startCard]);
   const card = INTRO_CARDS[index]!;
-  const prompt = PROMPTS[phase];
+  const prompt = promptOf(phase, index);
+  // Module 1 can be skipped; Module 2's ident, the ending, cannot.
+  const skippable = phase === "playing" && index !== END_CARD;
   const mainRef = useRef<HTMLElement>(null);
   // The caption and the prompt are kept as text for assistive technology. Where the screen cannot
   // paint them, that text is everyone's: shown, rather than an empty screen and no way to start.
   const [asText] = useState(() => !canvasDraws());
   const textClass = asText ? "font-mono text-sm tracking-widest" : "sr-only";
 
-  // Ending unmounts the skip button. If it had focus, the browser drops focus to the top of the
-  // document and a keyboard or screen-reader user loses their place; keep them on the video.
+  // Reaching Module 2's ident, by skip or not, unmounts the skip button. If it had focus, the
+  // browser drops focus to the top of the document and a keyboard or screen-reader user loses their
+  // place; keep them on the video.
   useEffect(() => {
     const focusLost = document.activeElement === null || document.activeElement === document.body;
-    if (phase === "ended" && focusLost) mainRef.current?.focus();
-  }, [phase]);
+    if (phase !== "gate" && !skippable && focusLost) mainRef.current?.focus();
+  }, [phase, skippable]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -119,7 +126,7 @@ export function IntroView({
       {prompt && <p className={textClass}>{prompt}</p>}
 
       {/* No variant: the portable call, as in WidgetsView. Skipping records nothing. */}
-      {phase === "playing" && <Button onClick={skip}>Skipping is recorded.</Button>}
+      {skippable && <Button onClick={skip}>Skipping is recorded.</Button>}
     </main>
   );
 }

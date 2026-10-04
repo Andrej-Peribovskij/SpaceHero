@@ -1,5 +1,5 @@
 /**
- * The orientation's sound, as the video sees it: eight things that happen to the sound, and a way
+ * The orientation's sound, as the video sees it: nine things that happen to the sound, and a way
  * to let go of the speakers. Nothing here knows about Web Audio — see design.md §5.
  *
  * The port exists so the rest of the intro never has to ask whether sound works. A browser may
@@ -21,8 +21,10 @@ export interface IntroAudio {
   readonly stop: () => void;
   /** Someone in the room is asleep. */
   readonly snore: () => void;
-  /** They wake, with a snort, a beat after Module 2's ident starts the music. */
+  /** They wake, with a snort. */
   readonly wake: () => void;
+  /** They punch the screen: every sound dies at once, and the blow and the dying set are heard. */
+  readonly punch: () => void;
   /** The video has paused, its page hidden: every sound holds where it is, the snore's wait too. */
   readonly pause: () => void;
   /** The page is back: every sound goes on from where it held. */
@@ -41,6 +43,7 @@ export const silentIntroAudio: IntroAudio = {
   stop: nothing,
   snore: nothing,
   wake: nothing,
+  punch: nothing,
   pause: nothing,
   unpause: nothing,
   close: nothing,

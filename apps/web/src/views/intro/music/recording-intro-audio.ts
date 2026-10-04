@@ -19,6 +19,7 @@ export function recordingIntroAudio(): RecordingIntroAudio {
     stop: record("stop"),
     snore: record("snore"),
     wake: record("wake"),
+    punch: record("punch"),
     pause: record("pause"),
     unpause: record("unpause"),
     close: record("close"),

@@ -1,5 +1,5 @@
 import type { CardArt } from "./art/render";
-import { glitchMs } from "./intro-timeline";
+import { glitchMs, punchMs } from "./intro-timeline";
 import { PixelScreen } from "./screen/pixel-screen";
 import { captionText, type IntroCard } from "./script";
 import type { CardClock } from "./use-intro-timeline";
@@ -43,6 +43,7 @@ export function IntroCardFrame({ index, card, clock, shownChars, art, prompt, st
         prompt={prompt}
         still={still}
         glitchAtMs={glitchMs(index)}
+        powerOffAtMs={punchMs(index)}
       />
     </div>
   );

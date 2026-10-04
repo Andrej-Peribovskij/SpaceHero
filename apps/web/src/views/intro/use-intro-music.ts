@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from "react";
 
 import type { IntroEvent } from "./intro-timeline";
 import { silentIntroAudio, type IntroAudio } from "./music/intro-audio";
-import { SNORE_CARD } from "./script";
+import { END_CARD, SNORE_CARD } from "./script";
 
 /** What each moment of the video asks of the music. Everything else leaves it as it is. */
 function cue(audio: IntroAudio, event: IntroEvent): void {
@@ -18,7 +18,14 @@ function cue(audio: IntroAudio, event: IntroEvent): void {
         audio.stop();
         audio.snore();
       }
+      // Module 2's ident starts the loop again from the top. Skipped or played through, Module 1
+      // is over, and Joe has slept through it; this is what wakes him.
+      if (event.index === END_CARD) audio.start();
       return;
+    case "wake":
+      return audio.wake();
+    case "punch":
+      return audio.punch();
     case "skipped":
       return audio.stop();
     case "seeked":
@@ -27,11 +34,8 @@ function cue(audio: IntroAudio, event: IntroEvent): void {
       audio.stop();
       return audio.start();
     case "ended":
-      // Module 2's ident starts the loop again from the top, and it plays while the ident waits.
-      // It is what wakes Joe, a beat later, with a snort. Skipped or played through, Module 1 is
-      // over, and he has slept through it.
-      audio.start();
-      return audio.wake();
+      // The punch has already silenced everything: the video ends on black, and in silence.
+      return;
   }
 }
 
