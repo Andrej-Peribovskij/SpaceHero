@@ -151,7 +151,7 @@ export const INTRO_CARDS: readonly IntroCard[] = [
   },
   {
     image:
-      "Card 8's light goes out. Out of the dark, stars, and the camera tilts down to the Martian surface at dusk, the sunset blue, Deimos high up with Externa's lights, shuttles climbing to it from a far port. On the plain, a dome half sunk in the dunes, a small ship by it, a ring of dark windows, and one lit. Close: through that window, a dark room, its walls lit only by the flicker of this video, playing on a screen out of sight. Above the dome, Externa's beacon blinks teal. In the room, under the video, someone snores.",
+      "Card 8's light goes out. Out of the dark, stars, and the camera tilts down to the Martian surface at dusk, the sunset blue, Deimos high up with Externa's lights, a shuttle climbing to it from a far port. On the plain, a dome half sunk in the dunes, a small ship by it, a ring of dark windows, and one lit. Close: through that window, a dark room, its walls lit only by the flicker of this video, playing on a screen out of sight. Above the dome, Externa's beacon blinks teal. In the room, under the video, someone snores.",
     caption: [
       // The caption waits while card 8's glare goes out and the camera tilts down from Mars's sky,
       // and again while it closes in on the window.

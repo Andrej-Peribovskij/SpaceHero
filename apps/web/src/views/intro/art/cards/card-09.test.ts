@@ -14,8 +14,10 @@ import {
   EXTERNA_MS,
   LANDED_MS,
   LIT_X,
+  TRIP_MS,
   NIGHT_MS,
   WINDOW,
+  shuttleAt,
 } from "./card-09";
 
 const CARD = INTRO_CARDS[9]!;
@@ -62,6 +64,22 @@ describe("card 9: Mars, 158 A.D.", () => {
     for (const dark of [LIT_X + 8, LIT_X + 16, LIT_X + 24]) expect(at(landed, dark, DOME.base - 4)).toBe(".");
     expect(upcoming(CORRIDOR_MS)).toMatch(/^the Corridor carries us all/);
     expect(CORRIDOR_MS).toBeGreaterThan(LANDED_MS);
+  });
+
+  it("sends one shuttle up to Deimos on \"the Corridor\", and no other: the sky is not traffic", () => {
+    const pixelAt = (time: number, progress: number) => {
+      const [x, y] = shuttleAt(progress);
+      return at(frameAt(time), Math.floor(x), Math.floor(y));
+    };
+    // The picture moves at 12 frames a second: where the shuttle is is where its frame put it.
+    const midFlight = frameTime(CORRIDOR_MS + 1500);
+    const progress = (midFlight - CORRIDOR_MS) / TRIP_MS;
+
+    // The one shuttle, where it should be; before the cue, nothing has left.
+    expect(pixelAt(midFlight, progress)).toBe("w");
+    expect(pixelAt(CORRIDOR_MS - 100, (TRIP_MS - 1700 - 100) / TRIP_MS)).not.toBe("w");
+    // Where the launch before it would have been, had they left every 1.7 s: empty sky.
+    expect(["w", "p"]).not.toContain(pixelAt(midFlight, progress + 1700 / TRIP_MS));
   });
 
   it("closes in on the lit window on \"contractors like you\", a room lit only by the video, flickering", () => {
