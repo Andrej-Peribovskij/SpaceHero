@@ -70,9 +70,10 @@ beat of silence follows it. Card 11, the Module 2 ident, SHALL then start the
 music again from the top. It shows card 0's picture and the caption
 *ABSOLUTE CONNECTIONS · Contractor Orientation · Module 2 of 14: What's the
 Drill*, whole rather than typed, above the prompt **PRESS ANY KEY TO CONTINUE
-ORIENTATION**. No key SHALL answer it. As the tune's first phrase ends, someone
-in the dark SHALL wake with a snort, once. When the snort is over, they punch
-the screen: the music MUST stop at once, a blow SHALL sound, and the whole
+ORIENTATION**. No key SHALL answer it. On the high note that ends the tune's
+first phrase, someone in the dark SHALL wake with a snort, once. A couple of
+seconds after the snort is over, they punch the screen: the music MUST stop at
+once, a blow SHALL sound, and the whole
 screen, caption and prompt included, SHALL collapse to black. The sequence
 ends there. Until beat 1 exists, nothing SHALL follow the black and no input
 SHALL move it on.

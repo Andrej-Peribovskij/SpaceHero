@@ -117,8 +117,8 @@ reuse of the motif outside the intro.
    music. A hidden page suspends the context, as it pauses the timeline (§2),
    and the snore's wait holds with it. The music stops on card 10
    and starts again from the top on card 11, Module 2's ident: the snore needs
-   the silence, and the music coming back is what wakes Joe, with the snort as
-   its first phrase ends. Then he punches the set (§13): `punch` stops every
+   the silence, and the music coming back is what wakes Joe, with the snort on
+   its first phrase's high note. Then he punches the set (§13): `punch` stops every
    sound at once and plays the blow, which is computed like the music, since
    a thump is simple enough to compute. The timeline cues both, so they pause
    with a hidden page like everything else. That plays on a skip too: skipped
@@ -161,7 +161,7 @@ reuse of the motif outside the intro.
    jumps to the start of card 11. Card 11 then starts Module 2's music, as it
    does when the video plays through, and the ending plays out: a skip skips
    Module 1, not Joe's punch. Card 11 has no skip, since it is the ending and
-   lasts under nine seconds. The spec forbids any request or storage write.
+   lasts under ten seconds. The spec forbids any request or storage write.
 
 9. **A pixel font of our own** (superseding "no pixel font", see §10). A
    third-party pixel font would need licence review. This one is drawn for the
@@ -236,10 +236,13 @@ reuse of the motif outside the intro.
    1 would answer with Joe's slap. Most players press at once, so the slap
    would have come before the music had woken him. Now the video plays its
    own ending, so the comic timing is ours. Card 11 asks for a key that no key
-   answers. Its music wakes Joe as the tune's first phrase ends, two bars in
-   at 6.67 s. The punch comes at 8 s, once the snort is over. Both are cues on
-   card 11's own clock (`wakeAtMs`, `punchAtMs` in `script.ts`), like the
-   glitch: the timeline fires `wake` and `punch`, and the music listens.
+   answers. Its music wakes Joe at 5.67 s, on the held high E a second before
+   the tune's first phrase ends, two bars in. The punch comes at 9 s: the snort
+   is over by 6.8 s, and Joe takes a couple of seconds to come round. The
+   playthrough moved both: the first cut had the snort as the phrase ended
+   and the punch at once after it, which left him no time to wake. Both are
+   cues on card 11's own clock (`wakeAtMs`, `punchAtMs` in `script.ts`), like
+   the glitch: the timeline fires `wake` and `punch`, and the music listens.
    The screen dies like a cathode-ray tube, two 12-fps frames per step. The
    picture squeezes to a line, flaring towards white, the line shrinks to a
    dot, and the dot goes out. It is applied to the whole composed screen, as
