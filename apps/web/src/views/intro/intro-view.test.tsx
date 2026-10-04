@@ -3,9 +3,6 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { server, installMockApi } from "../../testing/msw";
 import { GLITCH_SILENCE_MS, cardDurationMs, glitchMs } from "./intro-timeline";
 import { recordingIntroAudio } from "./music/recording-intro-audio";
-import { renderSnore } from "./music/snore";
-import { SAMPLE_RATE } from "./music/synth";
-import { SNORE_PAUSE_S } from "./music/web-audio";
 import { END_CARD, INTRO_CARDS, SNORE_CARD, captionText } from "./script";
 import { IntroView } from "./intro-view";
 
@@ -429,7 +426,7 @@ describe("the music", () => {
     expect(audio.calls).toEqual(["start", "dropOut"]);
   });
 
-  it("stops on the black card and snores, then Module 2's ident starts the loop again and plays on", () => {
+  it("stops on the black card and snores, then Module 2's ident starts the loop again, Joe wakes to it, and it plays on", () => {
     const { audio } = playWithMusic();
     fireEvent.keyDown(window, { key: "a" });
 
@@ -442,23 +439,17 @@ describe("the music", () => {
 
     advance(cardDurationMs(SNORE_CARD));
     expect(atTheEnd()).toBe(true);
-    expect(audio.calls).toEqual(["start", "dropOut", "resume", "stop", "snore", "start"]);
+    expect(audio.calls).toEqual(["start", "dropOut", "resume", "stop", "snore", "start", "wake"]);
 
     // Waiting for a key that nothing answers yet, the music plays on, and no input touches it.
     advance(600_000);
     fireEvent.keyDown(window, { key: "a" });
     fireEvent.click(screen.getByRole("main"));
 
-    expect(audio.calls).toEqual(["start", "dropOut", "resume", "stop", "snore", "start"]);
+    expect(audio.calls).toEqual(["start", "dropOut", "resume", "stop", "snore", "start", "wake"]);
   });
 
-  it("lets the snore finish in silence before Module 2's music starts", () => {
-    const snoreEndsMs = (SNORE_PAUSE_S * 1000) + (renderSnore().length * 1000) / SAMPLE_RATE;
-
-    expect(cardDurationMs(SNORE_CARD) - snoreEndsMs).toBeGreaterThanOrEqual(500);
-  });
-
-  it("on skip, stops Module 1's music and starts Module 2's from the top, with no snore", () => {
+  it("on skip, stops Module 1's music and starts Module 2's from the top, with no snore, and Joe still wakes to it", () => {
     const { audio } = playWithMusic();
     fireEvent.keyDown(window, { key: "a" });
     advance(cardStartMs(3) + FRAMES);
@@ -466,7 +457,7 @@ describe("the music", () => {
     fireEvent.click(screen.getByRole("button", { name: "Skipping is recorded." }));
     advance(600_000);
 
-    expect(audio.calls).toEqual(["start", "stop", "start"]);
+    expect(audio.calls).toEqual(["start", "stop", "start", "wake"]);
   });
 
   it("on skip during the snore, stops it before Module 2's music starts", () => {
@@ -476,7 +467,7 @@ describe("the music", () => {
 
     fireEvent.keyDown(window, { key: "Escape" });
 
-    expect(audio.calls.slice(-3)).toEqual(["snore", "stop", "start"]);
+    expect(audio.calls.slice(-4)).toEqual(["snore", "stop", "start", "wake"]);
   });
 
   describe("in a hidden tab", () => {

@@ -150,17 +150,17 @@ export const INTRO_CARDS: readonly IntroCard[] = [
     ],
   },
   {
-    // No caption: the snore is the whole card. It holds longer than a caption's hold, so the snore
-    // ends in silence before Module 2 starts the music again.
+    // No caption: the snore is the whole card. It holds a second longer than a caption's hold, so
+    // the snore ends in silence before Module 2 starts the music again.
     image: "Black. The music stops. A snore. A beat of silence.",
     caption: [],
-    holdMs: 4200,
+    holdMs: 4000,
   },
   {
     // The next module's ident, mirroring card 0: one module down, thirteen to go. It waits for a
-    // key the way the first one did, but with its music playing, and in beat 1 that music wakes Joe,
-    // who presses a key by slapping the screen off.
-    image: `${IDENT_IMAGE} The music starts again.`,
+    // key the way the first one did, but with its music playing, and that music wakes Joe with a
+    // snort. In beat 1 he presses the key, by slapping the screen off.
+    image: `${IDENT_IMAGE} The music starts again, and in the dark someone wakes with a snort.`,
     caption: [
       { text: "ABSOLUTE CONNECTIONS · Contractor Orientation\nModule 2 of 14: " },
       { text: "What's the Drill", emphasis: true },
