@@ -6,6 +6,7 @@ import {
   cardDurationMs,
   initialIntroState,
   msToType,
+  snoreMs,
   stepIntro,
   typedCharsAt,
   visibleChars,
@@ -59,12 +60,12 @@ describe("the gate", () => {
 });
 
 describe("the sequence", () => {
-  it("shows cards 1 to 11 once each, in order, then ends", () => {
+  it("shows cards 1 to 10 once each, in order, then ends", () => {
     const { state, events } = play({ type: "start" }, ...frames(TOTAL_MS + 1000));
 
     const cards = events.flatMap((event) => (event.type === "card" ? [event.index] : []));
 
-    expect(cards).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+    expect(cards).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     expect(events.at(-1)).toEqual({ type: "ended" });
     expect(state.phase).toBe("ended");
   });
@@ -245,10 +246,19 @@ describe("the end", () => {
     expect(later).toEqual({ state, events: [] });
   });
 
-  it("has a captionless card before the end, the snore, held for its own hold rather than a caption's", () => {
-    expect(INTRO_CARDS[SNORE_CARD]!.caption).toEqual([]);
-    expect(cardDurationMs(SNORE_CARD)).toBe(INTRO_CARDS[SNORE_CARD]!.holdMs);
-    expect(cardDurationMs(SNORE_CARD)).toBeGreaterThan(HOLD_MS);
+  it("snores once, on card 9, a beat after its last words, and holds the card longer for it", () => {
+    const { events } = play({ type: "start" }, ...frames(TOTAL_MS + 1000));
+    const card9 = INTRO_CARDS[SNORE_CARD]!;
+    const typedMs = msToType(card9, captionText(card9).length);
+    const at = (wanted: IntroEvent) => events.findIndex((event) => JSON.stringify(event) === JSON.stringify(wanted));
+
+    expect(SNORE_CARD).toBe(9);
+    expect(events.filter((event) => event.type === "snore")).toHaveLength(1);
+    expect(at({ type: "card", index: SNORE_CARD })).toBeLessThan(at({ type: "snore" }));
+    expect(at({ type: "snore" })).toBeLessThan(at({ type: "card", index: END_CARD }));
+    expect(snoreMs(SNORE_CARD)).toBeGreaterThan(typedMs);
+    expect(cardDurationMs(SNORE_CARD)).toBe(typedMs + card9.holdMs!);
+    expect(card9.holdMs).toBeGreaterThan(HOLD_MS);
   });
 
   it("holds every other card for the usual hold once its caption is typed", () => {

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from "react";
 
 import type { IntroEvent } from "./intro-timeline";
 import { silentIntroAudio, type IntroAudio } from "./music/intro-audio";
-import { END_CARD, SNORE_CARD } from "./script";
+import { END_CARD } from "./script";
 
 /** What each moment of the video asks of the music. Everything else leaves it as it is. */
 function cue(audio: IntroAudio, event: IntroEvent): void {
@@ -14,14 +14,16 @@ function cue(audio: IntroAudio, event: IntroEvent): void {
     case "glitch-end":
       return audio.resume();
     case "card":
-      if (event.index === SNORE_CARD) {
+      // Module 2's ident is the next video, and starts the loop again from the top: a cut, as one
+      // video gives way to the next, never a silence. Skipped or played through, Module 1 is over,
+      // and Joe has slept through it; this is what wakes him.
+      if (event.index === END_CARD) {
         audio.stop();
-        audio.snore();
+        audio.start();
       }
-      // Module 2's ident starts the loop again from the top. Skipped or played through, Module 1
-      // is over, and Joe has slept through it; this is what wakes him.
-      if (event.index === END_CARD) audio.start();
       return;
+    case "snore":
+      return audio.snore();
     case "wake":
       return audio.wake();
     case "punch":

@@ -1,7 +1,7 @@
 import { silentIntroAudio } from "./intro-audio";
 import type { Tune } from "./synth";
 import type { RecordedSounds } from "./sounds";
-import { SNORE_PAUSE_S, openIntroAudio, renderedTune, webIntroAudio } from "./web-audio";
+import { openIntroAudio, renderedTune, webIntroAudio } from "./web-audio";
 
 const TUNE: Tune = {
   bpm: 120,
@@ -166,7 +166,7 @@ describe("webIntroAudio", () => {
     expect(context.sources).toHaveLength(0);
   });
 
-  it("snores once, the recording, through a gain of its own, after a beat of silence", () => {
+  it("snores once, the recording, at once, through a gain of its own", () => {
     const { context, audio } = play();
 
     audio.snore();
@@ -176,7 +176,7 @@ describe("webIntroAudio", () => {
     expect(snore!.buffer!.samples).toBe(SOUNDS.snore);
     expect(snore!.connectedTo).toBe(context.gains[0]);
     expect(context.gains[0]!.connectedTo).toBe(context.destination);
-    expect(snore!.startedAt).toBe(context.currentTime + SNORE_PAUSE_S);
+    expect(snore!.startedAt).toBe(context.currentTime);
   });
 
   it("wakes with the snort once, at once, over the music", () => {

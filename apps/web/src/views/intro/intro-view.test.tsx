@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 
 import { server, installMockApi } from "../../testing/msw";
-import { GLITCH_SILENCE_MS, cardDurationMs, glitchMs } from "./intro-timeline";
+import { GLITCH_SILENCE_MS, cardDurationMs, glitchMs, snoreMs } from "./intro-timeline";
 import { recordingIntroAudio } from "./music/recording-intro-audio";
 import { END_CARD, INTRO_CARDS, SNORE_CARD, captionText } from "./script";
 import { IntroView } from "./intro-view";
@@ -250,14 +250,17 @@ describe("the end state", () => {
     expect(over()).toBe(true);
   });
 
-  it("goes through the captionless snore card before the ident", () => {
+  it("goes from Joe's window straight to Module 2's ident, with no black card between them", () => {
     render(<IntroView />);
     fireEvent.keyDown(window, { key: "a" });
-    advance(INTRO_CARDS.slice(0, END_CARD - 1).reduce((sum, _card, index) => sum + cardDurationMs(index), 0) + 100);
+    const toModule2 = INTRO_CARDS.slice(0, END_CARD).reduce((sum, _card, index) => sum + cardDurationMs(index), 0);
 
-    expect(showsCard(END_CARD - 1)).toBe(true);
-    expect(announced()).toBe("");
-    expect(screen.queryByText(CONTINUE_PROMPT)).not.toBeInTheDocument();
+    advance(toModule2 - 100);
+    expect(showsCard(SNORE_CARD)).toBe(true);
+    expect(announced()).toBe(captionText(INTRO_CARDS[SNORE_CARD]!));
+
+    advance(200);
+    expect(onModule2()).toBe(true);
   });
 
   it("is reached on its own when nobody skips", () => {
@@ -456,21 +459,22 @@ describe("the music", () => {
     expect(audio.calls).toEqual(["start", "dropOut"]);
   });
 
-  it("stops on the black card and snores, then Module 2's ident starts the loop again, Joe wakes to it, and punches it dead", () => {
+  it("snores over the music on card 9, then Module 2's ident cuts the loop back to its top, Joe wakes to it, and punches it dead", () => {
     const { audio } = playWithMusic();
     const { wakeAtMs, punchAtMs } = INTRO_CARDS[END_CARD]!;
     fireEvent.keyDown(window, { key: "a" });
 
-    advance(cardStartMs(SNORE_CARD) - FRAMES);
-    expect(audio.calls).not.toContain("stop");
-
-    advance(2 * FRAMES);
+    advance(cardStartMs(SNORE_CARD) + snoreMs(SNORE_CARD)! - FRAMES);
     expect(showsCard(SNORE_CARD)).toBe(true);
-    expect(audio.calls).toEqual(["start", "dropOut", "resume", "stop", "snore"]);
+    expect(audio.calls).toEqual(["start", "dropOut", "resume"]);
 
-    advance(cardDurationMs(SNORE_CARD));
+    // The snore comes over the music: nothing stops it.
+    advance(2 * FRAMES);
+    expect(audio.calls).toEqual(["start", "dropOut", "resume", "snore"]);
+
+    advance(cardStartMs(END_CARD) - cardStartMs(SNORE_CARD) - snoreMs(SNORE_CARD)!);
     expect(onModule2()).toBe(true);
-    expect(audio.calls).toEqual(["start", "dropOut", "resume", "stop", "snore", "start"]);
+    expect(audio.calls).toEqual(["start", "dropOut", "resume", "snore", "stop", "start"]);
 
     advance(wakeAtMs!);
     expect(audio.calls.slice(-1)).toEqual(["wake"]);
@@ -483,7 +487,7 @@ describe("the music", () => {
     fireEvent.keyDown(window, { key: "a" });
     fireEvent.click(screen.getByRole("main"));
 
-    expect(audio.calls).toEqual(["start", "dropOut", "resume", "stop", "snore", "start", "wake", "punch"]);
+    expect(audio.calls).toEqual(["start", "dropOut", "resume", "snore", "stop", "start", "wake", "punch"]);
   });
 
   it("on skip, stops Module 1's music and starts Module 2's from the top, with no snore, and Joe still wakes and punches it", () => {
@@ -494,17 +498,19 @@ describe("the music", () => {
     fireEvent.click(screen.getByRole("button", { name: "Skipping is recorded." }));
     advance(600_000);
 
-    expect(audio.calls).toEqual(["start", "stop", "start", "wake", "punch"]);
+    expect(audio.calls).not.toContain("snore");
+    expect(audio.calls.slice(-4)).toEqual(["stop", "start", "wake", "punch"]);
   });
 
-  it("on skip during the snore, stops it before Module 2's music starts", () => {
+  it("on skip during the snore, cuts it as Module 2's music starts", () => {
     const { audio } = playWithMusic();
     fireEvent.keyDown(window, { key: "a" });
-    advance(cardStartMs(SNORE_CARD) + FRAMES);
+    advance(cardStartMs(SNORE_CARD) + snoreMs(SNORE_CARD)! + FRAMES);
+    expect(audio.calls.slice(-1)).toEqual(["snore"]);
 
     fireEvent.keyDown(window, { key: "Escape" });
 
-    expect(audio.calls.slice(-3)).toEqual(["snore", "stop", "start"]);
+    expect(audio.calls.slice(-2)).toEqual(["stop", "start"]);
   });
 
   describe("in a hidden tab", () => {
@@ -686,19 +692,22 @@ describe("jumping card by card, in the dev server only", () => {
     expect(showsCard(0)).toBe(true);
   });
 
-  it("restarts the music from the top on a jump, and a jump off the black card cuts the snore", () => {
+  it("restarts the music from the top on a jump, and a jump during the snore cuts it", () => {
     at(`?card=${SNORE_CARD}`);
     const audio = recordingIntroAudio();
     render(<IntroView debugSeek openAudio={() => audio} />);
     fireEvent.keyDown(window, { key: "a" });
-    expect(audio.calls).toEqual(["start", "stop", "start", "stop", "snore"]);
+    expect(audio.calls).toEqual(["start", "stop", "start"]);
+
+    advance(snoreMs(SNORE_CARD)! + 100);
+    expect(audio.calls.slice(-1)).toEqual(["snore"]);
 
     fireEvent.keyDown(window, { key: "ArrowLeft" });
     expect(showsCard(SNORE_CARD - 1)).toBe(true);
     expect(audio.calls.slice(-2)).toEqual(["stop", "start"]);
   });
 
-  it("goes back from Module 2's ident to the black card, and no further forward", () => {
+  it("goes back from Module 2's ident to Joe's window, and no further forward", () => {
     render(<IntroView debugSeek />);
     fireEvent.keyDown(window, { key: "a" });
     fireEvent.keyDown(window, { key: "Escape" });

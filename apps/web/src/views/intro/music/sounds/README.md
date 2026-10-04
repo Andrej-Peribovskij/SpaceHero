@@ -2,12 +2,12 @@
 
 The intro's music is computed (`../synth.ts`); these two sounds are not. A
 snore made from noise and arithmetic sounded like a hiss through two rounds of
-tuning, so card 10's snore and card 11's waking snort are recordings.
+tuning, so card 9's snore and card 10's waking snort are recordings.
 
 | File        | Plays                                              | Source file        |
 |-------------|----------------------------------------------------|--------------------|
-| `snore.wav` | Card 10, a beat after the music stops: Joe asleep  | `Sleep Snorf.wav`  |
-| `wake.wav`  | Card 11, a beat after the music starts: Joe wakes  | `Snorf 1.wav`      |
+| `snore.wav` | Card 9, over the video and its music: Joe asleep   | `Sleep Snorf.wav`  |
+| `wake.wav`  | Card 10, on the first phrase's high note: he wakes | `Snorf 1.wav`      |
 
 ## Source and licence
 

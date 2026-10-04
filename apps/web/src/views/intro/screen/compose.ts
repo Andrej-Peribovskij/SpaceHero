@@ -53,7 +53,7 @@ export interface ScreenContent {
    */
   readonly glitchAtMs?: number;
   /**
-   * When, on the card's clock, Joe's punch kills the screen: on card 11 only. From then on the
+   * When, on the card's clock, Joe's punch kills the screen: on card 10 only. From then on the
    * screen collapses to black, or under reduced motion is black at once.
    */
   readonly powerOffAtMs?: number;

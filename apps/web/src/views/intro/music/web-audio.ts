@@ -19,9 +19,6 @@ const CUT_S = 0.005;
 /** How long a sound is let fade before it is stopped: five time constants is under 1% left. */
 const FADE_S = 5 * CUT_S;
 
-/** The beat of silence on the black card between the music stopping and the snore. */
-export const SNORE_PAUSE_S = 0.6;
-
 interface Playing {
   readonly source: AudioBufferSourceNode;
   readonly gain: GainNode;
@@ -68,13 +65,12 @@ function bufferOf(context: BaseAudioContext, samples: Float32Array<ArrayBuffer>)
 
 /**
  * `sounds` is asked at the moment a recording is to play, not when the audio opens: the gate's key
- * may come before the fetch has finished, and card 10 long after it.
+ * may come before the fetch has finished, and card 9's snore long after it.
  */
 export function webIntroAudio(context: AudioContext, tune: Tune, sounds: () => RecordedSounds = loadedSounds): IntroAudio {
   let music: Playing | undefined;
-  // Kept so a skip on the black card can stop it: the snore waits a beat before it starts, and
-  // must not then play over Module 2's music. The snort and the punch are kept so that leaving the
-  // screen stops them too.
+  // Kept so a stop can cut them: a skip during the snore must not let it run on into Module 2,
+  // and leaving the screen must silence the snort and the blow too.
   let snore: Playing | undefined;
   let wake: Playing | undefined;
   let thump: Playing | undefined;
@@ -106,11 +102,11 @@ export function webIntroAudio(context: AudioContext, tune: Tune, sounds: () => R
     thump = undefined;
   };
 
-  /** Samples, once, after a pause: nothing if they never arrived. */
-  const playOnce = (samples: Float32Array<ArrayBuffer> | undefined, pauseS: number): Playing | undefined => {
+  /** Samples, once, now: nothing if they never arrived. The timeline says when. */
+  const playOnce = (samples: Float32Array<ArrayBuffer> | undefined): Playing | undefined => {
     if (closed || !samples) return undefined;
 
-    return play(bufferOf(context, samples), { loop: false, at: context.currentTime + pauseS });
+    return play(bufferOf(context, samples), { loop: false, at: context.currentTime });
   };
 
   return {
@@ -124,16 +120,16 @@ export function webIntroAudio(context: AudioContext, tune: Tune, sounds: () => R
     resume: () => gainTo(1),
     stop: stopAll,
     snore: () => {
-      snore = playOnce(sounds().snore, SNORE_PAUSE_S);
+      snore = playOnce(sounds().snore);
     },
     wake: () => {
-      wake = playOnce(sounds().wake, 0);
+      wake = playOnce(sounds().wake);
     },
     // The set is struck dead: everything stops at once, in the gain's short cut rather than a
     // fade a listener would hear, and the blow sounds over the silence.
     punch: () => {
       stopAll();
-      thump = playOnce(renderedPunch(), 0);
+      thump = playOnce(renderedPunch());
     },
     // The context's own clock stops with it, so whatever was scheduled holds its place too. A
     // context once allowed to play may be resumed outside a gesture; if the browser says no, the

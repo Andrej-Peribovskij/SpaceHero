@@ -22,7 +22,7 @@ export const IDENT_HOLD_MS = 2500;
 /** How long the music stays out after the Ganymede line. Must end inside card 6's hold. */
 export const GLITCH_SILENCE_MS = 1500;
 
-/** How long the punched screen takes to die: to a line, a dot, and black. Card 11 ends with it. */
+/** How long the punched screen takes to die: to a line, a dot, and black. Card 10 ends with it. */
 export const POWER_OFF_MS = 600;
 
 export type IntroPhase = "gate" | "playing" | "ended";
@@ -49,7 +49,9 @@ export type IntroEvent =
   | { readonly type: "card"; readonly index: number }
   | { readonly type: "glitch" }
   | { readonly type: "glitch-end" }
-  /** Joe wakes, on card 11. */
+  /** Someone snores in Joe's room, on card 9. */
+  | { readonly type: "snore" }
+  /** Joe wakes, on card 10. */
   | { readonly type: "wake" }
   /** Joe punches the screen: the music dies, and the picture with it. */
   | { readonly type: "punch" }
@@ -168,10 +170,21 @@ function cuesOf(index: number): readonly Cue[] {
     cues.push({ atMs: glitchAtMs, event: { type: "glitch" } });
     cues.push({ atMs: glitchAtMs + GLITCH_SILENCE_MS, event: { type: "glitch-end" } });
   }
+  const snoreAtMs = snoreOf(card);
+  if (snoreAtMs !== undefined) cues.push({ atMs: snoreAtMs, event: { type: "snore" } });
   if (card.wakeAtMs !== undefined) cues.push({ atMs: card.wakeAtMs, event: { type: "wake" } });
   if (card.punchAtMs !== undefined) cues.push({ atMs: card.punchAtMs, event: { type: "punch" } });
 
   return cues;
+}
+
+function snoreOf(card: IntroCard): number | undefined {
+  return card.snoreAfterMs === undefined ? undefined : msToType(card, captionText(card).length) + card.snoreAfterMs;
+}
+
+/** When, from the start of a card, someone in Joe's room snores: on card 9, once its caption is typed. */
+export function snoreMs(index: number): number | undefined {
+  return snoreOf(INTRO_CARDS[index]!);
 }
 
 interface CardTiming {

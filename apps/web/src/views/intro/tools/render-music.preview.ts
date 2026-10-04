@@ -1,14 +1,14 @@
 /**
- * Writes the intro's sound to a WAV, for listening to it without playing the video: the loop
- * twice, then card 10 as it sounds — the stop, the pause, the snore and the silence after — and
- * card 11: Module 2's ident starting the loop again from the top, Joe waking to it, and his punch
- * cutting it dead, then the silence the video ends on. Started by `pnpm run intro:render-music`;
- * the file lands in `.cache/intro-previews/`, which git ignores.
+ * Writes the intro's sound to a WAV, for listening to it without playing the video: the whole
+ * video from the key press, timed as it plays. Module 1's loop runs from the gate, drops out at
+ * the Ganymede glitch and comes back, and someone snores over it on card 9. Module 2's ident cuts
+ * the loop back to its top, Joe wakes to it, and his punch kills it; the silence the video ends on
+ * closes the file. Started by `pnpm run intro:render-music`; the file lands in
+ * `.cache/intro-previews/`, which git ignores.
  *
  * These are the very samples the browser plays: the synth computes the music and the punch, the
  * snore and the snort are read from their recordings (`music/sounds/`), and Web Audio only plays
- * the buffers.
- * What this file cannot reproduce is the glitch's drop-out, which is a gain on the browser's side.
+ * the buffers. The glitch's drop-out, a gain on the browser's side, is a plain silence here.
  *
  * A `.preview.ts`, not a test, like `render-card.preview.ts`: only `vitest.preview.config.ts`
  * collects it.
@@ -19,21 +19,18 @@ import { fileURLToPath } from "node:url";
 
 import { it } from "vitest";
 
-import { cardDurationMs } from "../intro-timeline";
+import { GLITCH_SILENCE_MS, cardDurationMs, glitchMs, snoreMs } from "../intro-timeline";
 import { renderPunch } from "../music/punch";
 import { decodeWav } from "../music/sounds";
 import { SAMPLE_RATE, renderTune } from "../music/synth";
 import { ORIENTATION_TUNE } from "../music/tune";
-import { SNORE_PAUSE_S } from "../music/web-audio";
-import { END_CARD, INTRO_CARDS, SNORE_CARD } from "../script";
+import { END_CARD, INTRO_CARDS } from "../script";
 import { encodeWav } from "./wav";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
 /** From `apps/web/src/views/intro/tools/` up to the repository root, then into the cache. */
 const OUT = resolve(HERE, "../../../../../../.cache/intro-previews/music.wav");
-
-const LOOPS = 2;
 
 /** The silence kept after the punch: the video ends on it. */
 const AFTER_MS = 1500;
@@ -44,28 +41,34 @@ function recording(name: string): Float32Array<ArrayBuffer> {
   return decodeWav(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer);
 }
 
+/** When card `index` starts, counted from the key press. */
+const cardStartMs = (index: number) => INTRO_CARDS.slice(0, index).reduce((sum, _card, before) => sum + cardDurationMs(before), 0);
+
 it("renders the music", () => {
   const loop = renderTune(ORIENTATION_TUNE);
-  const snore = recording("snore.wav");
-  const wake = recording("wake.wav");
-  const punch = renderPunch();
-  const { wakeAtMs, punchAtMs } = INTRO_CARDS[END_CARD]!;
   const samples = (ms: number) => Math.round((ms * SAMPLE_RATE) / 1000);
-  const snoreCard = samples(cardDurationMs(SNORE_CARD));
-  const restart = loop.length * LOOPS + snoreCard;
-  const struck = restart + samples(punchAtMs!);
+  const { wakeAtMs, punchAtMs } = INTRO_CARDS[END_CARD]!;
+
+  const module2 = samples(cardStartMs(END_CARD));
+  const struck = module2 + samples(punchAtMs!);
   const out = new Float32Array(struck + samples(AFTER_MS));
 
-  for (let i = 0; i < LOOPS; i += 1) out.set(loop, i * loop.length);
-  out.set(snore, loop.length * LOOPS + samples(SNORE_PAUSE_S * 1000));
-  // Module 2's music, until the punch cuts it dead.
-  out.set(loop.subarray(0, struck - restart), restart);
-  // The snort plays over the music, so it is mixed in rather than set.
-  const wakeAt = restart + samples(wakeAtMs!);
-  wake.forEach((value, i) => {
-    if (wakeAt + i < struck) out[wakeAt + i]! += value;
-  });
-  out.set(punch, struck);
+  // Module 1's loop, from the key press to Module 2, then Module 2's from its top to the punch.
+  for (let i = 0; i < module2; i += 1) out[i] = loop[i % loop.length]!;
+  for (let i = module2; i < struck; i += 1) out[i] = loop[(i - module2) % loop.length]!;
+
+  // The glitch: the loop runs on, unheard.
+  const glitchCard = INTRO_CARDS.findIndex((card) => card.glitchAtChar !== undefined);
+  const silentFrom = samples(cardStartMs(glitchCard) + glitchMs(glitchCard)!);
+  out.fill(0, silentFrom, silentFrom + samples(GLITCH_SILENCE_MS));
+
+  // The snore and the snort play over the music, so they are mixed in rather than set.
+  const mix = (sound: Float32Array, at: number) => sound.forEach((value, i) => void (out[at + i]! += value));
+  const snoreCard = INTRO_CARDS.findIndex((card) => card.snoreAfterMs !== undefined);
+  mix(recording("snore.wav"), samples(cardStartMs(snoreCard) + snoreMs(snoreCard)!));
+  mix(recording("wake.wav"), module2 + samples(wakeAtMs!));
+
+  out.set(renderPunch(), struck);
 
   mkdirSync(dirname(OUT), { recursive: true });
   writeFileSync(OUT, encodeWav(out, SAMPLE_RATE));

@@ -161,13 +161,15 @@ disagree, so the two cannot drift apart unnoticed.
 
 ### Listening to the Intro Music
 
-`pnpm run intro:render-music` writes the orientation music to
-`.cache/intro-previews/music.wav`: the loop twice, then card 10's stop, pause,
-snore and silence, and Module 2's ident starting the loop again. These are the same samples the browser plays,
-because the synth in `apps/web/src/views/intro/music/` computes every one and
-Web Audio only loops the buffer. The glitch's drop-out is not in the file,
-because the browser does it with a gain. Change the note table in
-`music/tune.ts`, run the command again, and listen.
+`pnpm run intro:render-music` writes the intro's whole soundtrack to
+`.cache/intro-previews/music.wav`, timed as it plays from the key press: the
+loop, its drop-out at the Ganymede glitch, the snore over card 9, Module 2's
+ident cutting the loop back to its top, Joe's snort, and his punch. These are
+the same samples the browser plays: the synth in
+`apps/web/src/views/intro/music/` computes the music and the punch, the snore
+and the snort are the recordings in `music/sounds/`, and Web Audio only plays
+the buffers. Change the note table in `music/tune.ts`, run the command again,
+and listen.
 
 Every `.preview.ts` shares the preview config, so each command names the file
 it runs.

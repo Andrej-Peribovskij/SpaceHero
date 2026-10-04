@@ -35,11 +35,16 @@ export interface IntroCard {
    * Set on card 6 only: the one place the video visibly hides something.
    */
   readonly glitchAtChar?: number;
-  /** When, on the card's clock, Joe wakes with a snort. Set on card 11 only. */
+  /**
+   * How long after its caption is typed someone in the room snores, under the video and its music.
+   * Set on card 9 only, the close shot of Joe's window.
+   */
+  readonly snoreAfterMs?: number;
+  /** When, on the card's clock, Joe wakes with a snort. Set on card 10 only. */
   readonly wakeAtMs?: number;
   /**
    * When, on the card's clock, Joe punches the screen: the music dies and the picture collapses to
-   * black. Set on card 11 only, where it ends the video.
+   * black. Set on card 10 only, where it ends the video.
    */
   readonly punchAtMs?: number;
 }
@@ -146,7 +151,7 @@ export const INTRO_CARDS: readonly IntroCard[] = [
   },
   {
     image:
-      "Card 8's light goes out. Out of the dark, stars, and the camera tilts down to the Martian surface at dusk, the sunset blue, Deimos high up with Externa's lights, shuttles climbing to it from a far port. On the plain, a dome half sunk in the dunes, a small ship by it, a ring of dark windows, and one lit. Close: through that window, a dark room, its walls lit only by the flicker of this video, playing on a screen out of sight. Above the dome, Externa's beacon blinks teal.",
+      "Card 8's light goes out. Out of the dark, stars, and the camera tilts down to the Martian surface at dusk, the sunset blue, Deimos high up with Externa's lights, shuttles climbing to it from a far port. On the plain, a dome half sunk in the dunes, a small ship by it, a ring of dark windows, and one lit. Close: through that window, a dark room, its walls lit only by the flicker of this video, playing on a screen out of sight. Above the dome, Externa's beacon blinks teal. In the room, under the video, someone snores.",
     caption: [
       // The caption waits while card 8's glare goes out and the camera tilts down from Mars's sky,
       // and again while it closes in on the window.
@@ -155,12 +160,9 @@ export const INTRO_CARDS: readonly IntroCard[] = [
       { text: "the Corridor carries us all — and it is carried by contractors like you. ", pauseAfterMs: 900 },
       { text: "Your assignment awaits at Externa Prima." },
     ],
-  },
-  {
-    // No caption: the snore is the whole card. It holds a second longer than a caption's hold, so
-    // the snore ends in silence before Module 2 starts the music again.
-    image: "Black. The music stops. A snore. A beat of silence.",
-    caption: [],
+    // The video calls the contractor to his assignment, and a beat later the room answers with a
+    // snore, over the music. The card holds a second longer than usual so it ends before Module 2.
+    snoreAfterMs: 600,
     holdMs: 4000,
   },
   {
@@ -188,7 +190,7 @@ export const IDENT_CARD = 0;
  */
 export const END_CARD = INTRO_CARDS.length - 1;
 
-/** Card 10, black and captionless: the music stops on it, and someone snores. */
+/** Card 9, Joe's window: someone in the room snores under the video. */
 export const SNORE_CARD = END_CARD - 1;
 
 /** A caption as one string, for the live region and for tests. */

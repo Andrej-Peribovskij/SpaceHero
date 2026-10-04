@@ -2,12 +2,11 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { cardDurationMs } from "../intro-timeline";
+import { cardDurationMs, snoreMs } from "../intro-timeline";
 import { END_CARD, INTRO_CARDS, SNORE_CARD } from "../script";
 import { encodeWav } from "../tools/wav";
 import { decodeWav, soundStore } from "./sounds";
 import { SAMPLE_RATE } from "./synth";
-import { SNORE_PAUSE_S } from "./web-audio";
 
 // Resolved by hand: Vite rewrites `new URL("…", import.meta.url)` into a served-asset URL, which is
 // not a path readFileSync can open.
@@ -54,8 +53,8 @@ describe("the recorded sounds", () => {
     expect(seconds(wake)).toBeCloseTo(1.14, 1);
   });
 
-  it("let the snore finish in silence before Module 2's music starts", () => {
-    const snoreEndsMs = (SNORE_PAUSE_S + seconds(snore)) * 1000;
+  it("let the snore end with card 9, with a beat to spare, never running into Module 2", () => {
+    const snoreEndsMs = snoreMs(SNORE_CARD)! + seconds(snore) * 1000;
 
     expect(cardDurationMs(SNORE_CARD) - snoreEndsMs).toBeGreaterThanOrEqual(500);
   });

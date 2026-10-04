@@ -3,7 +3,7 @@ import snoreUrl from "./sounds/snore.wav?url";
 import wakeUrl from "./sounds/wake.wav?url";
 
 /**
- * The intro's two recorded sounds: card 10's snore and card 11's waking snort. `sounds/README.md`
+ * The intro's two recorded sounds: card 9's snore and card 10's waking snort. `sounds/README.md`
  * says where they come from and what was done to them. Everything else the intro plays is
  * computed; these are fetched while the gate waits and read into samples like the synth's, so
  * Web Audio plays them the same way.

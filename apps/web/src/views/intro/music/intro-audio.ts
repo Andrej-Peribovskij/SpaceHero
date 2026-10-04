@@ -17,15 +17,15 @@ export interface IntroAudio {
   readonly dropOut: () => void;
   /** The music is back, where the loop has got to by now, as if nothing had happened. */
   readonly resume: () => void;
-  /** The music ends: Module 1 is over. */
+  /** Every sound stops: a skip, a jump, or the next video starting. */
   readonly stop: () => void;
-  /** Someone in the room is asleep. */
+  /** Someone in the room is asleep, and snores under the video. */
   readonly snore: () => void;
   /** They wake, with a snort. */
   readonly wake: () => void;
   /** They punch the screen: every sound dies at once, and the blow and the dying set are heard. */
   readonly punch: () => void;
-  /** The video has paused, its page hidden: every sound holds where it is, the snore's wait too. */
+  /** The video has paused, its page hidden: every sound holds where it is. */
   readonly pause: () => void;
   /** The page is back: every sound goes on from where it held. */
   readonly unpause: () => void;

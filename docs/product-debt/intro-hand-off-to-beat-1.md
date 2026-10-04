@@ -6,7 +6,7 @@
 
 ## What
 
-The Chapter 1 intro ([script](../story/chapter-01-intro.md)) ends on card 11:
+The Chapter 1 intro ([script](../story/chapter-01-intro.md)) ends on card 10:
 Module 2's music wakes Joe, he punches the screen, and it dies to black. Beat 1
 is scripted to open in that dark, in Joe's room, with his line. Beat 1 does not
 exist yet. The intro therefore ends holding on a black screen, and nothing

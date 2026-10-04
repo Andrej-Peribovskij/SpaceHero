@@ -20,7 +20,7 @@ const SQUEEZE_MS = 2 * FRAME_MS;
 const LINE_MS = 2 * FRAME_MS;
 const DOT_MS = 2 * FRAME_MS;
 
-/** How long until the screen is black: inside card 11's power-off, which ends the video. */
+/** How long until the screen is black: inside card 10's power-off, which ends the video. */
 export const DEAD_MS = SQUEEZE_MS + LINE_MS + DOT_MS;
 
 const CENTRE_X = Math.floor(FRAME_WIDTH / 2);
