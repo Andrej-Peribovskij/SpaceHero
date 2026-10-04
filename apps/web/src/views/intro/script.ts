@@ -165,17 +165,17 @@ export const INTRO_CARDS: readonly IntroCard[] = [
   },
   {
     // The next module's ident, mirroring card 0: one module down, thirteen to go. It asks for a key
-    // the way the first one did, but nothing answers it: its music wakes Joe with a snort as the
-    // tune's first phrase ends, and he answers it himself, with his fist.
-    image: `${IDENT_IMAGE} The music starts again; at the end of its first phrase, someone in the dark wakes with a snort, and punches the screen: the music dies, and the picture collapses to a line, a dot, and black.`,
+    // the way the first one did, but nothing answers it: its music wakes Joe with a snort on the
+    // first phrase's high note, and once he has come round he answers it himself, with his fist.
+    image: `${IDENT_IMAGE} The music starts again; on its first phrase's high note, someone in the dark wakes with a snort, comes round, and punches the screen: the music dies, and the picture collapses to a line, a dot, and black.`,
     caption: [
       { text: "ABSOLUTE CONNECTIONS · Contractor Orientation\nModule 2 of 14: " },
       { text: "What's the Drill", emphasis: true },
     ],
-    // Two bars of the tune at 72 beats a minute: its first phrase, rising to the high E and back.
-    wakeAtMs: 6667,
-    // The snort is over by now, and the fist follows it at once.
-    punchAtMs: 8000,
+    // A second before the first phrase ends, two bars in at 72 beats a minute: on its high E, held.
+    wakeAtMs: 5667,
+    // The snort is over a second in, and Joe takes a couple more to come round before the fist.
+    punchAtMs: 9000,
   },
 ];
 

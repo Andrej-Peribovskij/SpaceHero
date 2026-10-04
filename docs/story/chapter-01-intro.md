@@ -76,7 +76,7 @@ telling the story, never the story itself.
 | 8 | The dive goes on into the glare, all white; out of it, a cliff of bleached rock towering out of the frame, a white sky and a swollen Sun beside it, and in the cliff a few caverns where the ones who stayed live, the rock their shelter from the light: dark mouths, ledges, awnings, fires, small figures in the shade; on the cracked plain, a ship that never left. The camera closes in on one cave, and from inside it: a single small figure, cloaked, alone at the edge of the shade, a hand to the brow, looking up at the white sky where a last ship climbs away. | Some chose to stay. Absolute Connections respects every choice. |
 | 9 | Card 8's light goes out. Out of the dark, stars, and the camera tilts down to the Martian surface at dusk, the sunset blue, Deimos high up with Externa's lights, shuttles climbing to it from a far port. On the plain, a dome half sunk in the dunes, a small ship by it, a ring of dark windows, and one lit. Close: through that window, a dark room, its walls lit only by the flicker of this video, playing on a screen out of sight. Above the dome, Externa's beacon blinks teal. | 158 years later, the Corridor carries us all — and it is carried by contractors like you. Your assignment awaits at Externa Prima. |
 | 10 | Black. The music stops. A snore. A beat of silence. | |
-| 11 | Black. Twinkling pixel stars. The Absolute Connections logo turns: a four-colour square one way, a white dial inside it the other. The music starts again; at the end of its first phrase, someone in the dark wakes with a snort, and punches the screen: the music dies, and the picture collapses to a line, a dot, and black. | ABSOLUTE CONNECTIONS · Contractor Orientation<br>Module 2 of 14: *What's the Drill* |
+| 11 | Black. Twinkling pixel stars. The Absolute Connections logo turns: a four-colour square one way, a white dial inside it the other. The music starts again; on its first phrase's high note, someone in the dark wakes with a snort, comes round, and punches the screen: the music dies, and the picture collapses to a line, a dot, and black. | ABSOLUTE CONNECTIONS · Contractor Orientation<br>Module 2 of 14: *What's the Drill* |
 
 Card 11 mirrors card 0 on purpose: the same ident, the same picture, the next
 module's title. Card 10 has no caption; the snore is the whole card. Card 11's
@@ -102,9 +102,10 @@ intro's clue.
 The intro ends on card 11, on black. Joe has been asleep in bed through all of
 it: the video started on its own, for no reason he can see, and it is what wakes
 him: Module 2's ident starting the tune up again, loud in the dark room, asking
-him to **PRESS ANY KEY TO CONTINUE ORIENTATION**. He wakes with a snort as its
-first phrase ends, and punches the screen. The music dies, the picture
-collapses, and beat 1 begins in that dark, in Joe's room on the Mars surface:
+him to **PRESS ANY KEY TO CONTINUE ORIENTATION**. He wakes with a snort on its
+first phrase's high note, comes round, and punches the screen. The music dies,
+the picture collapses, and beat 1 begins in that dark, in Joe's room on the
+Mars surface:
 
 > **JOE:** F@#K1N6 corporate propaganda… I can't stand it.
 

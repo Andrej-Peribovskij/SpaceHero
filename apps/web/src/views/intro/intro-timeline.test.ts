@@ -228,13 +228,13 @@ describe("the end", () => {
     expect(atMs("ended")).toBeGreaterThan(punchAtMs! + POWER_OFF_MS);
   });
 
-  it("wakes Joe as the tune's first phrase ends, two bars in, and punches only once the snort has had its moment", () => {
+  it("wakes Joe a second before the tune's first phrase ends, two bars in, and punches a few seconds later", () => {
     const { wakeAtMs, punchAtMs } = INTRO_CARDS[END_CARD]!;
     const barMs = (4 * 60_000) / ORIENTATION_TUNE.bpm;
 
-    expect(wakeAtMs).toBeCloseTo(2 * barMs, -1);
-    expect(punchAtMs! - wakeAtMs!).toBeGreaterThanOrEqual(1000);
-    expect(punchAtMs! - wakeAtMs!).toBeLessThanOrEqual(2000);
+    expect(wakeAtMs).toBeCloseTo(2 * barMs - 1000, -1);
+    expect(punchAtMs! - wakeAtMs!).toBeGreaterThanOrEqual(3000);
+    expect(punchAtMs! - wakeAtMs!).toBeLessThanOrEqual(4000);
   });
 
   it("holds on black once ended, indefinitely, with nothing more to happen", () => {

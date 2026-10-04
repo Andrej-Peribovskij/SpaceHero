@@ -123,10 +123,10 @@ describe("soundStore", () => {
 });
 
 describe("the snort and the punch", () => {
-  it("lets the snort finish before Joe's fist lands", () => {
+  it("lets the snort finish, and gives Joe a couple of seconds to come round, before his fist lands", () => {
     const wake = decodeWav(fileBytes("wake.wav"));
     const { wakeAtMs, punchAtMs } = INTRO_CARDS[END_CARD]!;
 
-    expect(wakeAtMs! + seconds(wake) * 1000).toBeLessThanOrEqual(punchAtMs!);
+    expect(punchAtMs! - (wakeAtMs! + seconds(wake) * 1000)).toBeGreaterThanOrEqual(2000);
   });
 });
