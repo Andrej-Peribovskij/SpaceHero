@@ -117,9 +117,10 @@ export function IntroView({
         still={reducedMotion}
       />
 
-      {/* Set once per card, so a screen reader hears each caption whole (design.md §7). */}
+      {/* Set once per card, so a screen reader hears each caption whole (design.md §7). Once the
+          punch has killed the screen, the caption dies with it, here as on the canvas. */}
       <p className={textClass} aria-live="polite">
-        {captionText(card)}
+        {phase === "ended" ? "" : captionText(card)}
       </p>
 
       {/* The prompt blinks on the screen; this is it as text, for assistive technology. */}

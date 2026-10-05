@@ -74,10 +74,11 @@ function onModule2(): boolean {
   return screen.queryByText(CONTINUE_PROMPT) !== null && announced() === captionText(INTRO_CARDS[END_CARD]!);
 }
 
-/** Over: Joe has punched the screen, and the prompt and the skip have gone with it. */
+/** Over: Joe has punched the screen, and the caption, the prompt and the skip have gone with it. */
 function over(): boolean {
   return (
     showsCard(END_CARD) &&
+    announced() === "" &&
     screen.queryByText(CONTINUE_PROMPT) === null &&
     within(screen.getByRole("main")).queryByRole("button") === null
   );
@@ -631,6 +632,18 @@ describe("without a canvas to paint on", () => {
 
     expect(screen.getByText(PROMPT)).not.toHaveClass("sr-only");
     expect(document.querySelector("[aria-live]")).not.toHaveClass("sr-only");
+  });
+
+  it("goes dark with the screen when Joe punches it: no caption and no prompt left showing", () => {
+    render(<IntroView />);
+    fireEvent.keyDown(window, { key: "a" });
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(announced()).toBe(captionText(INTRO_CARDS[END_CARD]!));
+
+    advance(cardDurationMs(END_CARD) + 100);
+
+    expect(announced()).toBe("");
+    expect(screen.queryByText(CONTINUE_PROMPT)).not.toBeInTheDocument();
   });
 
   it("keeps that text for assistive technology alone when the screen can paint it", () => {
