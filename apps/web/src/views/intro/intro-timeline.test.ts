@@ -4,6 +4,7 @@ import {
   MS_PER_CHAR,
   POWER_OFF_MS,
   cardDurationMs,
+  cuesOf,
   initialIntroState,
   msToType,
   snoreMs,
@@ -156,6 +157,22 @@ describe("skip", () => {
   });
 });
 
+describe("cuesOf", () => {
+  it("lists a card's cues in the order they happen, whatever kind each is", () => {
+    // Out of the order the kinds are listed in: a punch before the wake.
+    const card = { image: "", caption: [{ text: "Hi." }], punchAtMs: 100, wakeAtMs: 200 };
+
+    expect(cuesOf(card).map((cue) => cue.event.type)).toEqual(["punch", "wake"]);
+  });
+
+  it("lists every card's cues in time order", () => {
+    for (const card of INTRO_CARDS) {
+      const times = cuesOf(card).map((cue) => cue.atMs);
+      expect(times).toEqual([...times].sort((a, b) => a - b));
+    }
+  });
+});
+
 describe("seek, the debugging jump", () => {
   it("does nothing before the player opts in", () => {
     expect(play({ type: "seek", card: 5 })).toEqual({ state: initialIntroState, events: [] });
@@ -180,6 +197,15 @@ describe("seek, the debugging jump", () => {
   it("keeps to the cards there are", () => {
     expect(play({ type: "start" }, { type: "seek", card: -3 }).state.card).toBe(0);
     expect(play({ type: "start" }, { type: "seek", card: 99 }).state.card).toBe(END_CARD);
+  });
+
+  it.each([Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY])("stays where it is when asked for card %d", (card) => {
+    const before = play({ type: "start" }, { type: "tick", dtMs: 1000 });
+    const { state, events } = stepIntro(before.state, { type: "seek", card });
+
+    expect(state).toBe(before.state);
+    expect(events).toEqual([]);
+    expect(() => stepIntro(state, { type: "tick", dtMs: 16 })).not.toThrow();
   });
 
   it("lands on card 6 before its glitch, which then fires on time", () => {

@@ -155,14 +155,13 @@ export function punchMs(index: number): number | undefined {
   return INTRO_CARDS[index]!.punchAtMs;
 }
 
-interface Cue {
+export interface Cue {
   readonly atMs: number;
   readonly event: IntroEvent;
 }
 
-/** The events that fire partway through a card, rather than on entering it. */
-function cuesOf(index: number): readonly Cue[] {
-  const card = INTRO_CARDS[index]!;
+/** The events that fire partway through a card, rather than on entering it, in the order they happen. */
+export function cuesOf(card: IntroCard): readonly Cue[] {
   const glitchAtMs = glitchOf(card);
   const cues: Cue[] = [];
 
@@ -175,7 +174,9 @@ function cuesOf(index: number): readonly Cue[] {
   if (card.wakeAtMs !== undefined) cues.push({ atMs: card.wakeAtMs, event: { type: "wake" } });
   if (card.punchAtMs !== undefined) cues.push({ atMs: card.punchAtMs, event: { type: "punch" } });
 
-  return cues;
+  // In the order they happen, which is the order a tick crossing several of them fires them in.
+  // Stable, so cues at the same moment keep the order they were pushed in.
+  return cues.sort((a, b) => a.atMs - b.atMs);
 }
 
 function snoreOf(card: IntroCard): number | undefined {
@@ -200,7 +201,7 @@ interface CardTiming {
  */
 const TIMINGS: readonly CardTiming[] = INTRO_CARDS.map((card, index) => ({
   durationMs: durationOf(index),
-  cues: cuesOf(index),
+  cues: cuesOf(card),
   captionLength: captionText(card).length,
   glitchMs: glitchOf(card),
 }));
@@ -242,7 +243,8 @@ export function stepIntro(state: IntroState, action: IntroAction): IntroStep {
  * plays it from the top: Module 2's music, Joe waking, the punch.
  */
 function seek(state: IntroState, card: number): IntroStep {
-  if (state.phase === "gate") return { state, events: [] };
+  // A card that is no number is nowhere to go: clamping cannot make one of NaN.
+  if (state.phase === "gate" || !Number.isFinite(card)) return { state, events: [] };
 
   const index = Math.min(Math.max(Math.trunc(card), IDENT_CARD), END_CARD);
 
