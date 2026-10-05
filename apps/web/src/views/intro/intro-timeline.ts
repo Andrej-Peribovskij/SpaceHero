@@ -56,8 +56,8 @@ export type IntroEvent =
   /** Joe punches the screen: the music dies, and the picture with it. */
   | { readonly type: "punch" }
   | { readonly type: "skipped" }
-  /** The video jumped. The `card` event for where it landed follows. */
-  | { readonly type: "seeked" }
+  /** The video jumped, to the start of card `index`. The `card` event for it follows. */
+  | { readonly type: "seeked"; readonly index: number }
   | { readonly type: "ended" };
 
 export interface IntroStep {
@@ -250,7 +250,7 @@ function seek(state: IntroState, card: number): IntroStep {
 
   return {
     state: { phase: "playing", card: index, elapsedMs: 0 },
-    events: [{ type: "seeked" }, { type: "card", index }],
+    events: [{ type: "seeked", index }, { type: "card", index }],
   };
 }
 

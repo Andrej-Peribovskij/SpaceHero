@@ -182,7 +182,7 @@ describe("seek, the debugging jump", () => {
     const { state, events } = play({ type: "start" }, { type: "tick", dtMs: 1000 }, { type: "seek", card: 5 });
 
     expect(state).toEqual({ phase: "playing", card: 5, elapsedMs: 0 });
-    expect(events.slice(-2)).toEqual([{ type: "seeked" }, { type: "card", index: 5 }]);
+    expect(events.slice(-2)).toEqual([{ type: "seeked", index: 5 }, { type: "card", index: 5 }]);
 
     const after = stepIntro(state, { type: "tick", dtMs: cardDurationMs(5) });
     expect(after.state).toEqual({ phase: "playing", card: 6, elapsedMs: 0 });
@@ -219,7 +219,7 @@ describe("seek, the debugging jump", () => {
     const { state, events } = play({ type: "start" }, { type: "tick", dtMs: TOTAL_MS }, { type: "seek", card: SNORE_CARD });
 
     expect(state).toEqual({ phase: "playing", card: SNORE_CARD, elapsedMs: 0 });
-    expect(events.slice(-2)).toEqual([{ type: "seeked" }, { type: "card", index: SNORE_CARD }]);
+    expect(events.slice(-2)).toEqual([{ type: "seeked", index: SNORE_CARD }, { type: "card", index: SNORE_CARD }]);
   });
 
   it("onto the last card, plays it from the top: Joe wakes and punches the screen again", () => {

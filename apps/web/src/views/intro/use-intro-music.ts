@@ -4,6 +4,15 @@ import type { IntroEvent } from "./intro-timeline";
 import { silentIntroAudio, type IntroAudio } from "./music/intro-audio";
 import { END_CARD } from "./script";
 
+/**
+ * The loop again from the top, out of whatever it was in — the glitch's silence, or the snore and
+ * the snort, which the stop cuts.
+ */
+function restart(audio: IntroAudio): void {
+  audio.stop();
+  audio.start();
+}
+
 /** What each moment of the video asks of the music. Everything else leaves it as it is. */
 function cue(audio: IntroAudio, event: IntroEvent): void {
   switch (event.type) {
@@ -15,12 +24,9 @@ function cue(audio: IntroAudio, event: IntroEvent): void {
       return audio.resume();
     case "card":
       // Module 2's ident is the next video, and starts the loop again from the top: a cut, as one
-      // video gives way to the next, never a silence. Skipped or played through, Module 1 is over,
-      // and Joe has slept through it; this is what wakes him.
-      if (event.index === END_CARD) {
-        audio.stop();
-        audio.start();
-      }
+      // video gives way to the next, never a silence. Skipped, jumped to or played through, Module 1
+      // is over, and Joe has slept through it; this is what wakes him.
+      if (event.index === END_CARD) restart(audio);
       return;
     case "snore":
       return audio.snore();
@@ -29,12 +35,13 @@ function cue(audio: IntroAudio, event: IntroEvent): void {
     case "punch":
       return audio.punch();
     case "skipped":
-      return audio.stop();
+      // A skip lands on Module 2's ident, whose `card` event, next, cuts Module 1's music.
+      return;
     case "seeked":
-      // A jump, while debugging: the loop starts again from the top, out of whatever it was in —
-      // the glitch's silence, or the snore, which the stop cancels. The card landed on comes next.
-      audio.stop();
-      return audio.start();
+      // A jump, while debugging: the loop starts again from the top. Onto Module 2's ident, that
+      // card's own `card` event, next, already does it; doing it here too would start it twice.
+      if (event.index !== END_CARD) restart(audio);
+      return;
     case "ended":
       // The punch has already silenced everything: the video ends on black, and in silence.
       return;

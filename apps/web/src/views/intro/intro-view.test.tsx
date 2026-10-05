@@ -498,8 +498,8 @@ describe("the music", () => {
     fireEvent.click(screen.getByRole("button", { name: "Skipping is recorded." }));
     advance(600_000);
 
-    expect(audio.calls).not.toContain("snore");
-    expect(audio.calls.slice(-4)).toEqual(["stop", "start", "wake", "punch"]);
+    // One cut, once: Module 1's loop stopped and Module 2's started, not stopped twice.
+    expect(audio.calls).toEqual(["start", "stop", "start", "wake", "punch"]);
   });
 
   it("on skip during the snore, cuts it as Module 2's music starts", () => {
@@ -681,6 +681,17 @@ describe("jumping card by card, in the dev server only", () => {
 
     fireEvent.keyDown(window, { key: "a" });
     expect(showsCard(6)).toBe(true);
+    expect(audio.calls).toEqual(["start", "stop", "start"]);
+  });
+
+  it("starts Module 2's music once on a jump to its ident, not once for the jump and again for the card", () => {
+    at(`?card=${END_CARD}`);
+    const audio = recordingIntroAudio();
+    render(<IntroView debugSeek openAudio={() => audio} />);
+
+    fireEvent.keyDown(window, { key: "a" });
+
+    expect(onModule2()).toBe(true);
     expect(audio.calls).toEqual(["start", "stop", "start"]);
   });
 
