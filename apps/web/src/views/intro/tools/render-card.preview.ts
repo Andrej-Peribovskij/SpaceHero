@@ -16,7 +16,7 @@ import { it } from "vitest";
 import { artFor } from "../art";
 import { FRAME_HEIGHT, FRAME_WIDTH } from "../art/grid";
 import { FRAME_MS } from "../art/render";
-import { cardDurationMs, glitchMs, typedCharsAt } from "../intro-timeline";
+import { cardDurationMs, glitchMs, punchMs, typedCharsAt } from "../intro-timeline";
 import { END_CARD, IDENT_CARD, INTRO_CARDS, captionText } from "../script";
 import { composeScreen, isLit } from "../screen/compose";
 import { encodeApng, encodePng, type Frame } from "./png";
@@ -48,6 +48,7 @@ function screenAt(timeMs: number): Frame {
       promptLit: isLit(timeMs),
       timeMs,
       glitchAtMs: glitchMs(card),
+      powerOffAtMs: punchMs(card),
     }),
   };
 }

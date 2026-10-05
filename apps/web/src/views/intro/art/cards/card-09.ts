@@ -11,8 +11,8 @@ import { CARD_08_ART } from "./card-08";
  * who stayed under the white sky, and the light goes out of it a step at a time: 158 years pass in
  * the dark. Out of the dark, stars, and the camera tilts down from them to the Martian horizon at
  * dusk — the sunset blue, as it is on Mars, with a bright white star low in it that was home.
- * Deimos high up, Externa's lights on it; Phobos crossing; shuttles climbing from a far port to
- * Deimos, one leaving on "the Corridor". On the plain, a dome half sunk in the dunes, a small ship
+ * Deimos high up, Externa's lights on it; Phobos crossing; a shuttle climbing from a far port to
+ * Deimos, leaving on "the Corridor". On the plain, a dome half sunk in the dunes, a small ship
  * parked by it, a ring of dark windows, and one lit.
  *
  * On "contractors like you" the camera closes in on that window, and dissolves to it close: a dark
@@ -38,10 +38,9 @@ const EMERGE_STEP_MS = 90;
 /** The tilt down from the stars to the horizon. The caption waits for it (script.ts). */
 const TILT_MS = 2200;
 export const LANDED_MS = NIGHT_MS + TILT_MS;
-/** "the Corridor": a shuttle leaves the far port for Deimos, and one every period after. */
+/** "the Corridor": a shuttle leaves the far port for Deimos, the only one in the sky. */
 export const CORRIDOR_MS = cue("the Corridor");
-const LAUNCH_PERIOD_MS = 1700;
-const TRIP_MS = 4200;
+export const TRIP_MS = 4200;
 /** "contractors like you": the camera closes in on the lit window, and dissolves to it close. */
 export const CONTRACTORS_MS = cue("contractors like you");
 const PUSH_MS = 1300;
@@ -59,7 +58,7 @@ const TILT = 150;
 const GLOW_X = 70;
 /** Home: a bright white star, low in the glow. */
 export const EARTH = { x: 104, y: 86 } as const;
-/** Deimos, high up, with Externa on it; the port the shuttles leave from, on the horizon. */
+/** Deimos, high up, with Externa on it; the port the shuttle leaves from, on the horizon. */
 export const DEIMOS = { x: 146, y: 28 } as const;
 const PORT = { x: 334, y: HORIZON - 2 } as const;
 /** The dome: its middle, the foot of its wall, its half-width, the wall's height and the glass's. */
@@ -166,36 +165,35 @@ function paintPhobos(canvas: Canvas, t: number, rise: number): void {
   paintPicture(canvas, PHOBOS, Math.round(262 + (t / 1000) * 1.6), 50 + rise);
 }
 
-/** A shuttle's place on its way from the port to Deimos, from 0 to 1: straight up, then over. */
-function shuttleAt(progress: number): readonly [number, number] {
+/** The shuttle's place on its way from the port to Deimos, from 0 to 1: straight up, then over. */
+export function shuttleAt(progress: number): readonly [number, number] {
   const x = PORT.x + (DEIMOS.x - PORT.x) * progress ** 1.6;
   const y = PORT.y + (DEIMOS.y - PORT.y) * (1 - (1 - progress) ** 2);
   return [x, y];
 }
 
-/** The launches, on "the Corridor" and every period either side of it. */
-const LAUNCHES = Array.from({ length: 10 }, (_, index) => CORRIDOR_MS + (index - 4) * LAUNCH_PERIOD_MS);
+/**
+ * The one shuttle, leaving on "the Corridor" and climbing to Deimos with its dotted trail. One is a
+ * commute; a stream of them was traffic, and pulled the eye from the lit window.
+ */
+function paintShuttle(canvas: Canvas, t: number, rise: number): void {
+  const progress = (t - CORRIDOR_MS) / TRIP_MS;
+  if (progress < 0 || progress > 1) return;
 
-/** Shuttles climbing from the port to Deimos, each with its dotted trail, the one on cue with a flare. */
-function paintShuttles(canvas: Canvas, t: number, rise: number): void {
-  for (const launch of LAUNCHES) {
-    const progress = (t - launch) / TRIP_MS;
-    if (progress < 0 || progress > 1) continue;
-    for (let step = 1; step < 40; step += 1) {
-      const back = progress - step * 0.007;
-      if (back < 0) break;
-      if (noise(step, Math.floor(launch)) < 0.3 + step / 60) continue;
-      const [x, y] = shuttleAt(back);
-      canvas.set(x, y + rise, step < 8 ? "s" : "b");
-    }
-    const [x, y] = shuttleAt(progress);
-    canvas.set(x, y + rise, progress < 0.9 ? "w" : "p");
-    if (progress < 0.85) canvas.set(x, y + rise + 1, frameOf(t) % 2 === 0 ? "Y" : "o");
-    // The flare on the horizon as it lifts off.
-    if (t - launch < 300) {
-      for (let u = -2; u <= 2; u += 1) canvas.set(PORT.x + u, PORT.y + rise, Math.abs(u) < 2 ? "Y" : "o");
-      canvas.set(PORT.x, PORT.y - 1 + rise, "y");
-    }
+  for (let step = 1; step < 40; step += 1) {
+    const back = progress - step * 0.007;
+    if (back < 0) break;
+    if (noise(step, Math.floor(CORRIDOR_MS)) < 0.3 + step / 60) continue;
+    const [x, y] = shuttleAt(back);
+    canvas.set(x, y + rise, step < 8 ? "s" : "b");
+  }
+  const [x, y] = shuttleAt(progress);
+  canvas.set(x, y + rise, progress < 0.9 ? "w" : "p");
+  if (progress < 0.85) canvas.set(x, y + rise + 1, frameOf(t) % 2 === 0 ? "Y" : "o");
+  // The flare on the horizon as it lifts off.
+  if (t - CORRIDOR_MS < 300) {
+    for (let u = -2; u <= 2; u += 1) canvas.set(PORT.x + u, PORT.y + rise, Math.abs(u) < 2 ? "Y" : "o");
+    canvas.set(PORT.x, PORT.y - 1 + rise, "y");
   }
 }
 
@@ -227,7 +225,7 @@ function paintDunes(canvas: Canvas, rise: number, horizon: number): void {
   }
 }
 
-/** The port the shuttles leave from: low and far, a few lights and a blinking mast. */
+/** The port the shuttle leaves from: low and far, a few lights and a blinking mast. */
 function paintPort(canvas: Canvas, t: number, rise: number): void {
   for (let u = -9; u <= 9; u += 1) {
     const h = Math.abs(u) < 3 ? 3 : noise(u, 4) < 0.5 ? 2 : 1;
@@ -472,7 +470,7 @@ function paintWide(canvas: Canvas, t: number, rise: number): void {
   paintSky(canvas, rise, HORIZON, GLOW_X);
   paintEarth(canvas, rise);
   paintPhobos(canvas, t, rise);
-  paintShuttles(canvas, t, rise);
+  paintShuttle(canvas, t, rise);
   paintDeimos(canvas, t, DEIMOS.x, DEIMOS.y + rise);
   paintMesas(canvas, rise, HORIZON);
   paintPort(canvas, t, rise);

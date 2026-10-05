@@ -18,9 +18,11 @@ OpenSpec change that implements it.
   official history, and the first unreliable narrator in the game.
 - Presentation: 8-bit illustrated cards with captions over gloomy, mysterious
   chiptune music.
-- It ends on Mars in 158 A.D., on a snore, and then on the ident of Module 2,
-  *What's the Drill*, its music starting up again as it waits for a key. Beat 1
-  opens with Joe switching it off.
+- It ends on Mars in 158 A.D., on a snore over its last words, and then on the
+  ident of Module 2, *What's the Drill*, its music starting up again as it
+  asks for a key. The
+  music wakes Joe, and he answers it with his fist: the screen dies, and beat 1
+  opens in the dark of his room.
 
 ## The Frame
 
@@ -69,16 +71,18 @@ telling the story, never the story itself.
 | 2 | City silhouettes burning, crowds, torn flags, under a white sky. A flash; closer, both crowds stream in and pile into one fighting mass, their flags mixed above it. | Nations argued. Nations fought. For more than a century, humanity faced two enemies: the Sun above, and itself. |
 | 3 | Towers rise out of the ruins, too tall for the frame, and their shadows swallow the people. From below: corporate towers in a ring under one sky, their lights coming on together. In the sky between them, the Absolute Connections square appears, turning against them. Then the dark closes in from the edges, onto the square. | 2251. The corporations did what governments could not. They united the world. Order returned. *One world. Many partners.* |
 | 4 | Black. A spark at the centre of a dark server hall grows into a small sun hung in cables; its warm light spreads along the racks, and their lights come on in every company's colour. Round itself it draws the Plan: three orbits, and a dotted line of stations reaching out, one by one, into the dark. | 2256. Helios — the mind every corporation built together — delivered the Plan. Humanity would leave. Not all at once. Station by station. |
-| 5 | The Plan, zoomed into along Mars's orbit until Mars and Deimos fill the frame; Externa's lights come on across Deimos. Close: Externa Prima on Deimos's horizon, Mars dark above it, its cities lit. Jumps along the Corridor: to Steady Foot among Mars's trojans, then through the belt to Steady Hand, Jupiter ahead. Pulled out: the Sun, Mars, the belt, Jupiter, and between them a dotted line of stations lighting up, a corridor of light. | Externa, 2312. Steady Foot, 2389. Steady Hand, 2427. A corridor of light across the dark. |
+| 5 | The Plan, zoomed into along Mars's orbit until Mars and Deimos fill the frame; Externa's lights come on across Deimos. Close: Externa Prima, a great city across Deimos's horizon, seen from within it: glass domes, halls and palaces in front, and rising from its heart among them, their feet hidden, zaibatsu towers crowned in their colours and joined by skybridges, and soaring from among them, above them all, the teal tower of Absolute Connections, the square on its face; Mars dark above it, its cities lit. Jumps along the Corridor: to Steady Foot among Mars's trojans, then through the belt to Steady Hand, Jupiter ahead. Pulled out: the Sun, Mars, the belt, Jupiter, and between them a dotted line of stations lighting up, a corridor of light. | Externa, 2312. Steady Foot, 2389. Steady Hand, 2427. A corridor of light across the dark. |
 | 6 | Jupiter's dot on the Corridor, dived into, down into the Great Red Spot until the storm fills the frame; then back out to Jupiter, a giant behind four dark moons. The moons light up one by one as the line of light reaches them: Callisto, Europa, Io. One stays dark: Ganymede. | Callisto, 2492. Europa, 2502. Io, 2514. Ganymede was found unsuitable. — *see [The Ganymede Glitch](#the-ganymede-glitch)* |
 | 7 | White; out of it, a launch field on a bleached white Earth under a white sky, the great ships dark on their pads. They light one after another, and the sky fills with ships rising on columns of smoke. The camera climbs with them into the black. From orbit: the white Earth, its ships gathering into rivers of light, a few ending at Mars and Deimos, most streaming on past Mars, bound for the stations beyond. Then the camera dives into the Earth, down to its cracked ground. | 2547. The Diaspora began, and the calendar began again with it. Year Zero. |
 | 8 | The dive goes on into the glare, all white; out of it, a cliff of bleached rock towering out of the frame, a white sky and a swollen Sun beside it, and in the cliff a few caverns where the ones who stayed live, the rock their shelter from the light: dark mouths, ledges, awnings, fires, small figures in the shade; on the cracked plain, a ship that never left. The camera closes in on one cave, and from inside it: a single small figure, cloaked, alone at the edge of the shade, a hand to the brow, looking up at the white sky where a last ship climbs away. | Some chose to stay. Absolute Connections respects every choice. |
-| 9 | Card 8's light goes out. Out of the dark, stars, and the camera tilts down to the Martian surface at dusk, the sunset blue, Deimos high up with Externa's lights, shuttles climbing to it from a far port. On the plain, a dome half sunk in the dunes, a small ship by it, a ring of dark windows, and one lit. Close: through that window, a dark room, its walls lit only by the flicker of this video, playing on a screen out of sight. Above the dome, Externa's beacon blinks teal. | 158 years later, the Corridor carries us all — and it is carried by contractors like you. Your assignment awaits at Externa Prima. |
-| 10 | Black. The music stops. A snore. A beat of silence. | |
-| 11 | Black. Twinkling pixel stars. The Absolute Connections logo turns: a four-colour square one way, a white dial inside it the other. The music starts again. | ABSOLUTE CONNECTIONS · Contractor Orientation<br>Module 2 of 14: *What's the Drill* |
+| 9 | Card 8's light goes out. Out of the dark, stars, and the camera tilts down to the Martian surface at dusk, the sunset blue, Deimos high up with Externa's lights, a shuttle climbing to it from a far port. On the plain, a dome half sunk in the dunes, a small ship by it, a ring of dark windows, and one lit. Close: through that window, a dark room, its walls lit only by the flicker of this video, playing on a screen out of sight. Above the dome, Externa's beacon blinks teal. In the room, under the video, someone snores. | 158 years later, the Corridor carries us all — and it is carried by contractors like you. Your assignment awaits at Externa Prima. |
+| 10 | Black. Twinkling pixel stars. The Absolute Connections logo turns: a four-colour square one way, a white dial inside it the other. The music starts again; on its first phrase's high note, someone in the dark wakes with a snort, comes round, and punches the screen: the music dies, and the picture collapses to a line, a dot, and black. | ABSOLUTE CONNECTIONS · Contractor Orientation<br>Module 2 of 14: *What's the Drill* |
 
-Card 11 mirrors card 0 on purpose: the same ident, the same picture, the next
-module's title. Card 10 has no caption; the snore is the whole card.
+Card 10 mirrors card 0 on purpose: the same ident, the same picture, the next
+module's title. The video never stops for the snore: it comes over card 9's
+last shot and its music, the room answering the call to Externa Prima. Card
+10's prompt is never answered by the player: keys do nothing, and Joe answers
+it.
 
 The dates are the bible's [timeline](README.md#timeline); a change to one is a
 change to both.
@@ -97,12 +101,13 @@ intro's clue.
 
 ## Hand-off to Beat 1
 
-The intro ends on card 11; beat 1 begins in Joe's room on the Mars surface,
-with Module 2's ident waiting on his screen: **PRESS ANY KEY TO CONTINUE
-ORIENTATION**. Joe has been asleep in bed through all of it: the video started
-on its own, for no reason he can see, and it is what wakes him: Module 2's ident
-starting the tune up again, loud in the dark room. He presses a key, by
-slapping the screen off:
+The intro ends on card 10, on black. Joe has been asleep in bed through all of
+it: the video started on its own, for no reason he can see, and it is what wakes
+him: Module 2's ident starting the tune up again, loud in the dark room, asking
+him to **PRESS ANY KEY TO CONTINUE ORIENTATION**. He wakes with a snort on its
+first phrase's high note, comes round, and punches the screen. The music dies,
+the picture collapses, and beat 1 begins in that dark, in Joe's room on the
+Mars surface:
 
 > **JOE:** F@#K1N6 corporate propaganda… I can't stand it.
 

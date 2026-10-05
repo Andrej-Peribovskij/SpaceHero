@@ -59,6 +59,62 @@ describe("the screen's clock", () => {
 
     expect(hook.result.current.clock.current).toEqual({ card: END_CARD, ms: 0 });
   });
+
+  it("times a card from the player's action, not from the frame before it", () => {
+    const { hook } = counted();
+    act(() => hook.result.current.start());
+    // On a frame, then most of the way to the next one: frames come every 16 ms.
+    advance(1600);
+    advance(13);
+
+    act(() => hook.result.current.skip());
+    advance(20);
+
+    // Two frames have passed since the skip, at 3 ms and 19 ms. Counting from the frame before
+    // the skip would make it 32.
+    expect(hook.result.current.clock.current.card).toBe(END_CARD);
+    expect(hook.result.current.clock.current.ms).toBeLessThanOrEqual(20);
+    expect(hook.result.current.clock.current.ms).toBeGreaterThan(0);
+  });
+
+  it("does not count a key press that held the page up, even when the next frame is stamped before it ended", () => {
+    // Frames by hand, so each can carry the timestamp a browser gives it: the time it was due.
+    vi.useRealTimers();
+    const due: FrameRequestCallback[] = [];
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => due.push(callback));
+    vi.stubGlobal("cancelAnimationFrame", () => {});
+    let clock = 0;
+    vi.spyOn(performance, "now").mockImplementation(() => clock);
+    const frame = (stampedMs: number) => act(() => due.splice(0).forEach((callback) => callback(stampedMs)));
+
+    const { hook } = counted();
+    frame(0);
+    frame(16);
+    act(() => hook.result.current.start());
+    // Opening the audio held the key press up for a third of a second: it ends at 350 ms.
+    clock = 350;
+    act(() => hook.result.current.skip());
+    // The frame that was due while it ran is stamped 32, before the press was over; the next, 366.
+    frame(32);
+    frame(366);
+
+    expect(hook.result.current.clock.current).toEqual({ card: END_CARD, ms: 16 });
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("holds where the video stopped once it has ended, so the punched screen stays black", () => {
+    const { hook } = counted();
+    act(() => hook.result.current.start());
+    act(() => hook.result.current.skip());
+    advance(cardDurationMs(END_CARD) + 500);
+
+    expect(hook.result.current.phase).toBe("ended");
+    expect(hook.result.current.clock.current).toEqual({ card: END_CARD, ms: cardDurationMs(END_CARD) });
+
+    advance(60_000);
+    expect(hook.result.current.clock.current).toEqual({ card: END_CARD, ms: cardDurationMs(END_CARD) });
+  });
 });
 
 describe("useIntroTimeline", () => {

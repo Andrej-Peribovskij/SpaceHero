@@ -25,6 +25,8 @@ interface PixelScreenProps {
   readonly still: boolean;
   /** When, on the card's clock, the screen tears for two frames: the Ganymede glitch. */
   readonly glitchAtMs?: number | undefined;
+  /** When, on the card's clock, Joe's punch kills the screen. */
+  readonly powerOffAtMs?: number | undefined;
 }
 
 /**
@@ -40,16 +42,16 @@ interface PixelScreenProps {
  * The canvas is hidden from assistive technology: the view carries the picture's description,
  * the caption in a live region, and the prompt as text.
  */
-export function PixelScreen({ card, clock, art, caption, shownChars, prompt, still, glitchAtMs }: PixelScreenProps) {
+export function PixelScreen({ card, clock, art, caption, shownChars, prompt, still, glitchAtMs, powerOffAtMs }: PixelScreenProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const text = useRef({ caption, shownChars, prompt, glitchAtMs });
+  const text = useRef({ caption, shownChars, prompt, glitchAtMs, powerOffAtMs });
   const changed = useRef(true);
 
   // What the text shows is read by the loop below, which outlives any one render.
   useLayoutEffect(() => {
-    text.current = { caption, shownChars, prompt, glitchAtMs };
+    text.current = { caption, shownChars, prompt, glitchAtMs, powerOffAtMs };
     changed.current = true;
-  }, [caption, shownChars, prompt, glitchAtMs]);
+  }, [caption, shownChars, prompt, glitchAtMs, powerOffAtMs]);
 
   useEffect(() => {
     const context = canvasRef.current?.getContext("2d");
@@ -67,8 +69,10 @@ export function PixelScreen({ card, clock, art, caption, shownChars, prompt, sti
         return;
       }
       const timeMs = frameTime(now.ms);
-      // Moving, every 12-fps frame is new. Still, only a cut or a fade step changes the picture.
-      const key = still ? (art ? stillKey(art, timeMs) : "") : String(timeMs);
+      // Moving, every 12-fps frame is new. Still, only a cut, a fade step or the punch changes the
+      // picture.
+      const off = text.current.powerOffAtMs !== undefined && timeMs >= text.current.powerOffAtMs;
+      const key = still ? `${art ? stillKey(art, timeMs) : ""}${off ? ":off" : ""}` : String(timeMs);
 
       if (key !== painted || changed.current) {
         painted = key;

@@ -30,8 +30,4 @@ describe("the intro's art", () => {
   it("closes on the next module's ident, the same picture as the first", () => {
     expect(artFor(END_CARD)).toBe(artFor(IDENT_CARD));
   });
-
-  it("shows nothing on card 10 but black: the snore is the whole card", () => {
-    expect(renderFrame(artFor(10)!, 0).every((pixel) => pixel === ".")).toBe(true);
-  });
 });

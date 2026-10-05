@@ -2,7 +2,7 @@ import { parseBackground, parseFrames, parseSprite } from "../grid";
 import { singleScene, type CardArt } from "../render";
 
 /**
- * Card 0: the Absolute Connections ident. Card 11, Module 2's ident, shows the same art.
+ * Card 0: the Absolute Connections ident. Card 10, Module 2's ident, shows the same art.
  *
  * Script: "Black. Twinkling pixel stars. The Absolute Connections logo turns: a four-colour square
  * one way, a white dial inside it the other." The logo was chosen by prototype: see design.md §3.

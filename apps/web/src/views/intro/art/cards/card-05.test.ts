@@ -26,6 +26,9 @@ import {
   MARS_RADIUS,
   MARS_X,
   MARS_Y,
+  MAP_JUPITER,
+  PULL_FROM_MS,
+  pullingJupiter,
   STEADY_FOOT_LIT_MS,
   STEADY_FOOT_MS,
   STEADY_HAND_LIT_MS,
@@ -55,10 +58,14 @@ const hub = (frame: readonly string[], x: number, y: number) => region(frame, x 
 const lit = (pixels: readonly string[]) => count(pixels, "a", "Y");
 const mapStation = (frame: readonly string[], index: number) => at(frame, Math.round(MAP_STATIONS[index]![0]), Math.round(MAP_STATIONS[index]![1]));
 
-/** The longest run of one streak colour along any row: stars streaking past. */
+/**
+ * The longest run of one streak colour along any row of the sky: stars streaking past. Only the
+ * sky, above the city: Externa's halls and decks run long in night blue too.
+ */
+const SKY_ROWS = 70;
 function longestStreak(frame: readonly string[]): number {
   let longest = 0;
-  for (let y = 0; y < VISIBLE; y += 1) {
+  for (let y = 0; y < SKY_ROWS; y += 1) {
     let run = 0;
     for (let x = 0; x < FRAME_WIDTH; x += 1) {
       run = ["b", "s"].includes(at(frame, x, y)!) ? run + 1 : 0;
@@ -146,6 +153,53 @@ describe("card 5: Mars and Deimos, and the Corridor", () => {
     expect(mapStation(map, MAP_STEADY_FOOT)).toBe("w");
     expect(mapStation(map, MAP_STEADY_HAND)).toBe("w");
     expect(MAP_STATIONS.filter((_station, index) => mapStation(map, index) === "b")).toHaveLength(MAP_STATIONS.length - 2);
+  });
+
+  it("keeps Jupiter far off through the pull-out: one Jupiter, gliding to its place on the map, not shrinking away with the station", () => {
+    const jupiterAt = (time: number) => {
+      const { x, y, radius } = pullingJupiter(time);
+      const half = Math.floor(radius / 2);
+      return count(region(frameAt(time), Math.round(x) - half, Math.round(y) - half, Math.round(x) + half, Math.round(y) + half), "m", "o", "a", "y");
+    };
+    const moments = [0.1, 0.3, 0.5, 0.7, 0.9].map((share) => PULL_FROM_MS + share * (CORRIDOR_FROM_MS - PULL_FROM_MS));
+
+    for (const time of moments) expect(jupiterAt(time)).toBeGreaterThan(20);
+    // It ends where the map has it, a little smaller than ahead of the station, and gets there steadily.
+    const end = pullingJupiter(CORRIDOR_FROM_MS - 1);
+    expect([end.x, end.y, end.radius].map(Math.round)).toEqual([MAP_JUPITER.x, MAP_JUPITER.y, MAP_JUPITER.radius]);
+    const radii = moments.map((time) => pullingJupiter(time).radius);
+    expect(radii).toEqual([...radii].sort((a, b) => b - a));
+  });
+
+  it("shows Externa Prima as the city it is: a skyline across the horizon, Absolute Connections' tower far above it, the square on its face", () => {
+    const close = frameAt(CLOSE_MS + 300);
+    const firstTeal = close.findIndex((pixel) => pixel === "t");
+    const lightsIn = (left: number, right: number) => lit(region(close, left, 30, right, 135));
+
+    // The teal tower tops the city, high in the frame.
+    expect(Math.floor(firstTeal / FRAME_WIDTH)).toBeLessThan(25);
+    // Thousands of windows: lit from one side of the towers to the other, not a few in the middle.
+    expect(lightsIn(80, 310)).toBeGreaterThan(500);
+    expect(lightsIn(80, 170)).toBeGreaterThan(100);
+    expect(lightsIn(210, 310)).toBeGreaterThan(100);
+    // The four-colour square, near the tower's top: a zaibatsu spire before it hides part of its red corner.
+    const logo = region(close, 180, 30, 205, 60);
+    for (const corner of ["t", "Y", "s"]) expect(count(logo, corner)).toBeGreaterThanOrEqual(8);
+    expect(count(logo, "r")).toBeGreaterThanOrEqual(3);
+  });
+
+  it("raises the towers from the middle of the city: the city in front hides their feet", () => {
+    const close = frameAt(CLOSE_MS + 300);
+    // Absolute Connections' tower is teal down to the ground: none of that shows near it.
+    expect(count(region(close, 178, 60, 206, 100), "t")).toBeGreaterThan(40);
+    expect(count(region(close, 178, 120, 206, 140), "t")).toBe(0);
+  });
+
+  it("raises Absolute Connections' tower from among the zaibatsu, some of them standing before it", () => {
+    const shaft = region(frameAt(CLOSE_MS + 300), 178, 60, 206, 100);
+    // Their crowns' bands, red and orange, across its face; its teal still showing between them.
+    expect(count(shaft, "r", "o")).toBeGreaterThan(8);
+    expect(count(shaft, "t")).toBeGreaterThan(40);
   });
 
   it("puts the belt between the steadies, far from Mars", () => {

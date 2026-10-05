@@ -1,12 +1,13 @@
 import { silentIntroAudio, type IntroAudio } from "./intro-audio";
-import { renderSnore } from "./snore";
+import { renderPunch } from "./punch";
+import { loadSounds, loadedSounds, type RecordedSounds } from "./sounds";
 import { SAMPLE_RATE, renderTune, type Tune } from "./synth";
 
 /**
- * The intro's music through Web Audio. The synth has already worked out every sample, so this
- * only plays buffers, each through a gain of its own: the tune looping, its gain closed and opened
- * by the glitch, and the snore once. Two node types, buffer source and gain, which every browser
- * with Web Audio has.
+ * The intro's sound through Web Audio. Every sample is worked out already, by the synth or read
+ * from a recording, so this only plays buffers, each through a gain of its own: the tune looping,
+ * its gain closed and opened by the glitch, and the snore, the waking snort and the punch once
+ * each. Two node types, buffer source and gain, which every browser with Web Audio has.
  */
 
 /**
@@ -17,9 +18,6 @@ const CUT_S = 0.005;
 
 /** How long a sound is let fade before it is stopped: five time constants is under 1% left. */
 const FADE_S = 5 * CUT_S;
-
-/** The beat of silence on the black card between the music stopping and the snore. */
-export const SNORE_PAUSE_S = 0.6;
 
 interface Playing {
   readonly source: AudioBufferSourceNode;
@@ -39,13 +37,24 @@ export function renderedTune(tune: Tune): Float32Array<ArrayBuffer> {
   return samples;
 }
 
+let punchSamples: Float32Array<ArrayBuffer> | undefined;
+
+/** The punch's samples: rendered now if nothing has rendered them yet. */
+const renderedPunch = () => (punchSamples ??= renderPunch());
+
 /**
  * Works the tune out ahead, so the gate's key press only has to copy it into a buffer. Rendering
  * the loop takes tens of milliseconds, too long to spend inside the handler, where it would hold
- * up the first frame. Where there is no Web Audio, nobody will hear it, so nothing is rendered.
+ * up the first frame. The recorded sounds are fetched and the punch rendered now too, long before
+ * the end needs them; the fetch goes first, so a render that throws cannot hold it back. Where
+ * there is no Web Audio, nobody will hear any of it, so nothing is rendered or fetched.
  */
 export function prepareIntroAudio(tune: Tune): void {
-  if (typeof AudioContext !== "undefined") renderedTune(tune);
+  if (typeof AudioContext === "undefined") return;
+
+  void loadSounds();
+  renderedTune(tune);
+  renderedPunch();
 }
 
 function bufferOf(context: BaseAudioContext, samples: Float32Array<ArrayBuffer>): AudioBuffer {
@@ -54,11 +63,17 @@ function bufferOf(context: BaseAudioContext, samples: Float32Array<ArrayBuffer>)
   return buffer;
 }
 
-export function webIntroAudio(context: AudioContext, tune: Tune): IntroAudio {
+/**
+ * `sounds` is asked at the moment a recording is to play, not when the audio opens: the gate's key
+ * may come before the fetch has finished, and card 9's snore long after it.
+ */
+export function webIntroAudio(context: AudioContext, tune: Tune, sounds: () => RecordedSounds = loadedSounds): IntroAudio {
   let music: Playing | undefined;
-  // Kept so a skip on the black card can stop it: the snore waits a beat before it starts, and
-  // must not then play over Module 2's music.
+  // Kept so a stop can cut them: a skip during the snore must not let it run on into Module 2,
+  // and leaving the screen must silence the snort and the blow too.
   let snore: Playing | undefined;
+  let wake: Playing | undefined;
+  let thump: Playing | undefined;
   let closed = false;
   // The loop's buffer, made once: Module 2's ident starts it again from the same one.
   let loop: AudioBuffer | undefined;
@@ -75,14 +90,23 @@ export function webIntroAudio(context: AudioContext, tune: Tune): IntroAudio {
 
   const gainTo = (level: number) => music?.gain.gain.setTargetAtTime(level, context.currentTime, CUT_S);
 
-  /** Both sounds faded out and stopped: a source stopped mid-wave clicks. */
+  /** Every sound faded out and stopped: a source stopped mid-wave clicks. */
   const stopAll = () => {
-    for (const playing of [music, snore]) {
+    for (const playing of [music, snore, wake, thump]) {
       playing?.gain.gain.setTargetAtTime(0, context.currentTime, CUT_S);
       playing?.source.stop(context.currentTime + FADE_S);
     }
     music = undefined;
     snore = undefined;
+    wake = undefined;
+    thump = undefined;
+  };
+
+  /** Samples, once, now: nothing if they never arrived. The timeline says when. */
+  const playOnce = (samples: Float32Array<ArrayBuffer> | undefined): Playing | undefined => {
+    if (closed || !samples) return undefined;
+
+    return play(bufferOf(context, samples), { loop: false, at: context.currentTime });
   };
 
   return {
@@ -96,9 +120,16 @@ export function webIntroAudio(context: AudioContext, tune: Tune): IntroAudio {
     resume: () => gainTo(1),
     stop: stopAll,
     snore: () => {
-      if (closed) return;
-
-      snore = play(bufferOf(context, renderSnore()), { loop: false, at: context.currentTime + SNORE_PAUSE_S });
+      snore = playOnce(sounds().snore);
+    },
+    wake: () => {
+      wake = playOnce(sounds().wake);
+    },
+    // The set is struck dead: everything stops at once, in the gain's short cut rather than a
+    // fade a listener would hear, and the blow sounds over the silence.
+    punch: () => {
+      stopAll();
+      thump = playOnce(renderedPunch());
     },
     // The context's own clock stops with it, so whatever was scheduled holds its place too. A
     // context once allowed to play may be resumed outside a gesture; if the browser says no, the
@@ -133,6 +164,8 @@ export function openIntroAudio(tune: Tune): IntroAudio {
     // Usually already running, made inside a gesture. If the browser still says no, the video
     // plays on silently: nothing waits for this.
     context.resume().catch(() => {});
+    // Whatever preparing did not fetch, or failed to: card 9 is over a minute away yet.
+    void loadSounds();
     return webIntroAudio(context, tune);
   } catch {
     return silentIntroAudio;

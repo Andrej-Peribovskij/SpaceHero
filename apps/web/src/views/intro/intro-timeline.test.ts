@@ -2,15 +2,19 @@ import {
   GLITCH_SILENCE_MS,
   HOLD_MS,
   MS_PER_CHAR,
+  POWER_OFF_MS,
   cardDurationMs,
+  cuesOf,
   initialIntroState,
   msToType,
+  snoreMs,
   stepIntro,
   typedCharsAt,
   visibleChars,
   type IntroEvent,
   type IntroState,
 } from "./intro-timeline";
+import { ORIENTATION_TUNE } from "./music/tune";
 import { END_CARD, INTRO_CARDS, SNORE_CARD, captionText } from "./script";
 
 /** Run a list of actions from the gate, collecting every event on the way. */
@@ -57,12 +61,12 @@ describe("the gate", () => {
 });
 
 describe("the sequence", () => {
-  it("shows cards 1 to 11 once each, in order, then ends", () => {
+  it("shows cards 1 to 10 once each, in order, then ends", () => {
     const { state, events } = play({ type: "start" }, ...frames(TOTAL_MS + 1000));
 
     const cards = events.flatMap((event) => (event.type === "card" ? [event.index] : []));
 
-    expect(cards).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+    expect(cards).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     expect(events.at(-1)).toEqual({ type: "ended" });
     expect(state.phase).toBe("ended");
   });
@@ -130,48 +134,157 @@ describe("the Ganymede glitch", () => {
 });
 
 describe("skip", () => {
-  it.each([0, 3, 9])("jumps from card %i straight to the end", (card) => {
+  it.each([0, 3, 9, SNORE_CARD])("jumps from card %i to the start of Module 2's ident, which then plays out", (card) => {
     let state = play({ type: "start" }).state;
     while (state.card < card) state = stepIntro(state, { type: "tick", dtMs: 16 }).state;
 
     const step = stepIntro(state, { type: "skip" });
 
-    expect(step.state.phase).toBe("ended");
-    expect(step.state.card).toBe(END_CARD);
-    expect(step.events).toEqual([{ type: "skipped" }, { type: "ended" }]);
+    expect(step.state).toEqual({ phase: "playing", card: END_CARD, elapsedMs: 0 });
+    expect(step.events).toEqual([{ type: "skipped" }, { type: "card", index: END_CARD }]);
+
+    const rest = stepIntro(step.state, { type: "tick", dtMs: cardDurationMs(END_CARD) });
+    expect(rest.events).toEqual([{ type: "wake" }, { type: "punch" }, { type: "ended" }]);
   });
 
-  it("does nothing once the video has ended", () => {
-    const ended = play({ type: "start" }, { type: "skip" }).state;
+  it("does nothing on Module 2's ident, the ending, nor once the video has ended", () => {
+    const ending = play({ type: "start" }, { type: "skip" }, { type: "tick", dtMs: 1000 }).state;
+    const ended = stepIntro(ending, { type: "tick", dtMs: cardDurationMs(END_CARD) }).state;
 
+    expect(stepIntro(ending, { type: "skip" })).toEqual({ state: ending, events: [] });
+    expect(ended.phase).toBe("ended");
     expect(stepIntro(ended, { type: "skip" })).toEqual({ state: ended, events: [] });
   });
 });
 
+describe("cuesOf", () => {
+  it("lists a card's cues in the order they happen, whatever kind each is", () => {
+    // Out of the order the kinds are listed in: a punch before the wake.
+    const card = { image: "", caption: [{ text: "Hi." }], punchAtMs: 100, wakeAtMs: 200 };
+
+    expect(cuesOf(card).map((cue) => cue.event.type)).toEqual(["punch", "wake"]);
+  });
+
+  it("lists every card's cues in time order", () => {
+    for (const card of INTRO_CARDS) {
+      const times = cuesOf(card).map((cue) => cue.atMs);
+      expect(times).toEqual([...times].sort((a, b) => a - b));
+    }
+  });
+});
+
+describe("seek, the debugging jump", () => {
+  it("does nothing before the player opts in", () => {
+    expect(play({ type: "seek", card: 5 })).toEqual({ state: initialIntroState, events: [] });
+  });
+
+  it("goes to the start of a card, says so, and plays on from there", () => {
+    const { state, events } = play({ type: "start" }, { type: "tick", dtMs: 1000 }, { type: "seek", card: 5 });
+
+    expect(state).toEqual({ phase: "playing", card: 5, elapsedMs: 0 });
+    expect(events.slice(-2)).toEqual([{ type: "seeked", index: 5 }, { type: "card", index: 5 }]);
+
+    const after = stepIntro(state, { type: "tick", dtMs: cardDurationMs(5) });
+    expect(after.state).toEqual({ phase: "playing", card: 6, elapsedMs: 0 });
+  });
+
+  it("goes back as readily as forward, to the start of a card already seen", () => {
+    const { state } = play({ type: "start" }, { type: "tick", dtMs: cardDurationMs(0) + 500 }, { type: "seek", card: 0 });
+
+    expect(state).toEqual({ phase: "playing", card: 0, elapsedMs: 0 });
+  });
+
+  it("keeps to the cards there are", () => {
+    expect(play({ type: "start" }, { type: "seek", card: -3 }).state.card).toBe(0);
+    expect(play({ type: "start" }, { type: "seek", card: 99 }).state.card).toBe(END_CARD);
+  });
+
+  it.each([Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY])("stays where it is when asked for card %d", (card) => {
+    const before = play({ type: "start" }, { type: "tick", dtMs: 1000 });
+    const { state, events } = stepIntro(before.state, { type: "seek", card });
+
+    expect(state).toBe(before.state);
+    expect(events).toEqual([]);
+    expect(() => stepIntro(state, { type: "tick", dtMs: 16 })).not.toThrow();
+  });
+
+  it("lands on card 6 before its glitch, which then fires on time", () => {
+    const { events } = play({ type: "start" }, { type: "seek", card: 6 }, ...frames(cardDurationMs(6)));
+
+    expect(events.filter((event) => event.type === "glitch")).toHaveLength(1);
+    expect(events.filter((event) => event.type === "glitch-end")).toHaveLength(1);
+  });
+
+  it("plays again from the end, back onto the snore card", () => {
+    const { state, events } = play({ type: "start" }, { type: "tick", dtMs: TOTAL_MS }, { type: "seek", card: SNORE_CARD });
+
+    expect(state).toEqual({ phase: "playing", card: SNORE_CARD, elapsedMs: 0 });
+    expect(events.slice(-2)).toEqual([{ type: "seeked", index: SNORE_CARD }, { type: "card", index: SNORE_CARD }]);
+  });
+
+  it("onto the last card, plays it from the top: Joe wakes and punches the screen again", () => {
+    const { state, events } = play({ type: "start" }, { type: "seek", card: END_CARD }, ...frames(cardDurationMs(END_CARD)));
+
+    expect(state.phase).toBe("ended");
+    expect(events.filter((event) => event.type === "wake" || event.type === "punch")).toEqual([{ type: "wake" }, { type: "punch" }]);
+  });
+});
+
 describe("the end", () => {
-  it("holds on Module 2's ident, whole, indefinitely", () => {
+  it("plays Module 2's ident whole, never typed, then wakes Joe, then his punch, then ends", () => {
+    const toLastCard = INTRO_CARDS.slice(0, END_CARD).reduce((sum, _card, index) => sum + cardDurationMs(index), 0);
+    const { state } = play({ type: "start" }, { type: "tick", dtMs: toLastCard + 10 });
+    const { wakeAtMs, punchAtMs } = INTRO_CARDS[END_CARD]!;
+
+    expect(state).toEqual({ phase: "playing", card: END_CARD, elapsedMs: 10 });
+    expect(visibleChars(state)).toBe(captionText(INTRO_CARDS[END_CARD]!).length);
+
+    const atMs = (event: IntroEvent["type"]) => {
+      let clock = state;
+      for (let ms = 10; ms <= cardDurationMs(END_CARD) + 16; ms += 16) {
+        const step = stepIntro(clock, { type: "tick", dtMs: 16 });
+        if (step.events.some((fired) => fired.type === event)) return ms + 16;
+        clock = step.state;
+      }
+      return undefined;
+    };
+    expect(atMs("wake")).toBeGreaterThan(wakeAtMs!);
+    expect(atMs("wake")).toBeLessThanOrEqual(wakeAtMs! + 16);
+    expect(atMs("punch")).toBeGreaterThan(punchAtMs!);
+    expect(atMs("punch")).toBeLessThanOrEqual(punchAtMs! + 16);
+    expect(atMs("ended")).toBeGreaterThan(punchAtMs! + POWER_OFF_MS);
+  });
+
+  it("wakes Joe a second before the tune's first phrase ends, two bars in, and punches a few seconds later", () => {
+    const { wakeAtMs, punchAtMs } = INTRO_CARDS[END_CARD]!;
+    const barMs = (4 * 60_000) / ORIENTATION_TUNE.bpm;
+
+    expect(wakeAtMs).toBeCloseTo(2 * barMs - 1000, -1);
+    expect(punchAtMs! - wakeAtMs!).toBeGreaterThanOrEqual(3000);
+    expect(punchAtMs! - wakeAtMs!).toBeLessThanOrEqual(4000);
+  });
+
+  it("holds on black once ended, indefinitely, with nothing more to happen", () => {
     const { state } = play({ type: "start" }, { type: "tick", dtMs: TOTAL_MS });
     const later = stepIntro(state, { type: "tick", dtMs: 600_000 });
 
-    expect(state.phase).toBe("ended");
-    expect(visibleChars(state)).toBe(captionText(INTRO_CARDS[END_CARD]!).length);
+    expect(state).toEqual({ phase: "ended", card: END_CARD, elapsedMs: cardDurationMs(END_CARD) });
     expect(later).toEqual({ state, events: [] });
   });
 
-  it("ends in the same tick that reaches the last card, never showing it as playing", () => {
-    const toLastCard = INTRO_CARDS.slice(0, END_CARD).reduce((sum, _card, index) => sum + cardDurationMs(index), 0);
+  it("snores once, on card 9, a beat after its last words, and holds the card longer for it", () => {
+    const { events } = play({ type: "start" }, ...frames(TOTAL_MS + 1000));
+    const card9 = INTRO_CARDS[SNORE_CARD]!;
+    const typedMs = msToType(card9, captionText(card9).length);
+    const at = (wanted: IntroEvent) => events.findIndex((event) => JSON.stringify(event) === JSON.stringify(wanted));
 
-    // Exactly to the boundary: no time is left over once the last card is entered.
-    const { state, events } = play({ type: "start" }, { type: "tick", dtMs: toLastCard });
-
-    expect(state.phase).toBe("ended");
-    expect(events.slice(-2)).toEqual([{ type: "card", index: END_CARD }, { type: "ended" }]);
-  });
-
-  it("has a captionless card before the end, the snore, held for its own hold rather than a caption's", () => {
-    expect(INTRO_CARDS[SNORE_CARD]!.caption).toEqual([]);
-    expect(cardDurationMs(SNORE_CARD)).toBe(INTRO_CARDS[SNORE_CARD]!.holdMs);
-    expect(cardDurationMs(SNORE_CARD)).toBeGreaterThan(HOLD_MS);
+    expect(SNORE_CARD).toBe(9);
+    expect(events.filter((event) => event.type === "snore")).toHaveLength(1);
+    expect(at({ type: "card", index: SNORE_CARD })).toBeLessThan(at({ type: "snore" }));
+    expect(at({ type: "snore" })).toBeLessThan(at({ type: "card", index: END_CARD }));
+    expect(snoreMs(SNORE_CARD)).toBeGreaterThan(typedMs);
+    expect(cardDurationMs(SNORE_CARD)).toBe(typedMs + card9.holdMs!);
+    expect(card9.holdMs).toBeGreaterThan(HOLD_MS);
   });
 
   it("holds every other card for the usual hold once its caption is typed", () => {

@@ -70,13 +70,15 @@ export interface IntroTimeline extends Shown {
   /**
    * The clock the screen paints from, read every frame rather than rendered. While a card plays it
    * is the timeline's own, so the picture keeps step with the caption: it stops while the page is
-   * hidden and loses what a stalled frame loses, as the caption does. The idents, which nothing
-   * cues, run on it at the gate and at the end too, by the same frames.
+   * hidden and loses what a stalled frame loses, as the caption does. The ident at the gate, which
+   * nothing cues, runs on it too, by the same frames.
    */
   readonly clock: { readonly current: CardClock };
   readonly reducedMotion: boolean;
   readonly start: () => void;
   readonly skip: () => void;
+  /** Jumps to the start of a card: a debugging aid, never the player's. See `useDebugSeek`. */
+  readonly seek: (card: number) => void;
 }
 
 /**
@@ -116,10 +118,13 @@ export function useIntroTimeline(onEvent?: (event: IntroEvent) => void): IntroTi
 
   const clock = useRef<CardClock>({ card: initialIntroState.card, ms: 0 });
 
-  /** The screen's clock moves on: with the timeline while a card plays, by `dtMs` for an ident. */
+  /**
+   * The screen's clock moves on: with the timeline once it has started, by `dtMs` for the ident,
+   * which nothing cues. Ended, it holds where the video stopped: black, after the punch.
+   */
   const advanceClock = useCallback((dtMs: number) => {
     const state = stateRef.current;
-    const timed = state.phase === "playing" && state.card !== IDENT_CARD;
+    const timed = state.phase !== "gate" && state.card !== IDENT_CARD;
     const sameCard = state.card === clock.current.card;
     clock.current = { card: state.card, ms: timed ? state.elapsedMs : sameCard ? clock.current.ms + dtMs : 0 };
   }, []);
@@ -137,15 +142,20 @@ export function useIntroTimeline(onEvent?: (event: IntroEvent) => void): IntroTi
     [advanceClock, show],
   );
 
+  /** When the frame clock last counted to: the last frame, or a key press since it. */
+  const counted = useRef<number | undefined>(undefined);
+
   // The frame clock runs for as long as the video is on screen: the timeline only moves while it
-  // plays, but the idents at the gate and at the end are never still.
+  // plays, but the ident at the gate is never still.
   useEffect(() => {
     let frame = 0;
-    let last: number | undefined;
 
     const loop = (now: number) => {
-      const dtMs = last === undefined ? 0 : Math.min(now - last, MAX_FRAME_MS);
-      last = now;
+      const last = counted.current;
+      const dtMs = last === undefined ? 0 : Math.min(Math.max(0, now - last), MAX_FRAME_MS);
+      // A frame is stamped with when it was due. One held up by a slow key press is stamped before
+      // the press ended, and must not wind the clock back to before it.
+      counted.current = last === undefined ? now : Math.max(now, last);
       if (stateRef.current.phase === "playing" && dtMs > 0) dispatch({ type: "tick", dtMs });
       else advanceClock(dtMs);
       frame = requestAnimationFrame(loop);
@@ -153,7 +163,7 @@ export function useIntroTimeline(onEvent?: (event: IntroEvent) => void): IntroTi
 
     // Hidden, the video pauses: the next frame after coming back starts a fresh clock.
     const onVisibilityChange = () => {
-      if (document.visibilityState === "hidden") last = undefined;
+      if (document.visibilityState === "hidden") counted.current = undefined;
     };
 
     frame = requestAnimationFrame(loop);
@@ -164,8 +174,22 @@ export function useIntroTimeline(onEvent?: (event: IntroEvent) => void): IntroTi
     };
   }, [dispatch, advanceClock]);
 
-  const start = useCallback(() => dispatch({ type: "start" }), [dispatch]);
-  const skip = useCallback(() => dispatch({ type: "skip" }), [dispatch]);
+  /**
+   * An action from the player, between two frames: what it starts is timed from now, not from the
+   * frame before it. A frame can be a third of a second apart in a throttled tab, and the next tick
+   * would otherwise hand the new card time that passed before the key was pressed.
+   */
+  const byPlayer = useCallback(
+    (action: IntroAction) => {
+      dispatch(action);
+      if (counted.current !== undefined) counted.current = performance.now();
+    },
+    [dispatch],
+  );
+
+  const start = useCallback(() => byPlayer({ type: "start" }), [byPlayer]);
+  const skip = useCallback(() => byPlayer({ type: "skip" }), [byPlayer]);
+  const seek = useCallback((card: number) => byPlayer({ type: "seek", card }), [byPlayer]);
 
   return {
     ...shown,
@@ -173,5 +197,6 @@ export function useIntroTimeline(onEvent?: (event: IntroEvent) => void): IntroTi
     reducedMotion,
     start,
     skip,
+    seek,
   };
 }

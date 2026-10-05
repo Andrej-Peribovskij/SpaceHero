@@ -1,6 +1,7 @@
 import { silentIntroAudio } from "./intro-audio";
 import type { Tune } from "./synth";
-import { openIntroAudio, renderedTune, webIntroAudio } from "./web-audio";
+import type { RecordedSounds } from "./sounds";
+import { openIntroAudio, prepareIntroAudio, renderedTune, webIntroAudio } from "./web-audio";
 
 const TUNE: Tune = {
   bpm: 120,
@@ -87,9 +88,12 @@ class FakeContext {
   }
 }
 
+/** Stand-ins for the recordings: only which buffer plays matters here, not how it sounds. */
+const SOUNDS = { snore: new Float32Array(100), wake: new Float32Array(50) } as const;
+
 function play() {
   const context = new FakeContext();
-  const audio = webIntroAudio(context as unknown as AudioContext, TUNE);
+  const audio = webIntroAudio(context as unknown as AudioContext, TUNE, () => SOUNDS);
   return { context, audio };
 }
 
@@ -162,16 +166,89 @@ describe("webIntroAudio", () => {
     expect(context.sources).toHaveLength(0);
   });
 
-  it("snores once, through a gain of its own, after a beat of silence", () => {
+  it("snores once, the recording, at once, through a gain of its own", () => {
     const { context, audio } = play();
 
     audio.snore();
 
     const [snore] = context.sources;
     expect(snore!.loop).toBe(false);
+    expect(snore!.buffer!.samples).toBe(SOUNDS.snore);
     expect(snore!.connectedTo).toBe(context.gains[0]);
     expect(context.gains[0]!.connectedTo).toBe(context.destination);
-    expect(snore!.startedAt).toBeGreaterThan(context.currentTime);
+    expect(snore!.startedAt).toBe(context.currentTime);
+  });
+
+  it("wakes with the snort once, at once, over the music", () => {
+    const { context, audio } = play();
+    audio.start();
+
+    audio.wake();
+
+    const [music, wake] = context.sources;
+    expect(wake!.loop).toBe(false);
+    expect(wake!.buffer!.samples).toBe(SOUNDS.wake);
+    expect(wake!.startedAt).toBe(context.currentTime);
+    expect(music!.stopped).toBe(false);
+  });
+
+  it("on the punch, cuts every sound dead and sounds the blow over the silence, at once", () => {
+    const { context, audio } = play();
+    audio.start();
+    audio.wake();
+
+    audio.punch();
+
+    const [music, wake, thump] = context.sources;
+    for (const [index, source] of [music, wake].entries()) {
+      expect(context.gains[index]!.gain.target).toBe(0);
+      expect(source!.stoppedAt).toBeLessThan(context.currentTime + 0.1);
+    }
+    expect(thump!.loop).toBe(false);
+    expect(thump!.buffer!.length).toBeGreaterThan(0);
+    expect(thump!.startedAt).toBe(context.currentTime);
+    expect(thump!.stopped).toBe(false);
+  });
+
+  it("lets go of the blow too when the intro leaves the screen", () => {
+    const { context, audio } = play();
+    audio.punch();
+
+    audio.close();
+
+    expect(context.sources[0]!.stopped).toBe(true);
+  });
+
+  it("plays nothing for a recording that never arrived, and carries on", () => {
+    const context = new FakeContext();
+    const audio = webIntroAudio(context as unknown as AudioContext, TUNE, () => ({}));
+    audio.start();
+
+    audio.snore();
+    audio.wake();
+
+    expect(context.sources).toHaveLength(1);
+  });
+
+  it("asks for the recordings when they are to play, so one that arrives after the gate still plays", () => {
+    const context = new FakeContext();
+    let sounds: RecordedSounds = {};
+    const audio = webIntroAudio(context as unknown as AudioContext, TUNE, () => sounds);
+
+    sounds = SOUNDS;
+    audio.snore();
+
+    expect(context.sources[0]!.buffer!.samples).toBe(SOUNDS.snore);
+  });
+
+  it("stops the snort on a stop", () => {
+    const { context, audio } = play();
+    audio.start();
+    audio.wake();
+
+    audio.stop();
+
+    expect(context.sources[1]!.stopped).toBe(true);
   });
 
   it("fades the music and the snore out on a stop, rather than cutting them mid-wave", () => {
@@ -312,5 +389,29 @@ describe("openIntroAudio", () => {
     expect(audio).not.toBe(silentIntroAudio);
     expect(resume).toHaveBeenCalled();
     expect(unhandled).not.toHaveBeenCalled();
+  });
+
+  it("asks for the recordings again, in case preparing never fetched them or failed to", () => {
+    const fetchFile = vi.fn(() => Promise.reject(new TypeError("network down")));
+    vi.stubGlobal("fetch", fetchFile);
+    vi.stubGlobal("AudioContext", FakeContext);
+
+    openIntroAudio(TUNE);
+
+    const asked = fetchFile.mock.calls.map((call: unknown[]) => String(call[0]));
+    expect(asked.some((url) => url.includes("snore"))).toBe(true);
+    expect(asked.some((url) => url.includes("wake"))).toBe(true);
+  });
+});
+
+describe("prepareIntroAudio", () => {
+  it("fetches the recordings even when rendering the tune throws", () => {
+    const fetchFile = vi.fn(() => Promise.reject(new TypeError("network down")));
+    vi.stubGlobal("fetch", fetchFile);
+    vi.stubGlobal("AudioContext", FakeContext);
+    const uneven: Tune = { ...TUNE, voices: [...TUNE.voices, { ...TUNE.voices[0]!, name: "longer", bars: ["A4 - - - A4 - - -"] }] };
+
+    expect(() => prepareIntroAudio(uneven)).toThrow();
+    expect(fetchFile).toHaveBeenCalled();
   });
 });

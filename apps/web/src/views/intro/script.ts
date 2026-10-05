@@ -35,6 +35,18 @@ export interface IntroCard {
    * Set on card 6 only: the one place the video visibly hides something.
    */
   readonly glitchAtChar?: number;
+  /**
+   * How long after its caption is typed someone in the room snores, under the video and its music.
+   * Set on card 9 only, the close shot of Joe's window.
+   */
+  readonly snoreAfterMs?: number;
+  /** When, on the card's clock, Joe wakes with a snort. Set on card 10 only. */
+  readonly wakeAtMs?: number;
+  /**
+   * When, on the card's clock, Joe punches the screen: the music dies and the picture collapses to
+   * black. Set on card 10 only, where it ends the video.
+   */
+  readonly punchAtMs?: number;
 }
 
 const GANYMEDE_LINE = "Ganymede was found unsuitable.";
@@ -92,7 +104,7 @@ export const INTRO_CARDS: readonly IntroCard[] = [
   },
   {
     image:
-      "The Plan, zoomed into along Mars's orbit until Mars and Deimos fill the frame; Externa's lights come on across Deimos. Close: Externa Prima on Deimos's horizon, Mars dark above it, its cities lit. Jumps along the Corridor: to Steady Foot among Mars's trojans, then through the belt to Steady Hand, Jupiter ahead. Pulled out: the Sun, Mars, the belt, Jupiter, and between them a dotted line of stations lighting up, a corridor of light.",
+      "The Plan, zoomed into along Mars's orbit until Mars and Deimos fill the frame; Externa's lights come on across Deimos. Close: Externa Prima, a great city across Deimos's horizon, seen from within it: glass domes, halls and palaces in front, and rising from its heart among them, their feet hidden, zaibatsu towers crowned in their colours and joined by skybridges, and soaring from among them, above them all, the teal tower of Absolute Connections, the square on its face; Mars dark above it, its cities lit. Jumps along the Corridor: to Steady Foot among Mars's trojans, then through the belt to Steady Hand, Jupiter ahead. Pulled out: the Sun, Mars, the belt, Jupiter, and between them a dotted line of stations lighting up, a corridor of light.",
     caption: [
       // The caption waits while the picture zooms from card 4's Plan onto Mars and Deimos, and
       // after each place while the picture closes in on it or jumps on to the next.
@@ -139,7 +151,7 @@ export const INTRO_CARDS: readonly IntroCard[] = [
   },
   {
     image:
-      "Card 8's light goes out. Out of the dark, stars, and the camera tilts down to the Martian surface at dusk, the sunset blue, Deimos high up with Externa's lights, shuttles climbing to it from a far port. On the plain, a dome half sunk in the dunes, a small ship by it, a ring of dark windows, and one lit. Close: through that window, a dark room, its walls lit only by the flicker of this video, playing on a screen out of sight. Above the dome, Externa's beacon blinks teal.",
+      "Card 8's light goes out. Out of the dark, stars, and the camera tilts down to the Martian surface at dusk, the sunset blue, Deimos high up with Externa's lights, a shuttle climbing to it from a far port. On the plain, a dome half sunk in the dunes, a small ship by it, a ring of dark windows, and one lit. Close: through that window, a dark room, its walls lit only by the flicker of this video, playing on a screen out of sight. Above the dome, Externa's beacon blinks teal. In the room, under the video, someone snores.",
     caption: [
       // The caption waits while card 8's glare goes out and the camera tilts down from Mars's sky,
       // and again while it closes in on the window.
@@ -148,34 +160,42 @@ export const INTRO_CARDS: readonly IntroCard[] = [
       { text: "the Corridor carries us all — and it is carried by contractors like you. ", pauseAfterMs: 900 },
       { text: "Your assignment awaits at Externa Prima." },
     ],
-  },
-  {
-    // No caption: the snore is the whole card. It holds a second longer than a caption's hold, so
-    // the snore ends in silence before Module 2 starts the music again.
-    image: "Black. The music stops. A snore. A beat of silence.",
-    caption: [],
+    // The video calls the contractor to his assignment, and a beat later the room answers with a
+    // snore, over the music. The card holds a second longer than usual so it ends before Module 2.
+    snoreAfterMs: 600,
     holdMs: 4000,
   },
   {
-    // The next module's ident, mirroring card 0: one module down, thirteen to go. It waits for a
-    // key the way the first one did, but with its music playing, and in beat 1 that music wakes Joe,
-    // who presses a key by slapping the screen off.
-    image: `${IDENT_IMAGE} The music starts again.`,
+    // The next module's ident, mirroring card 0: one module down, thirteen to go. It asks for a key
+    // the way the first one did, but nothing answers it: its music wakes Joe with a snort on the
+    // first phrase's high note, and once he has come round he answers it himself, with his fist.
+    image: `${IDENT_IMAGE} The music starts again; on its first phrase's high note, someone in the dark wakes with a snort, comes round, and punches the screen: the music dies, and the picture collapses to a line, a dot, and black.`,
     caption: [
       { text: "ABSOLUTE CONNECTIONS · Contractor Orientation\nModule 2 of 14: " },
       { text: "What's the Drill", emphasis: true },
     ],
+    // A second before the first phrase ends, two bars in at 72 beats a minute: on its high E, held.
+    wakeAtMs: 5667,
+    // The snort is over a second in, and Joe takes a couple more to come round before the fist.
+    punchAtMs: 9000,
   },
 ];
 
 /** The ident: shown at the gate and held briefly once the player opts in. */
 export const IDENT_CARD = 0;
 
-/** The last card — the next module's ident — and the one the sequence ends, or is skipped, onto. */
+/**
+ * The last card — the next module's ident, where Joe wakes and punches the screen — and the one a
+ * skip jumps to.
+ */
 export const END_CARD = INTRO_CARDS.length - 1;
 
-/** Card 10, black and captionless: the music stops on it, and someone snores. */
-export const SNORE_CARD = END_CARD - 1;
+/**
+ * Card 9, Joe's window: someone in the room snores under the video. Found by its snore rather than
+ * counted back from the end, so a card added before or after it cannot move the name off it. The
+ * snore itself is cued by `snoreAfterMs`; this is the card's name, for the tests.
+ */
+export const SNORE_CARD = INTRO_CARDS.findIndex((card) => card.snoreAfterMs !== undefined);
 
 /** A caption as one string, for the live region and for tests. */
 export function captionText(card: IntroCard): string {

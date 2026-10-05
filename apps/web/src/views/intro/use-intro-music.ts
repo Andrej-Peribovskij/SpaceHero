@@ -2,7 +2,16 @@ import { useCallback, useEffect, useRef } from "react";
 
 import type { IntroEvent } from "./intro-timeline";
 import { silentIntroAudio, type IntroAudio } from "./music/intro-audio";
-import { SNORE_CARD } from "./script";
+import { END_CARD } from "./script";
+
+/**
+ * The loop again from the top, out of whatever it was in — the glitch's silence, or the snore and
+ * the snort, which the stop cuts.
+ */
+function restart(audio: IntroAudio): void {
+  audio.stop();
+  audio.start();
+}
 
 /** What each moment of the video asks of the music. Everything else leaves it as it is. */
 function cue(audio: IntroAudio, event: IntroEvent): void {
@@ -14,17 +23,28 @@ function cue(audio: IntroAudio, event: IntroEvent): void {
     case "glitch-end":
       return audio.resume();
     case "card":
-      if (event.index === SNORE_CARD) {
-        audio.stop();
-        audio.snore();
-      }
+      // Module 2's ident is the next video, and starts the loop again from the top: a cut, as one
+      // video gives way to the next, never a silence. Skipped, jumped to or played through, Module 1
+      // is over, and Joe has slept through it; this is what wakes him.
+      if (event.index === END_CARD) restart(audio);
       return;
+    case "snore":
+      return audio.snore();
+    case "wake":
+      return audio.wake();
+    case "punch":
+      return audio.punch();
     case "skipped":
-      return audio.stop();
+      // A skip lands on Module 2's ident, whose `card` event, next, cuts Module 1's music.
+      return;
+    case "seeked":
+      // A jump, while debugging: the loop starts again from the top. Onto Module 2's ident, that
+      // card's own `card` event, next, already does it; doing it here too would start it twice.
+      if (event.index !== END_CARD) restart(audio);
+      return;
     case "ended":
-      // Module 2's ident starts the loop again from the top, and it plays while the ident waits:
-      // in beat 1, it is what wakes Joe. Skipped or played through, Module 1 is over.
-      return audio.start();
+      // The punch has already silenced everything: the video ends on black, and in silence.
+      return;
   }
 }
 

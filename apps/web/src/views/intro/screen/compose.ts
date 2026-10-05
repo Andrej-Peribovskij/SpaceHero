@@ -6,6 +6,7 @@ import { FONT, ADVANCE } from "./font";
 import { glitchFrameAt, glitchScreen } from "./glitch";
 import { GLYPH_COLUMNS, GLYPH_ROWS } from "./glyphs";
 import { layoutCaption, type CaptionLine } from "./layout";
+import { powerOffScreen } from "./power-off";
 
 /**
  * The whole orientation screen as one picture: the card's art, and over its lower edge a black
@@ -51,6 +52,11 @@ export interface ScreenContent {
    * only. Never under reduced motion.
    */
   readonly glitchAtMs?: number;
+  /**
+   * When, on the card's clock, Joe's punch kills the screen: on card 10 only. From then on the
+   * screen collapses to black, or under reduced motion is black at once.
+   */
+  readonly powerOffAtMs?: number;
 }
 
 /** Whether a blinking prompt is lit at `timeMs`: on for one period, off for the next. */
@@ -118,5 +124,11 @@ export function composeScreen(content: ScreenContent): PaletteChar[] {
 
   // The glitch tears the whole screen, caption and all: the monitor fails, not the picture.
   const glitched = content.glitchAtMs === undefined || content.still ? undefined : glitchFrameAt(content.glitchAtMs, content.timeMs);
-  return glitched === undefined ? frame : glitchScreen(frame, glitched);
+  const screen = glitched === undefined ? frame : glitchScreen(frame, glitched);
+
+  // The punch kills the whole set, caption and all, as the glitch tears it all.
+  if (content.powerOffAtMs !== undefined && content.timeMs >= content.powerOffAtMs) {
+    return powerOffScreen(screen, content.timeMs - content.powerOffAtMs, content.still);
+  }
+  return screen;
 }

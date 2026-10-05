@@ -26,13 +26,13 @@ const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 export const OUTPUT_DIR = join(repoRoot, ".cache", "intro-previews");
 
 /**
- * Cards 0 to 11, as `apps/web/src/views/intro/script.ts` numbers them. Repeated here because this
+ * Cards 0 to 10, as `apps/web/src/views/intro/script.ts` numbers them. Repeated here because this
  * script cannot import TypeScript; the renderer checks the card against the script itself, so a
  * drifted bound fails there rather than rendering the wrong thing.
  */
-export const LAST_CARD = 11;
+export const LAST_CARD = 10;
 
-const USAGE = "usage: pnpm run intro:render-card <card 0–11> [still times in ms…]";
+const USAGE = "usage: pnpm run intro:render-card <card 0–10> [still times in ms…]";
 
 /** The card and the still times, checked. Throws with the usage line on anything else. */
 export function parseArgs(args) {
