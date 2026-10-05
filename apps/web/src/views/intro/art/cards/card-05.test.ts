@@ -58,10 +58,14 @@ const hub = (frame: readonly string[], x: number, y: number) => region(frame, x 
 const lit = (pixels: readonly string[]) => count(pixels, "a", "Y");
 const mapStation = (frame: readonly string[], index: number) => at(frame, Math.round(MAP_STATIONS[index]![0]), Math.round(MAP_STATIONS[index]![1]));
 
-/** The longest run of one streak colour along any row: stars streaking past. */
+/**
+ * The longest run of one streak colour along any row of the sky: stars streaking past. Only the
+ * sky, above the city: Externa's halls and decks run long in night blue too.
+ */
+const SKY_ROWS = 70;
 function longestStreak(frame: readonly string[]): number {
   let longest = 0;
-  for (let y = 0; y < VISIBLE; y += 1) {
+  for (let y = 0; y < SKY_ROWS; y += 1) {
     let run = 0;
     for (let x = 0; x < FRAME_WIDTH; x += 1) {
       run = ["b", "s"].includes(at(frame, x, y)!) ? run + 1 : 0;
@@ -181,6 +185,13 @@ describe("card 5: Mars and Deimos, and the Corridor", () => {
     // The four-colour square, near the tower's top.
     const logo = region(close, 180, 30, 205, 60);
     for (const corner of ["t", "Y", "r", "s"]) expect(count(logo, corner)).toBeGreaterThanOrEqual(8);
+  });
+
+  it("raises the towers from the middle of the city: the city in front hides their feet", () => {
+    const close = frameAt(CLOSE_MS + 300);
+    // Absolute Connections' tower is teal down to the ground: none of that shows near it.
+    expect(count(region(close, 178, 60, 206, 100), "t")).toBeGreaterThan(40);
+    expect(count(region(close, 178, 120, 206, 140), "t")).toBe(0);
   });
 
   it("puts the belt between the steadies, far from Mars", () => {

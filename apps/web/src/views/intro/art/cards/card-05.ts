@@ -13,8 +13,9 @@ import { CARD_04_ART, LIGHT_X, LIGHT_Y, ORBITS } from "./card-04";
  * the left where the Sun is, while Deimos comes out from beside it. The zoom ends with both
  * magnified, and the caption waits for it. On "Externa" the city on Deimos lights up and shuttles
  * start to run to it from Mars, whose night side lights up city by city; then the camera pushes in
- * on Externa Prima, close: towers on Deimos's curved horizon, domes, the docks, a shuttle lifting
- * off, and Mars hanging dark over it all, its cities lit. Then it jumps along the Corridor, the
+ * on Externa Prima, close: a city on Deimos's curved horizon, its towers rising from among domes
+ * and palaces, a shuttle lifting off the landing deck in front, and Mars hanging dark over it all,
+ * its cities lit. Then it jumps along the Corridor, the
  * stars streaking past: to Steady Foot among Mars's trojans, Mars small behind it, lighting up on
  * its name; and again, through the belt, its rocks rushing past, to Steady Hand, a turning ring
  * with Jupiter ahead. On "A corridor of light" it pulls out to the whole of it — the Sun at the
@@ -500,13 +501,23 @@ const CLOSE_STARS = starsOf(100, 90);
 /** Mars, hanging over the city: from Deimos, mostly its night side, a thin crescent of day. */
 const CLOSE_MARS = { x: 78, y: -24, radius: 112 } as const;
 const BEHIND_SUN = unit(-0.95, -0.12, -0.32);
-/** Deimos's horizon: so small a moon that it curves away within the frame. */
+/**
+ * The ground at the city's heart, where the towers stand. None of it shows: the city in front of
+ * them hides their feet. Deimos is so small a moon that every line of its ground curves away
+ * within the frame.
+ */
 const HORIZON = 128;
 const HORIZON_CURVE = 2400;
 const groundAt = (x: number) => HORIZON + ((x - FRAME_WIDTH / 2) ** 2) / HORIZON_CURVE;
+/** Deimos's edge against the sky, beyond the heart: the far skyline stands on it. */
+const LIMB_RISE = 18;
+const limbAt = (x: number) => groundAt(x) - LIMB_RISE;
+/** The middle ring of the city, nearer than the towers, and the near ring, nearer still: lower in the frame, flatter. */
+const midAt = (x: number) => 148 + ((x - FRAME_WIDTH / 2) ** 2) / 3200;
+const nearAt = (x: number) => 174 + ((x - FRAME_WIDTH / 2) ** 2) / 5000;
 
-/** Where something standing `width` wide from `left` meets the curved ground. */
-const baseOf = (left: number, width: number) => Math.ceil(groundAt(left + width / 2)) + 2;
+/** Where something standing `width` wide from `left` meets a line of ground: the heart's, unless told. */
+const baseOf = (left: number, width: number, ground = groundAt) => Math.ceil(ground(left + width / 2)) + 2;
 
 /** How high above the horizon the city's glow reaches. */
 const GLOW_HEIGHT = 48;
@@ -520,7 +531,7 @@ const GLOW_FLOOR = 0.07;
 function paintCityGlow(canvas: Canvas): void {
   for (let x = 0; x < FRAME_WIDTH; x += 1) {
     const middle = 1 - Math.abs(x - FRAME_WIDTH / 2) / (FRAME_WIDTH / 2);
-    const ground = groundAt(x);
+    const ground = limbAt(x);
     for (let y = Math.floor(ground - GLOW_HEIGHT); y < ground; y += 1) {
       // Only behind the city: it fades out well before the frame's edges.
       const strength = (1 - (ground - y) / GLOW_HEIGHT) ** 1.5 * middle ** 2.5;
@@ -531,13 +542,13 @@ function paintCityGlow(canvas: Canvas): void {
   }
 }
 
-/** The far city: plain towers right across the horizon, taller towards the middle, a few lights in each. */
+/** The far city: plain towers right along Deimos's edge, taller towards the middle, a few lights in each. */
 const FAR_TOWERS: readonly { readonly left: number; readonly width: number; readonly height: number }[] = (() => {
   const towers: { left: number; width: number; height: number }[] = [];
   for (let left = 4; left < FRAME_WIDTH - 6; ) {
     const width = 4 + Math.floor(noise(left, 301) * 6);
     const middle = 1 - Math.abs(left + width / 2 - FRAME_WIDTH / 2) / (FRAME_WIDTH / 2);
-    towers.push({ left, width, height: Math.floor((8 + 40 * middle) * (0.55 + noise(left, 302) * 0.7)) });
+    towers.push({ left, width, height: Math.floor((6 + 32 * middle) * (0.55 + noise(left, 302) * 0.7)) });
     left += width + (noise(left, 303) < 0.3 ? 1 : 0);
   }
   return towers;
@@ -545,7 +556,7 @@ const FAR_TOWERS: readonly { readonly left: number; readonly width: number; read
 
 function paintFarCity(canvas: Canvas): void {
   for (const tower of FAR_TOWERS) {
-    const base = baseOf(tower.left, tower.width);
+    const base = baseOf(tower.left, tower.width, limbAt);
     const top = base - tower.height;
     for (let y = top; y < base; y += 1) {
       for (let x = tower.left; x < tower.left + tower.width; x += 1) {
@@ -730,10 +741,13 @@ function paintBridges(canvas: Canvas): void {
   }
 }
 
-/** The low city at the towers' feet: blocks shoulder to shoulder along the ground, every one lit. */
+/**
+ * The low city at the towers' feet: blocks shoulder to shoulder along the ground, every one lit.
+ * The city in front hides most of it; it shows towards the edges, where the rings in front are low.
+ */
 const BLOCKS: readonly { readonly left: number; readonly width: number; readonly height: number }[] = (() => {
   const blocks: { left: number; width: number; height: number }[] = [];
-  for (let left = 74; left < 340; ) {
+  for (let left = 0; left < FRAME_WIDTH; ) {
     const width = 3 + Math.floor(noise(left, 311) * 5);
     const middle = 1 - Math.abs(left + width / 2 - FRAME_WIDTH / 2) / (FRAME_WIDTH / 2);
     blocks.push({ left, width, height: 3 + Math.floor(noise(left, 312) * (3 + 6 * middle)) });
@@ -754,38 +768,157 @@ function paintLowCity(canvas: Canvas): void {
   }
 }
 
-interface Dome {
-  readonly x: number;
-  readonly radius: number;
+/** The step between a near dome's ribs, along it and up it: wide enough apart to show how big it is. */
+const RIB_STEP = Math.PI / 9;
+
+/** Where a point of a dome lies on it: its longitude across, its latitude up, both in radians. */
+function domeAngles(cx: number, base: number, radius: number, x: number, y: number): readonly [number, number] {
+  const up = Math.min(1, (base - y) / radius);
+  const ring = Math.sqrt(1 - up * up) * radius;
+  const across = ring > 0 ? Math.max(-1, Math.min(1, (x - cx) / ring)) : 0;
+  return [Math.asin(across), Math.asin(up)];
 }
 
-const DOMES: readonly Dome[] = [
-  { x: 84, radius: 15 },
-  { x: 312, radius: 20 },
-  { x: 366, radius: 10 },
-];
+/** Whether a dome's glass frame runs between this pixel and the next one right, or the one above. */
+function onRib(cx: number, base: number, radius: number, x: number, y: number): boolean {
+  const [longitude, latitude] = domeAngles(cx, base, radius, x + 0.5, y + 0.5);
+  const [nextLongitude] = domeAngles(cx, base, radius, x + 1.5, y + 0.5);
+  const [, upLatitude] = domeAngles(cx, base, radius, x + 0.5, y - 0.5);
+  return Math.floor(longitude / RIB_STEP) !== Math.floor(nextLongitude / RIB_STEP) || Math.floor(latitude / RIB_STEP) !== Math.floor(upLatitude / RIB_STEP);
+}
 
-function paintDome(canvas: Canvas, dome: Dome): void {
-  const base = groundAt(dome.x) + 2;
-  for (let y = Math.floor(base - dome.radius); y < base; y += 1) {
-    for (let x = Math.floor(dome.x - dome.radius); x <= dome.x + dome.radius; x += 1) {
-      const d = Math.hypot(x + 0.5 - dome.x, y + 0.5 - base) / dome.radius;
+/** A glass dome over lit streets, standing on `base`. A near one shows its frame, ribs across and round. */
+function paintDome(canvas: Canvas, cx: number, base: number, radius: number, ribs = false): void {
+  for (let y = Math.floor(base - radius); y < base; y += 1) {
+    for (let x = Math.floor(cx - radius); x <= cx + radius; x += 1) {
+      const d = Math.hypot(x + 0.5 - cx, y + 0.5 - base) / radius;
       if (d > 1) continue;
       // Glass: a pale rim, a glint where the Sun strikes it, and the lights of the streets inside.
-      if (d > 0.88) canvas.set(x, y, x < dome.x ? "s" : "b");
-      else if (d > 0.7 && x < dome.x - dome.radius * 0.3 && y < base - dome.radius * 0.5) canvas.set(x, y, "p");
-      else if (y > base - dome.radius * 0.45 && noise(x, y) < 0.25) canvas.set(x, y, noise(x + 3, y) < 0.5 ? "a" : "Y");
+      if (d > 0.88 || (radius > 4 && d > 1 - 1.5 / radius)) canvas.set(x, y, x < cx ? "s" : "b");
+      else if (d > 0.7 && x < cx - radius * 0.3 && y < base - radius * 0.5) canvas.set(x, y, "p");
+      else if (ribs && onRib(cx, base, radius, x, y)) canvas.set(x, y, x < cx ? "s" : "b");
+      else if (y > base - radius * 0.45 && noise(x, y) < 0.25) canvas.set(x, y, noise(x + 3, y) < 0.5 ? "a" : "Y");
       else canvas.set(x, y, ditherAt(x, y) < 0.5 ? "n" : "b");
     }
   }
 }
 
 /**
+ * The middle ring: palaces with tall windows under their cornices, some crowned with a small dome;
+ * terraces set back as they rise; domes on drums. Shoulder to shoulder in front of the towers and
+ * tallest in the middle, so the towers rise from among them and only their tops show.
+ */
+interface MidBuilding {
+  readonly left: number;
+  readonly width: number;
+  readonly height: number;
+  readonly kind: "palace" | "terrace" | "dome";
+  readonly cupola: boolean;
+}
+
+const MID_RING: readonly MidBuilding[] = (() => {
+  const buildings: MidBuilding[] = [];
+  for (let left = -6; left < FRAME_WIDTH + 6; ) {
+    const choice = noise(left, 321);
+    const kind = choice < 0.22 ? "dome" : choice < 0.45 ? "terrace" : "palace";
+    const width = (kind === "dome" ? 16 : 12) + Math.floor(noise(left, 322) * 14);
+    const middle = 1 - Math.abs(left + width / 2 - FRAME_WIDTH / 2) / (FRAME_WIDTH / 2);
+    const height = Math.floor((16 + 26 * middle) * (0.75 + noise(left, 323) * 0.45));
+    buildings.push({ left, width, height, kind, cupola: kind === "palace" && noise(left, 324) < 0.4 });
+    left += width + (noise(left, 325) < 0.25 ? 2 : 0);
+  }
+  return buildings;
+})();
+
+/** How far a terrace steps in from each side on its row `v`, counted from its top: it sets back every six rows. */
+const TERRACE_ROWS = 6;
+const terraceInset = (building: MidBuilding, v: number) => (building.kind === "terrace" ? Math.max(0, 2 - Math.floor(v / TERRACE_ROWS)) * 2 : 0);
+
+/** A block of the middle ring, from `top` to `base`: a cornice that catches the light, then tall windows, most of them lit. */
+function paintBlock(canvas: Canvas, building: MidBuilding, top: number, base: number): void {
+  for (let y = top; y < base; y += 1) {
+    const v = y - top;
+    const inset = terraceInset(building, v);
+    const from = building.left + inset;
+    const to = building.left + building.width - inset;
+    for (let x = from; x < to; x += 1) {
+      const u = x - from;
+      const cornice = v === 0 || (building.kind === "terrace" && v % TERRACE_ROWS === 0);
+      // Windows two rows tall, every third column; both rows of a window lit or dark together.
+      const row = v % 5;
+      const window = v > 2 && (row === 2 || row === 3) && u % 3 === 1 && x < to - 1;
+      const sill = row === 3 ? y - 1 : y;
+      if (cornice) canvas.set(x, y, u < 2 ? "p" : "g");
+      else if (window) canvas.set(x, y, noise(x, sill) < 0.62 ? windowColour(x, sill) : ".");
+      else canvas.set(x, y, x === from ? "g" : u < 2 || v === 1 ? "b" : "n");
+    }
+  }
+}
+
+function paintMidBuilding(canvas: Canvas, building: MidBuilding): void {
+  const base = baseOf(building.left, building.width, midAt);
+  const top = base - building.height;
+  const centre = building.left + building.width / 2;
+
+  if (building.kind === "dome") {
+    const radius = building.width / 2;
+    const drum = base - Math.max(5, building.height - Math.floor(radius));
+    paintDome(canvas, centre, drum, radius);
+    paintBlock(canvas, building, drum, base);
+    return;
+  }
+  paintBlock(canvas, building, top, base);
+  if (building.cupola) {
+    const radius = Math.min(5, Math.floor(building.width / 4));
+    paintDome(canvas, centre, top, radius);
+    canvas.set(Math.floor(centre), top - radius - 1, "g");
+  }
+}
+
+/** The near ring: great glass domes, their frames showing, and long low halls between them. */
+const NEAR_DOMES: readonly { readonly x: number; readonly radius: number }[] = [
+  { x: 104, radius: 28 },
+  { x: 198, radius: 22 },
+  { x: 290, radius: 30 },
+  { x: 372, radius: 18 },
+];
+const NEAR_HALLS: readonly { readonly left: number; readonly width: number; readonly height: number }[] = [
+  { left: 66, width: 22, height: 18 },
+  { left: 128, width: 52, height: 25 },
+  { left: 214, width: 52, height: 29 },
+  { left: 318, width: 44, height: 21 },
+];
+
+/** A hall: a roof edge bright in the Sun, and bands of glass lit along its length, split by mullions. */
+function paintHall(canvas: Canvas, hall: (typeof NEAR_HALLS)[number]): void {
+  const base = baseOf(hall.left, hall.width, nearAt);
+  const top = base - hall.height;
+  for (let y = top; y < Math.min(base, VISIBLE); y += 1) {
+    const v = y - top;
+    for (let x = hall.left; x < hall.left + hall.width; x += 1) {
+      const u = x - hall.left;
+      const band = (v % 8 === 4 || v % 8 === 5) && u > 1 && u < hall.width - 2;
+      const mullion = u % 5 === 0;
+      if (v === 0) canvas.set(x, y, u < hall.width / 2 ? "p" : "g");
+      else if (band) canvas.set(x, y, mullion ? "n" : noise(x >> 2, y) < 0.8 ? windowColour(x >> 2, y) : "b");
+      else canvas.set(x, y, u === 0 ? "g" : u < 3 || v === 1 ? "b" : "n");
+    }
+  }
+}
+
+function paintNearRing(canvas: Canvas): void {
+  for (const hall of NEAR_HALLS) paintHall(canvas, hall);
+  for (const dome of NEAR_DOMES) paintDome(canvas, dome.x, Math.ceil(nearAt(dome.x)) + 2, dome.radius, true);
+}
+
+/**
  * The docking spire: cheap docking is what Externa was founded on. A lattice mast with arms to
- * the right, freighters berthed on the upper two; the lowest is where the incoming shuttle docks.
+ * the right, standing behind the middle ring, freighters berthed on the upper two; the lowest is
+ * where the incoming shuttle docks.
  */
 const SPIRE_X = 336;
-const SPIRE_ARMS = [20, 42, 64] as const;
+const SPIRE_HEIGHT = 90;
+const SPIRE_ARMS = [26, 48, 70] as const;
 
 /** A freighter, berthed side on: a long hull, its running lights. */
 const FREIGHTER: Picture = parsePicture(
@@ -799,7 +932,7 @@ const FREIGHTER: Picture = parsePicture(
 
 function paintDockingSpire(canvas: Canvas, t: number): void {
   const base = baseOf(SPIRE_X, 4);
-  const top = base - 76;
+  const top = base - SPIRE_HEIGHT;
   for (let y = top; y < base; y += 1) {
     canvas.set(SPIRE_X, y, "g");
     canvas.set(SPIRE_X + 3, y, "n");
@@ -830,8 +963,9 @@ function paintFlyers(canvas: Canvas, t: number): void {
   }
 }
 
-/** The pads at the docks, where the shuttles lift off and land. */
-const PAD = { left: 18, right: 64 } as const;
+/** The landing deck at the front of the city, where the shuttles lift off and land: its pads, and how high it stands. */
+const PAD = { left: 8, right: 60 } as const;
+const DECK_Y = 150;
 
 /** A shuttle, nose up. */
 const SHUTTLE: Picture = parsePicture(
@@ -845,13 +979,22 @@ const SHUTTLE: Picture = parsePicture(
 `,
 );
 
-/** The ground: grey rock, cratered, lit low from the left, its edge bright against the sky. */
+/**
+ * The ground: grey rock, cratered, lit low from the left, its edge bright against the sky. Where
+ * the rings of the city part, the streets between them show, lamps along each.
+ */
 function paintGround(canvas: Canvas): void {
   for (let x = 0; x < FRAME_WIDTH; x += 1) {
-    const top = Math.floor(groundAt(x));
+    const top = Math.floor(limbAt(x));
+    const midStreet = Math.floor(midAt(x)) + 1;
+    const nearStreet = Math.floor(nearAt(x)) + 1;
     for (let y = top; y < VISIBLE; y += 1) {
       if (y === top) {
         canvas.set(x, y, "p");
+        continue;
+      }
+      if ((y === midStreet && x % 6 === 0) || (y === nearStreet && x % 8 === 0)) {
+        canvas.set(x, y, "a");
         continue;
       }
       const crater = smoothNoise(x / 16, y / 6, 1000);
@@ -861,30 +1004,39 @@ function paintGround(canvas: Canvas): void {
   }
 }
 
-/** The docks: pads with edge lights blinking in turn, and a gantry over them. */
-function paintDocks(canvas: Canvas, t: number): void {
-  const pad = Math.floor(groundAt(PAD.left)) - 1;
-  for (let x = PAD.left; x < PAD.right; x += 1) {
-    canvas.set(x, pad, "g");
-    canvas.set(x, pad + 1, "n");
+/** The landing deck: a slab on legs, its pads' edge lights blinking in turn, and a gantry over them. */
+function paintDeck(canvas: Canvas, t: number): void {
+  for (let x = PAD.left - 8; x < PAD.right + 8; x += 1) {
+    canvas.set(x, DECK_Y, x < PAD.left + 16 ? "p" : "g");
+    canvas.set(x, DECK_Y + 1, "b");
+    canvas.set(x, DECK_Y + 2, "n");
+  }
+  // The legs, with the streets beyond showing between them.
+  for (let x = PAD.left - 4; x < PAD.right + 8; x += 14) {
+    for (let y = DECK_Y + 3; y < VISIBLE; y += 1) {
+      canvas.set(x, y, "g");
+      canvas.set(x + 1, y, "b");
+      canvas.set(x + 2, y, "n");
+    }
   }
   const chase = Math.floor(t / 120);
-  for (let x = PAD.left; x < PAD.right; x += 6) canvas.set(x, pad - 1, (x / 6 + chase) % 4 === 0 ? "w" : "r");
+  for (let x = PAD.left; x < PAD.right; x += 6) canvas.set(x, DECK_Y - 1, (x / 6 + chase) % 4 === 0 ? "w" : "r");
 
-  for (let y = pad - 30; y < pad; y += 1) {
-    canvas.set(PAD.right + 3, y, "g");
-    canvas.set(PAD.right + 6, y, "n");
-    if ((y - pad) % 6 === 0) for (let x = PAD.right + 3; x <= PAD.right + 6; x += 1) canvas.set(x, y, "g");
+  const gantry = PAD.right + 3;
+  for (let y = DECK_Y - 30; y < DECK_Y; y += 1) {
+    canvas.set(gantry, y, "g");
+    canvas.set(gantry + 3, y, "n");
+    if ((y - DECK_Y) % 6 === 0) for (let x = gantry; x <= gantry + 3; x += 1) canvas.set(x, y, "g");
   }
-  for (let x = PAD.right - 14; x <= PAD.right + 6; x += 1) canvas.set(x, pad - 30, "g");
+  for (let x = PAD.right - 14; x <= gantry + 3; x += 1) canvas.set(x, DECK_Y - 30, "g");
 }
 
-/** The shuttles: one lifting off the pad on a flame, one coming in to dock on the spire's lowest arm. */
+/** The shuttles: one lifting off the deck on a flame, one coming in to dock on the spire's lowest arm. */
 function paintCloseShuttles(canvas: Canvas, t: number): void {
-  const pad = Math.floor(groundAt(PAD.left)) - 2;
+  const pad = DECK_Y - 1;
   const climb = fraction(Math.max(0, t - CLOSE_MS) / 1900);
   const rise = climb * climb * 150;
-  const left = PAD.left + 18;
+  const left = PAD.left + 22;
   const top = pad - SHUTTLE.height - Math.round(rise);
   paintPicture(canvas, SHUTTLE, left, top);
   const flame = ["Y", "o", "r"] as const;
@@ -903,28 +1055,30 @@ function paintCloseShuttles(canvas: Canvas, t: number): void {
 
 /**
  * Externa Prima, close: the oldest hub of the Diaspora, a city on Deimos's curved horizon too big
- * for the frame. Its glow behind it; a far skyline right across the horizon; the zaibatsu towers,
- * each crowned in its company's colour and joined by skybridges; in the middle and far above them
- * all, Absolute Connections' own tower, teal, with the square on its face; at their feet a low city
- * lit end to end, domes of lit streets, the docks with a shuttle lifting off, and the docking spire
- * with its freighters. In the sky over it, Mars: mostly its night side, a thin crescent of day, its
- * cities lit.
+ * for the frame, seen from inside it, ring behind ring. Its glow behind it, and a far skyline along
+ * Deimos's edge. At its heart the zaibatsu towers, each crowned in its company's colour and joined
+ * by skybridges, and in the middle and far above them all, Absolute Connections' own tower, teal,
+ * with the square on its face; the docking spire with its freighters. The towers rise from among
+ * the city in front, and none of their feet show: a ring of palaces, terraces and domes, and nearer
+ * still great glass domes, long halls and the landing deck, a shuttle lifting off it. In the sky over
+ * it, Mars: mostly its night side, a thin crescent of day, its cities lit.
  */
 function paintCloseUp(canvas: Canvas, t: number): void {
   paintSky(canvas, CLOSE_STARS);
   paintMarsDisc(canvas, CLOSE_MARS.x, CLOSE_MARS.y, CLOSE_MARS.radius, BEHIND_SUN, t, CITIES.length);
   paintCityGlow(canvas);
+  paintGround(canvas);
   paintFarCity(canvas);
-  for (const dome of DOMES) paintDome(canvas, dome);
   paintBridges(canvas);
   for (const skyscraper of SKYSCRAPERS) paintSkyscraper(canvas, skyscraper, t);
   paintOurs(canvas, t);
   paintLowCity(canvas);
   paintDockingSpire(canvas, t);
   paintFlyers(canvas, t);
+  for (const building of MID_RING) paintMidBuilding(canvas, building);
+  paintNearRing(canvas);
+  paintDeck(canvas, t);
   paintCloseShuttles(canvas, t);
-  paintGround(canvas);
-  paintDocks(canvas, t);
 }
 
 // ═══ the jumps along the Corridor ═══

@@ -104,7 +104,7 @@ export const INTRO_CARDS: readonly IntroCard[] = [
   },
   {
     image:
-      "The Plan, zoomed into along Mars's orbit until Mars and Deimos fill the frame; Externa's lights come on across Deimos. Close: Externa Prima, a great city across Deimos's horizon, zaibatsu towers crowned in their colours and joined by skybridges, and above them all the teal tower of Absolute Connections, the square on its face; Mars dark above it, its cities lit. Jumps along the Corridor: to Steady Foot among Mars's trojans, then through the belt to Steady Hand, Jupiter ahead. Pulled out: the Sun, Mars, the belt, Jupiter, and between them a dotted line of stations lighting up, a corridor of light.",
+      "The Plan, zoomed into along Mars's orbit until Mars and Deimos fill the frame; Externa's lights come on across Deimos. Close: Externa Prima, a great city across Deimos's horizon, seen from within it: glass domes, halls and palaces in front, and rising from its heart among them, their feet hidden, zaibatsu towers crowned in their colours and joined by skybridges, and above them all the teal tower of Absolute Connections, the square on its face; Mars dark above it, its cities lit. Jumps along the Corridor: to Steady Foot among Mars's trojans, then through the belt to Steady Hand, Jupiter ahead. Pulled out: the Sun, Mars, the belt, Jupiter, and between them a dotted line of stations lighting up, a corridor of light.",
     caption: [
       // The caption waits while the picture zooms from card 4's Plan onto Mars and Deimos, and
       // after each place while the picture closes in on it or jumps on to the next.
