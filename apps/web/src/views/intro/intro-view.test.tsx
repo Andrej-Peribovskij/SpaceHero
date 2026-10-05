@@ -732,13 +732,20 @@ describe("jumping card by card, in the dev server only", () => {
   });
 
   it("goes back from Module 2's ident to Joe's window, and no further forward", () => {
-    render(<IntroView debugSeek />);
+    const audio = recordingIntroAudio();
+    render(<IntroView debugSeek openAudio={() => audio} />);
     fireEvent.keyDown(window, { key: "a" });
     fireEvent.keyDown(window, { key: "Escape" });
     expect(onModule2()).toBe(true);
 
+    // While it still plays, → leaves it playing: no restart, and Joe still wakes on time.
+    advance(1000);
+    const before = audio.calls.length;
     fireEvent.keyDown(window, { key: "ArrowRight" });
     expect(onModule2()).toBe(true);
+    expect(audio.calls).toHaveLength(before);
+    advance(INTRO_CARDS[END_CARD]!.wakeAtMs! - 1000 + 100);
+    expect(audio.calls.slice(-1)).toEqual(["wake"]);
 
     fireEvent.keyDown(window, { key: "ArrowLeft" });
     expect(showsCard(SNORE_CARD)).toBe(true);

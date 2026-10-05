@@ -52,8 +52,9 @@ export function useDebugSeek({ enabled, phase, card, seek }: DebugSeekOptions): 
       if (step === 0) return;
 
       const target = Math.min(Math.max(card + step, IDENT_CARD), END_CARD);
-      // Past the end there is nowhere to go: Module 2's ident stays as it is.
-      if (phase === "ended" && target === END_CARD) return;
+      // Past either end there is nowhere to go: the card stays as it is, playing on or over, rather
+      // than starting again from its top.
+      if (target === card) return;
 
       seek(target);
       remember(target);
