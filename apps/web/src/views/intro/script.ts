@@ -190,8 +190,12 @@ export const IDENT_CARD = 0;
  */
 export const END_CARD = INTRO_CARDS.length - 1;
 
-/** Card 9, Joe's window: someone in the room snores under the video. */
-export const SNORE_CARD = END_CARD - 1;
+/**
+ * Card 9, Joe's window: someone in the room snores under the video. Found by its snore rather than
+ * counted back from the end, so a card added before or after it cannot move the name off it. The
+ * snore itself is cued by `snoreAfterMs`; this is the card's name, for the tests.
+ */
+export const SNORE_CARD = INTRO_CARDS.findIndex((card) => card.snoreAfterMs !== undefined);
 
 /** A caption as one string, for the live region and for tests. */
 export function captionText(card: IntroCard): string {
