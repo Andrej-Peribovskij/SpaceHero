@@ -54,14 +54,18 @@ export function decodeWav(bytes: ArrayBuffer): Float32Array<ArrayBuffer> {
 }
 
 export interface SoundStore {
-  /** Fetches and reads every sound, once: a second call waits on the first. */
+  /**
+   * Fetches and reads every sound still missing: a call while a fetch is under way waits on it,
+   * and a call after one has failed tries the missing sounds again.
+   */
   readonly load: () => Promise<void>;
   readonly sounds: () => RecordedSounds;
 }
 
 /**
  * The sounds, fetched with `fetchFile`. A sound that cannot be fetched or read stays missing, and
- * plays as silence: sound never stops the video.
+ * plays as silence: sound never stops the video. It is missing only until the next `load`, so a
+ * connection that dropped while the gate waited does not silence the sound for the page's life.
  */
 export function soundStore(fetchFile: (url: string) => Promise<Response>): SoundStore {
   const loaded: Partial<Record<SoundName, Float32Array<ArrayBuffer>>> = {};
@@ -72,17 +76,24 @@ export function soundStore(fetchFile: (url: string) => Promise<Response>): Sound
       const response = await fetchFile(URLS[name]);
       if (response.ok) loaded[name] = decodeWav(await response.arrayBuffer());
     } catch {
-      // Missing, then: the moment it was for passes in silence.
+      // Missing, then: the moment it was for passes in silence, unless a later load finds it.
     }
   };
 
-  return {
-    load: () => (loading ??= Promise.all((Object.keys(URLS) as SoundName[]).map(loadOne)).then(() => {})),
-    sounds: () => loaded,
+  const load = () => {
+    const missing = (Object.keys(URLS) as SoundName[]).filter((name) => loaded[name] === undefined);
+    if (missing.length === 0) return Promise.resolve();
+
+    loading ??= Promise.all(missing.map(loadOne)).then(() => {
+      loading = undefined;
+    });
+    return loading;
   };
+
+  return { load, sounds: () => loaded };
 }
 
-/** The page's sounds: fetched once, for the page's life. */
+/** The page's sounds: fetched once each, for the page's life. */
 const pageSounds = soundStore((url) => fetch(url));
 
 export const loadSounds = pageSounds.load;

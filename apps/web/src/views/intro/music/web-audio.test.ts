@@ -1,7 +1,7 @@
 import { silentIntroAudio } from "./intro-audio";
 import type { Tune } from "./synth";
 import type { RecordedSounds } from "./sounds";
-import { openIntroAudio, renderedTune, webIntroAudio } from "./web-audio";
+import { openIntroAudio, prepareIntroAudio, renderedTune, webIntroAudio } from "./web-audio";
 
 const TUNE: Tune = {
   bpm: 120,
@@ -389,5 +389,29 @@ describe("openIntroAudio", () => {
     expect(audio).not.toBe(silentIntroAudio);
     expect(resume).toHaveBeenCalled();
     expect(unhandled).not.toHaveBeenCalled();
+  });
+
+  it("asks for the recordings again, in case preparing never fetched them or failed to", () => {
+    const fetchFile = vi.fn(() => Promise.reject(new TypeError("network down")));
+    vi.stubGlobal("fetch", fetchFile);
+    vi.stubGlobal("AudioContext", FakeContext);
+
+    openIntroAudio(TUNE);
+
+    const asked = fetchFile.mock.calls.map((call: unknown[]) => String(call[0]));
+    expect(asked.some((url) => url.includes("snore"))).toBe(true);
+    expect(asked.some((url) => url.includes("wake"))).toBe(true);
+  });
+});
+
+describe("prepareIntroAudio", () => {
+  it("fetches the recordings even when rendering the tune throws", () => {
+    const fetchFile = vi.fn(() => Promise.reject(new TypeError("network down")));
+    vi.stubGlobal("fetch", fetchFile);
+    vi.stubGlobal("AudioContext", FakeContext);
+    const uneven: Tune = { ...TUNE, voices: [...TUNE.voices, { ...TUNE.voices[0]!, name: "longer", bars: ["A4 - - - A4 - - -"] }] };
+
+    expect(() => prepareIntroAudio(uneven)).toThrow();
+    expect(fetchFile).toHaveBeenCalled();
   });
 });

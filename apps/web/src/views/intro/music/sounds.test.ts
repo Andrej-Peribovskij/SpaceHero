@@ -112,6 +112,21 @@ describe("soundStore", () => {
     expect(store.sounds().wake).toBeDefined();
   });
 
+  it("tries a sound it could not fetch again on the next load, and only that one", async () => {
+    const failing = ["snore.wav"];
+    const { asked, fetchFile } = serving(failing);
+    const store = soundStore(fetchFile);
+
+    await store.load();
+    expect(store.sounds().snore).toBeUndefined();
+
+    failing.length = 0;
+    await store.load();
+
+    expect(store.sounds().snore).toEqual(decodeWav(fileBytes("snore.wav")));
+    expect(asked.filter((url) => url.includes("wake"))).toHaveLength(1);
+  });
+
   it("leaves a sound missing when the server answers with an error", async () => {
     const store = soundStore(async () => new Response("gone", { status: 404 }));
 

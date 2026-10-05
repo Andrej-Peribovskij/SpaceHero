@@ -45,16 +45,16 @@ const renderedPunch = () => (punchSamples ??= renderPunch());
 /**
  * Works the tune out ahead, so the gate's key press only has to copy it into a buffer. Rendering
  * the loop takes tens of milliseconds, too long to spend inside the handler, where it would hold
- * up the first frame. The punch is rendered and the recorded sounds fetched now too, long before
- * the end needs them. Where there is no Web Audio, nobody will hear any of it, so nothing is
- * rendered or fetched.
+ * up the first frame. The recorded sounds are fetched and the punch rendered now too, long before
+ * the end needs them; the fetch goes first, so a render that throws cannot hold it back. Where
+ * there is no Web Audio, nobody will hear any of it, so nothing is rendered or fetched.
  */
 export function prepareIntroAudio(tune: Tune): void {
   if (typeof AudioContext === "undefined") return;
 
+  void loadSounds();
   renderedTune(tune);
   renderedPunch();
-  void loadSounds();
 }
 
 function bufferOf(context: BaseAudioContext, samples: Float32Array<ArrayBuffer>): AudioBuffer {
@@ -164,6 +164,8 @@ export function openIntroAudio(tune: Tune): IntroAudio {
     // Usually already running, made inside a gesture. If the browser still says no, the video
     // plays on silently: nothing waits for this.
     context.resume().catch(() => {});
+    // Whatever preparing did not fetch, or failed to: card 9 is over a minute away yet.
+    void loadSounds();
     return webIntroAudio(context, tune);
   } catch {
     return silentIntroAudio;
