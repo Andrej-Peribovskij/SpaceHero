@@ -66,15 +66,38 @@ Archive a completed change in the experimental workflow.
 5. **Perform the archive**
 
    ```bash
-   mkdir -p openspec/changes/archive
-   mv openspec/changes/<name> openspec/changes/archive/YYYY-MM-DD-<name>
+   pnpm run spec:validate <name>
+   pnpm run spec:archive <name>
    ```
 
-6. **Display summary**
+   `spec:archive` does two things, and both matter. It applies the change's
+   delta specs (`specs/<capability>/spec.md`: ADDED, MODIFIED, REMOVED,
+   RENAMED requirements) to the baseline in
+   `openspec/specs/<capability>/spec.md`, creating it if needed, and it moves
+   the change, `.openspec.yaml` included, to
+   `openspec/changes/archive/YYYY-MM-DD-<name>/`.
+
+   Never move the folder by hand. A plain `mv` archives the change but leaves
+   its requirements out of `openspec/specs/`, so the baseline, third in
+   CLAUDE.md's source-of-truth order, stops describing what the product does.
+   `mkdir -p` and `mv` are not portable either.
+
+6. **Check what the move left behind**
+
+   - Run `pnpm run spec:validate --specs` for the baseline it wrote. Read the
+     new or changed spec once: a blank line may be missing around a heading.
+   - Search the repository for `openspec/changes/<name>/` and point each hit at
+     the archived folder. Prose paths are not links, so nothing else finds them.
+   - Stage the move (`git add -A openspec`) **before** running
+     `pnpm run check:links`. It reads the file list from git's index, and it
+     fails with `ENOENT` on a moved file that is still unstaged.
+
+7. **Display summary**
 
    Show archive completion summary including:
    - Change name
    - Archive location
+   - Baseline specs created or updated, with their requirement counts
    - Whether the ticked tasks were verified, checked now, or archived unverified
    - Any warnings (incomplete artifacts/tasks)
 
@@ -85,4 +108,5 @@ Archive a completed change in the experimental workflow.
 - Don't block archive on warnings - just inform and confirm
 - **Verification is offered, never required.** Skipping it is a valid answer
   and is reported in the summary, not argued with.
-- Preserve .openspec.yaml when moving to archive
+- Archive only through `pnpm run spec:archive`, which syncs the baseline specs
+  and keeps `.openspec.yaml`. Never move the change folder by hand
