@@ -194,6 +194,13 @@ describe("card 5: Mars and Deimos, and the Corridor", () => {
     expect(count(region(close, 178, 120, 206, 140), "t")).toBe(0);
   });
 
+  it("raises Absolute Connections' tower from among the zaibatsu, some of them standing before it", () => {
+    const shaft = region(frameAt(CLOSE_MS + 300), 178, 60, 206, 100);
+    // Their crowns' bands, red and orange, across its face; its teal still showing between them.
+    expect(count(shaft, "r", "o")).toBeGreaterThan(8);
+    expect(count(shaft, "t")).toBeGreaterThan(40);
+  });
+
   it("puts the belt between the steadies, far from Mars", () => {
     expect(MAP_STEADY_HAND).toBeGreaterThan(MAP_STEADY_FOOT + 5);
     expect(MAP_STATIONS[MAP_STEADY_HAND]![0] - MAP_STATIONS[MAP_STEADY_FOOT]![0]).toBeGreaterThan(100);

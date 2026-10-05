@@ -577,6 +577,8 @@ interface Skyscraper {
   readonly crown: Crown;
   /** A zaibatsu's colour: a lit band under its crown, and its beacon. */
   readonly accent?: PaletteChar;
+  /** How many rows nearer than the city's heart it stands: lower in the frame. */
+  readonly nearer?: number;
 }
 
 /** How deep a crown is, in rows: below it, the tower is full width. */
@@ -622,6 +624,17 @@ const SKYSCRAPERS: readonly Skyscraper[] = [
   { left: 296, width: 10, height: 52, crown: "slant", accent: "o" },
 ];
 
+/**
+ * Three zaibatsu towers a little nearer than the rest, standing before Absolute Connections' own:
+ * it soars from among the great towers, not from behind them. Their tops stay below the square.
+ */
+const FRONT_ROWS = 6;
+const FRONT_SKYSCRAPERS: readonly Skyscraper[] = [
+  { left: 168, width: 13, height: 68 + FRONT_ROWS, crown: "stepped", accent: "r", nearer: FRONT_ROWS },
+  { left: 200, width: 12, height: 62 + FRONT_ROWS, crown: "slant", accent: "Y", nearer: FRONT_ROWS },
+  { left: 186, width: 9, height: 46 + FRONT_ROWS, crown: "spire", accent: "o", nearer: FRONT_ROWS },
+];
+
 /** Beacons blink each to its own beat, so the skyline never blinks as one. */
 const beaconOf = (t: number, left: number) => beaconLit(t + left * 37);
 
@@ -629,7 +642,7 @@ const beaconOf = (t: number, left: number) => beaconLit(t + left * 37);
 const windowColour = (x: number, y: number): PaletteChar => (noise(x + 1, y) < 0.18 ? "p" : noise(x + 2, y) < 0.3 ? "Y" : "a");
 
 function paintSkyscraper(canvas: Canvas, tower: Skyscraper, t: number): void {
-  const base = baseOf(tower.left, tower.width);
+  const base = baseOf(tower.left, tower.width) + (tower.nearer ?? 0);
   const top = base - tower.height;
 
   for (let y = top; y < base; y += 1) {
@@ -1072,6 +1085,7 @@ function paintCloseUp(canvas: Canvas, t: number): void {
   paintBridges(canvas);
   for (const skyscraper of SKYSCRAPERS) paintSkyscraper(canvas, skyscraper, t);
   paintOurs(canvas, t);
+  for (const skyscraper of FRONT_SKYSCRAPERS) paintSkyscraper(canvas, skyscraper, t);
   paintLowCity(canvas);
   paintDockingSpire(canvas, t);
   paintFlyers(canvas, t);
