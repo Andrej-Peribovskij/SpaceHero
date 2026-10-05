@@ -25,4 +25,5 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkLinks } from "./lib/links.mjs";
 
-process.exit(checkLinks(join(dirname(fileURLToPath(import.meta.url)), "..")));
+// exitCode, not exit(): exit() can cut off output still queued for a pipe.
+process.exitCode = checkLinks(join(dirname(fileURLToPath(import.meta.url)), ".."));

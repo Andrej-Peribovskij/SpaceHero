@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, renameSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { brokenLinks, checkLinks, isExternal, markdownFiles, pathPart } from "./links.mjs";
+import { brokenLinks, checkLinks, isExternal, markdownFiles, pathPart, withoutCode } from "./links.mjs";
 
 // The throwaway repositories must not see the developer's git config: commit
 // signing would prompt or fail, a global hooksPath would run hooks, and a
@@ -132,6 +132,84 @@ test("outside a repository the failure is one readable line and exit 1", () => {
     assert.equal(code, 1);
     assert.equal(errors.length, 1);
     assert.match(errors[0], /^check:links: git ls-files failed/);
+  });
+});
+
+test("a conflicted path is listed once, not once per stage", () => {
+  const root = repo();
+  within(root, () => {
+    git(root, "checkout", "-q", "-b", "other");
+    write(root, "README.md", "[guide](docs/guide.md) other\n");
+    git(root, "commit", "-q", "-am", "other");
+    git(root, "checkout", "-q", "-");
+    write(root, "README.md", "[guide](docs/guide.md) mine\n");
+    git(root, "commit", "-q", "-am", "mine");
+    const merge = spawnSync("git", ["merge", "-q", "other"], { cwd: root, encoding: "utf8" });
+    assert.notEqual(merge.status, 0, "the merge conflicts");
+
+    assert.equal(markdownFiles(root).filter((f) => f === "README.md").length, 1);
+  });
+});
+
+test("a file that cannot be read is reported, not thrown", () => {
+  const root = repo();
+  within(root, () => {
+    // Listed, then gone before it is read: the race an editor's save can cause.
+    assert.deepEqual(brokenLinks(root, ["README.md", "docs/vanished.md"]), [
+      "docs/vanished.md (unreadable: ENOENT)",
+    ]);
+  });
+});
+
+test("a link starting with / resolves from the repository root", () => {
+  const root = repo();
+  within(root, () => {
+    write(root, "docs/deep/page.md", "[guide](/docs/guide.md) [gone](/docs/nope.md)\n");
+    assert.deepEqual(brokenLinks(root, ["docs/deep/page.md"]), ["docs/deep/page.md -> /docs/nope.md"]);
+  });
+});
+
+test("a link whose case differs from the file is broken on every platform", () => {
+  const root = repo();
+  within(root, () => {
+    write(root, "index.md", "[a](docs/Guide.md) [b](Docs/guide.md) [c](docs/guide.md)\n");
+    const broken = brokenLinks(root, ["index.md"]);
+    // Linux finds no such file; Windows and macOS find it and reject the case.
+    assert.equal(broken.length, 2, broken.join("\n"));
+    assert.match(broken[0], /^index\.md -> docs\/Guide\.md/);
+    assert.match(broken[1], /^index\.md -> Docs\/guide\.md/);
+  });
+});
+
+test("links inside code fences and code spans are examples, not links", () => {
+  assert.equal(withoutCode("a `[x](y.md)` b"), "a  b");
+  const root = repo();
+  within(root, () => {
+    write(
+      root,
+      "howto.md",
+      [
+        "Write `[see](openspec/changes/<slug>/proposal.md)` like this:",
+        "",
+        "```md",
+        "[see](placeholder.md)",
+        "```",
+        "",
+        "~~~",
+        "[also](placeholder.md)",
+        "~~~",
+        "",
+        "````md",
+        "```",
+        "[nested](placeholder.md)",
+        "```",
+        "````",
+        "",
+        "[real](missing.md) and [`code` text](docs/guide.md)",
+        "",
+      ].join("\n"),
+    );
+    assert.deepEqual(brokenLinks(root, ["howto.md"]), ["howto.md -> missing.md"]);
   });
 });
 
