@@ -63,36 +63,60 @@ Archive a completed change in the experimental workflow.
    **Never** refuse to archive because the user skipped this, argue with the
    answer, or check the code without being asked. It is offered, not required.
 
-5. **Perform the archive**
+5. **Get onto a feature branch**
+
+   Archiving writes files, and nothing is edited on `main`
+   (`docs/delivery.md#branching`). If the current branch is `main` or belongs
+   to other work, create `chore/spec/archive-<name>` from an up-to-date
+   `origin/main`; the change is usually archived just after its pull request
+   merged. If the working tree is dirty, stop and ask whether to stash, commit
+   or abort. Never stash or commit on the user's behalf.
+
+6. **Perform the archive**
 
    ```bash
-   pnpm run spec:validate <name>
    pnpm run spec:archive <name>
    ```
 
-   `spec:archive` does two things, and both matter. It applies the change's
-   delta specs (`specs/<capability>/spec.md`: ADDED, MODIFIED, REMOVED,
-   RENAMED requirements) to the baseline in
-   `openspec/specs/<capability>/spec.md`, creating it if needed, and it moves
-   the change, `.openspec.yaml` included, to
-   `openspec/changes/archive/YYYY-MM-DD-<name>/`.
+   `spec:archive` does three things, and all of them matter. It validates the
+   change, the same check `spec:validate <name>` runs, and refuses to go on if
+   it fails. It applies the change's delta specs (`specs/<capability>/spec.md`:
+   ADDED, MODIFIED, REMOVED, RENAMED requirements) to the baseline in
+   `openspec/specs/<capability>/spec.md`, creating it if needed, and checks
+   the rebuilt baseline as well. And it moves the change, `.openspec.yaml`
+   included, to `openspec/changes/archive/YYYY-MM-DD-<name>/`.
+
+   **If it refuses, stop.** Report its errors and leave the change where it is.
+   A validation error is not a warning: fixing the delta specs is an edit to
+   the change, reviewed like any other, and the archive is run again after it.
+   Do not get round it with `--no-validate`, `--skip-specs` or a move by hand.
 
    Never move the folder by hand. A plain `mv` archives the change but leaves
    its requirements out of `openspec/specs/`, so the baseline, third in
    CLAUDE.md's source-of-truth order, stops describing what the product does.
    `mkdir -p` and `mv` are not portable either.
 
-6. **Check what the move left behind**
+7. **Check what the move left behind**
 
-   - Run `pnpm run spec:validate --specs` for the baseline it wrote. Read the
-     new or changed spec once: a blank line may be missing around a heading.
-   - Search the repository for `openspec/changes/<name>/` and point each hit at
-     the archived folder. Prose paths are not links, so nothing else finds them.
-   - Stage the move (`git add -A openspec`) **before** running
-     `pnpm run check:links`. It reads the file list from git's index, and it
-     fails with `ENOENT` on a moved file that is still unstaged.
+   - Run `pnpm run spec:validate --specs`, and read each baseline spec that
+     `spec:archive` listed under "Specs to update" once: a blank line may be
+     missing around a heading.
+   - Find prose paths to the old folder, which no link check sees:
+     `rg -n "changes/<name>" --glob "!openspec/changes/archive/**"`. The
+     pattern has no `openspec/` prefix and no trailing slash, so it also finds
+     `changes/<name>/design.md` and a path closed by a backtick. Point each hit
+     that names this change at `openspec/changes/archive/YYYY-MM-DD-<name>/`;
+     skip a longer change name that only begins with `<name>`. Leave the archive
+     alone: the archived change's own text and older archives are records.
+   - Stage exactly what the archive touched, plus those fixes:
+     `git add -A openspec/changes/<name> openspec/changes/archive/YYYY-MM-DD-<name>`,
+     each `openspec/specs/<capability>` it listed, and the files you repointed.
+     Never `git add -A openspec`: it would sweep in unrelated work under
+     `openspec/`. Then run `pnpm run check:links`. It checks the Markdown
+     files git tracks, so the archived folder and a new baseline spec are only
+     checked once staged.
 
-7. **Display summary**
+8. **Display summary**
 
    Show archive completion summary including:
    - Change name
@@ -105,7 +129,8 @@ Archive a completed change in the experimental workflow.
 - Always prompt for change selection if not provided
 - Use `pnpm run spec:status` for completion checking
 - Run OpenSpec through the `spec:*` npm scripts.
-- Don't block archive on warnings - just inform and confirm
+- Don't block archive on warnings (incomplete artifacts or tasks) - just inform
+  and confirm. A validation error from `spec:archive` is not a warning: stop
 - **Verification is offered, never required.** Skipping it is a valid answer
   and is reported in the summary, not argued with.
 - Archive only through `pnpm run spec:archive`, which syncs the baseline specs
