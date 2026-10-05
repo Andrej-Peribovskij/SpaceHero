@@ -25,7 +25,7 @@ takes an export as its input (`SOURCE_PATH`). Running it anyway would mean
 exporting our own code as a fake handoff, then approving it ourselves. The
 ceremony would stay, but the reviewer it exists for would be gone.
 
-The Chapter 1 intro (`openspec/changes/chapter-1-intro/`) was the first screen
+The Chapter 1 intro (`openspec/changes/archive/2026-10-05-chapter-1-intro/`) was the first screen
 to meet this. Its design put it straight into v1.0.0, and review of pull
 request #8 found that this contradicts CLAUDE.md. This ADR settles which one
 gives way.
