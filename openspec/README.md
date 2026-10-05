@@ -29,3 +29,13 @@ pnpm run spec:status --change <change-slug>
 pnpm run spec:validate <change-slug>
 pnpm run spec:archive <change-slug>
 ```
+
+## The `/opsx` commands are ours
+
+`.claude/commands/opsx/*.md` began as OpenSpec's generated commands and has
+been edited here since: `archive.md`, for one, offers verification and archives
+through `spec:archive`. `pnpm run spec:update` (`openspec update`) rewrites
+every one of them from OpenSpec's templates, without looking at what is there.
+After running it, review the diff under `.claude/commands/opsx/` and restore
+what it dropped. `scripts/opsx-commands.test.mjs` fails on the edits it
+protects.
