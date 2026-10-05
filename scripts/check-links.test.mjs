@@ -1,82 +1,53 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, renameSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
-import { brokenLinks, isExternal, markdownFiles, pathPart } from "./check-links.mjs";
+import { join } from "node:path";
 
-function git(cwd, ...args) {
-  const r = spawnSync("git", ["-c", "user.name=test", "-c", "user.email=test@example.com", ...args], {
-    cwd,
-    encoding: "utf8",
-  });
-  assert.equal(r.status, 0, `git ${args.join(" ")}: ${r.stderr}`);
-}
+// The checks themselves are tested in lib/links.test.mjs. This runs the entry
+// point as CI does, so a guard that stops it from doing anything — and lets the
+// gate exit 0 having checked nothing — fails here.
+process.env.GIT_CONFIG_NOSYSTEM = "1";
+process.env.GIT_CONFIG_GLOBAL = join(tmpdir(), "check-links-test-no-such-gitconfig");
 
-function write(root, file, text) {
-  mkdirSync(dirname(join(root, file)), { recursive: true });
-  writeFileSync(join(root, file), text);
-}
-
-/** A repository with two committed docs that link to each other, and a third that is gitignored. */
-function repo() {
+/** A repository holding a copy of the entry point, its library, and one broken link. */
+function repoWithBrokenLink() {
   const root = mkdtempSync(join(tmpdir(), "check-links-"));
-  git(root, "init", "-q");
-  write(root, "README.md", "[guide](docs/guide.md)\n");
-  write(root, "docs/guide.md", "[home](../README.md)\n");
-  write(root, "docs/gone.md", "nothing to see\n");
-  write(root, ".gitignore", "ignored/\n");
-  git(root, "add", "-A");
-  git(root, "commit", "-q", "-m", "init");
-  write(root, "ignored/notes.md", "[nowhere](missing.md)\n");
+  mkdirSync(join(root, "repo/scripts/lib"), { recursive: true });
+  const repo = join(root, "repo");
+  copyFileSync(join(import.meta.dirname, "check-links.mjs"), join(repo, "scripts/check-links.mjs"));
+  copyFileSync(join(import.meta.dirname, "lib/links.mjs"), join(repo, "scripts/lib/links.mjs"));
+  writeFileSync(join(repo, "README.md"), "[nowhere](missing.md)\n");
+  assert.equal(spawnSync("git", ["init", "-q"], { cwd: repo }).status, 0);
   return root;
 }
 
-test("external and fragment-only targets have no path to resolve", () => {
-  assert.equal(isExternal("https://example.com"), true);
-  assert.equal(pathPart("#heading"), null);
-  assert.equal(pathPart("mailto:a@b.c"), null);
-  assert.equal(pathPart("docs/a%20b.md#x"), "docs/a b.md");
-});
+function assertFailsOnTheLink(run) {
+  assert.equal(run.status, 1, run.stdout + run.stderr);
+  assert.match(run.stderr, /1 broken relative link\(s\)/);
+  assert.match(run.stderr, /README\.md -> missing\.md/);
+}
 
-test("a clean tree lists the committed files and finds nothing broken", () => {
-  const root = repo();
+test("the entry point runs the check and fails on a broken link", () => {
+  const root = repoWithBrokenLink();
   try {
-    const files = markdownFiles(root);
-    assert.deepEqual(files.sort(), ["README.md", "docs/gone.md", "docs/guide.md"]);
-    assert.deepEqual(brokenLinks(root, files), []);
+    const repo = join(root, "repo");
+    assertFailsOnTheLink(spawnSync(process.execPath, ["scripts/check-links.mjs"], { cwd: repo, encoding: "utf8" }));
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
 });
 
-test("an unstaged move reports the links it broke instead of crashing", () => {
-  const root = repo();
+test("it still runs when reached through a link to the checkout", () => {
+  // A junction on Windows (no privilege needed), a directory symlink elsewhere.
+  // The path Node resolves for the module then differs from argv[1], which is
+  // what silenced the earlier main-module guard.
+  const root = repoWithBrokenLink();
   try {
-    mkdirSync(join(root, "docs/archive/2026"), { recursive: true });
-    renameSync(join(root, "docs/guide.md"), join(root, "docs/archive/2026/guide.md"));
-
-    const files = markdownFiles(root);
-    assert.ok(!files.includes("docs/guide.md"), "the old path is skipped");
-    assert.ok(files.includes("docs/archive/2026/guide.md"), "the new, untracked path is checked");
-
-    assert.deepEqual(brokenLinks(root, files).sort(), [
-      "README.md -> docs/guide.md",
-      "docs/archive/2026/guide.md -> ../README.md",
-    ]);
-  } finally {
-    rmSync(root, { recursive: true, force: true });
-  }
-});
-
-test("an unstaged delete is skipped, and ignored files are never read", () => {
-  const root = repo();
-  try {
-    unlinkSync(join(root, "docs/gone.md"));
-    const files = markdownFiles(root);
-    assert.deepEqual(files.sort(), ["README.md", "docs/guide.md"]);
-    assert.deepEqual(brokenLinks(root, files), []);
+    symlinkSync(join(root, "repo"), join(root, "link"), "junction");
+    const script = join(root, "link", "scripts", "check-links.mjs");
+    assertFailsOnTheLink(spawnSync(process.execPath, [script], { cwd: join(root, "link"), encoding: "utf8" }));
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
