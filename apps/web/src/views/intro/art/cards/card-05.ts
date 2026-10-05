@@ -625,14 +625,36 @@ const SKYSCRAPERS: readonly Skyscraper[] = [
 ];
 
 /**
- * Three zaibatsu towers a little nearer than the rest, standing before Absolute Connections' own:
- * it soars from among the great towers, not from behind them. Their tops stay below the square.
+ * A nearer row of zaibatsu towers, lower than the great ones and set between them, so the towers
+ * stand in depth rather than side by side. Before Absolute Connections' own stand four: it soars
+ * from among them, and the tallest crosses a corner of the square on its face. Painted far to
+ * near: the tall one first, the lower ones in front of it.
  */
 const FRONT_ROWS = 6;
+const front = (left: number, width: number, height: number, crown: Crown, accent?: PaletteChar): Skyscraper => ({
+  left,
+  width,
+  height: height + FRONT_ROWS,
+  crown,
+  ...(accent === undefined ? {} : { accent }),
+  nearer: FRONT_ROWS,
+});
 const FRONT_SKYSCRAPERS: readonly Skyscraper[] = [
-  { left: 168, width: 13, height: 68 + FRONT_ROWS, crown: "stepped", accent: "r", nearer: FRONT_ROWS },
-  { left: 200, width: 12, height: 62 + FRONT_ROWS, crown: "slant", accent: "Y", nearer: FRONT_ROWS },
-  { left: 186, width: 9, height: 46 + FRONT_ROWS, crown: "spire", accent: "o", nearer: FRONT_ROWS },
+  front(194, 13, 89, "spire", "s"),
+  // The left side, in front of the great towers there.
+  front(95, 11, 44, "mast", "s"),
+  front(108, 12, 58, "stepped", "o"),
+  front(133, 11, 50, "slant"),
+  front(145, 12, 70, "spire", "Y"),
+  // The right side.
+  front(226, 12, 66, "slant", "r"),
+  front(240, 10, 48, "mast"),
+  front(255, 12, 58, "spire", "s"),
+  front(279, 12, 46, "stepped", "o"),
+  // Before Absolute Connections' tower.
+  front(168, 13, 68, "stepped", "r"),
+  front(203, 12, 62, "slant", "Y"),
+  front(184, 9, 46, "spire", "o"),
 ];
 
 /** Beacons blink each to its own beat, so the skyline never blinks as one. */

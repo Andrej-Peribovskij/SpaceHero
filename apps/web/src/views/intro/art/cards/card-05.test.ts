@@ -182,9 +182,10 @@ describe("card 5: Mars and Deimos, and the Corridor", () => {
     expect(lightsIn(80, 310)).toBeGreaterThan(500);
     expect(lightsIn(80, 170)).toBeGreaterThan(100);
     expect(lightsIn(210, 310)).toBeGreaterThan(100);
-    // The four-colour square, near the tower's top.
+    // The four-colour square, near the tower's top: a zaibatsu spire before it hides part of its red corner.
     const logo = region(close, 180, 30, 205, 60);
-    for (const corner of ["t", "Y", "r", "s"]) expect(count(logo, corner)).toBeGreaterThanOrEqual(8);
+    for (const corner of ["t", "Y", "s"]) expect(count(logo, corner)).toBeGreaterThanOrEqual(8);
+    expect(count(logo, "r")).toBeGreaterThanOrEqual(3);
   });
 
   it("raises the towers from the middle of the city: the city in front hides their feet", () => {
