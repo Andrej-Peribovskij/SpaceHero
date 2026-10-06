@@ -1,10 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, renameSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readdirSync, renameSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { brokenLinks, checkLinks, isExternal, markdownFiles, pathPart } from "./links.mjs";
+import { brokenLinks, checkLinks, isExternal, markdownFiles, pathPart, withoutCode } from "./links.mjs";
 
 // The throwaway repositories must not see the developer's git config: commit
 // signing would prompt or fail, a global hooksPath would run hooks, and a
@@ -170,6 +170,154 @@ test("a link starting with / resolves from the repository root", () => {
     write(root, "docs/deep/page.md", "[guide](/docs/guide.md) [gone](/docs/nope.md)\n");
     assert.deepEqual(brokenLinks(root, ["docs/deep/page.md"]), ["docs/deep/page.md -> /docs/nope.md"]);
   });
+});
+
+/** The broken links in a single file `doc.md` holding `lines`, in a fresh repository. */
+function brokenIn(lines, options) {
+  const root = repo();
+  try {
+    write(root, "doc.md", [...lines, ""].join("\n"));
+    return brokenLinks(root, ["doc.md"], options);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+}
+
+test("links inside fenced code blocks are examples, not links", () => {
+  assert.deepEqual(
+    brokenIn([
+      "```md",
+      "[backtick](placeholder.md)",
+      "```",
+      "~~~",
+      "[tilde](placeholder.md)",
+      "~~~",
+      "````md",
+      "```",
+      "[shorter fence inside](placeholder.md)",
+      "```",
+      "````",
+      "~~~ info with a ` backtick is fine after tildes",
+      "[tilde info](placeholder.md)",
+      "~~~",
+      "[after](missing.md)",
+    ]),
+    ["doc.md -> missing.md"],
+  );
+});
+
+test("a fence nested in a list item sits deeper than three spaces and still counts", () => {
+  // The shape of .claude/commands/opsx/propose.md: a fence at eight spaces.
+  assert.deepEqual(
+    brokenIn([
+      "   a. **For each artifact**:",
+      "      - Get instructions:",
+      "        ```bash",
+      "        see [the proposal](openspec/changes/<name>/proposal.md)",
+      "        ```",
+      "      - Then [this](missing.md)",
+    ]),
+    ["doc.md -> missing.md"],
+  );
+});
+
+test("a fence closes only on the same character, at least as long, with nothing after", () => {
+  // Each of these leaves the fence open, so the link stays inside it.
+  for (const close of ["~~~", "``", "``` js"]) {
+    assert.deepEqual(brokenIn(["```", close, "[inside](placeholder.md)", "```", "[after](missing.md)"]), [
+      "doc.md -> missing.md",
+    ]);
+  }
+  assert.deepEqual(brokenIn(["````", "```", "[inside](placeholder.md)", "````", "[after](missing.md)"]), [
+    "doc.md -> missing.md",
+  ]);
+  // An unclosed fence runs to the end of the file.
+  assert.deepEqual(brokenIn(["[before](missing.md)", "```", "[inside](placeholder.md)"]), ["doc.md -> missing.md"]);
+});
+
+test("a backtick fence whose info string holds a backtick is text, so links after it are checked", () => {
+  assert.deepEqual(brokenIn(["``` not`a fence", "[real](missing.md)"]), ["doc.md -> missing.md"]);
+});
+
+test("links inside code spans are examples; an escaped backtick opens no span", () => {
+  // Blanked to spaces of the same width, so `[a]`x`(b.md)` cannot join into a link.
+  assert.equal(withoutCode("a `[x](y.md)` b"), `a ${" ".repeat("`[x](y.md)`".length)} b`);
+  assert.deepEqual(brokenIn(["[a]`x`(missing.md)"]), []);
+  assert.deepEqual(
+    brokenIn([
+      "Write `[see](openspec/changes/<slug>/proposal.md)` like this.",
+      "Double: `` a ` [x](placeholder.md) `` and done.",
+      "Escaped: \\`[escaped](missing-1.md)\\` is plain text.",
+      "Unmatched: ``[run](missing-2.md)` has no partner of length two.",
+      "Escaped backslash: \\\\`[in a span](placeholder.md)` is code.",
+      "[`code` in the text](docs/guide.md) and [`code`](missing-3.md)",
+    ]),
+    ["doc.md -> missing-1.md", "doc.md -> missing-2.md", "doc.md -> missing-3.md"],
+  );
+});
+
+test("a link whose case differs from the file is broken on every platform", () => {
+  const broken = brokenIn(["[a](docs/Guide.md) [b](Docs/guide.md) [c](docs/guide.md) [d](docs/) [e](./README.md)"]);
+  // Linux finds no such file; Windows and macOS find it and reject the case.
+  assert.equal(broken.length, 2, broken.join("\n"));
+  assert.match(broken[0], /^doc\.md -> docs\/Guide\.md( \(case differs from the file on disk\))?$/);
+  assert.match(broken[1], /^doc\.md -> Docs\/guide\.md( \(case differs from the file on disk\))?$/);
+});
+
+test("a decomposed name from the file system is not a case error", () => {
+  const root = repo();
+  within(root, () => {
+    const composed = "café.md";
+    write(root, composed, "menu\n");
+    write(root, "doc.md", `[menu](${composed})\n`);
+    // macOS's HFS+ lists names decomposed whatever was written.
+    const decomposing = (dir) => readdirSync(dir).map((name) => name.normalize("NFD"));
+    assert.deepEqual(brokenLinks(root, ["doc.md"], { readdir: decomposing }), []);
+  });
+});
+
+test("a directory that cannot be listed is reported, not thrown", () => {
+  const root = repo();
+  within(root, () => {
+    write(root, "doc.md", "[guide](docs/guide.md) [home](README.md)\n");
+    const locked = (dir) => {
+      if (dir === join(root, "docs")) throw Object.assign(new Error("permission denied"), { code: "EACCES" });
+      return readdirSync(dir);
+    };
+    assert.deepEqual(brokenLinks(root, ["doc.md"], { readdir: locked }), [
+      "doc.md -> docs/guide.md (unreadable: EACCES)",
+    ]);
+  });
+});
+
+test("a protocol-relative target is external", () => {
+  assert.equal(isExternal("//example.com/docs/guide.md"), true);
+  assert.equal(pathPart("//example.com/docs/guide.md"), null);
+  assert.equal(isExternal("/docs/guide.md"), false);
+  assert.deepEqual(brokenIn(["[cdn](//example.com/missing.md) [root](/missing.md)"]), ["doc.md -> /missing.md"]);
+});
+
+test("reference-style definitions are checked like inline links", () => {
+  assert.deepEqual(
+    brokenIn([
+      "See [the guide][guide] and [the other][other].",
+      "",
+      "[guide]: docs/guide.md",
+      '   [other]: missing-1.md "three spaces is still a definition"',
+      "[case]: Docs/guide.md",
+      "[web]: https://example.com/missing.md",
+      "[cdn]: //example.com/missing.md",
+      "[anchor]: #heading",
+      "[^note]: missing.md is a footnote's text, not a link",
+      "    [indented]: missing.md is an indented code block",
+      "Text before [mid]: missing.md is not a definition",
+      "`[span]: missing.md`",
+      "```",
+      "[fenced]: missing.md",
+      "```",
+    ]).map((b) => b.replace(/ \(case differs from the file on disk\)$/, "")),
+    ["doc.md -> missing-1.md", "doc.md -> Docs/guide.md"],
+  );
 });
 
 test("broken links are listed and exit 1; a clean tree exits 0", () => {

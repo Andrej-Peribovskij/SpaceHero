@@ -16,6 +16,11 @@
 // run, and so does a link to a file deleted but not yet committed. Ignore the
 // note, or finish the change, and the verdict matches what will be pushed.
 //
+// The verdict is GitHub's, wherever it runs: link syntax inside code is an
+// example, not a link; reference definitions (`[label]: path.md`) are links;
+// and a link whose case differs from the file is broken on Windows and macOS
+// too, as it is on Linux CI.
+//
 // Deliberately relative links only: an HTTP checker needs the network, turns a
 // third party's outage into a red build, and is the kind of check people learn
 // to ignore.
