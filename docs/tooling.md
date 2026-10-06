@@ -108,8 +108,9 @@ Three consequences worth knowing when editing them:
   it guards with `isMainModule(import.meta.url)` from
   `scripts/lib/main-module.mjs`; `process/design/scripts/` keeps its own copy.
   Not `import.meta.main`: some CI jobs run on the runner's default Node.
-  `scripts/lib/main-module.test.mjs` rejects the bare comparison anywhere in
-  the repository.
+  `scripts/lib/main-module.test.mjs` rejects the bare comparison in any
+  tracked script, on one line or split through a variable; a comment or a
+  fresh disguise gets past it, so it is a tripwire, not a proof.
 
 pnpm's `shellEmulator` setting would make `VAR=value cmd` work on Windows with
 no new dependency, and is deliberately **not** enabled. It is a repo-wide
