@@ -5,14 +5,13 @@ import { mkdirSync, mkdtempSync, renameSync, rmSync, unlinkSync, writeFileSync }
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { brokenLinks, checkLinks, isExternal, markdownFiles, pathPart } from "./links.mjs";
+import { isolateGitConfig } from "./test-support.mjs";
 
 // The throwaway repositories must not see the developer's git config: commit
 // signing would prompt or fail, a global hooksPath would run hooks, and a
-// global excludes file would change what --exclude-standard lists. A missing
-// global file reads as empty. node --test runs each file in its own process,
-// so this does not leak into other tests.
-process.env.GIT_CONFIG_NOSYSTEM = "1";
-process.env.GIT_CONFIG_GLOBAL = join(tmpdir(), "links-test-no-such-gitconfig");
+// global excludes file would change what --exclude-standard lists. node --test
+// runs each file in its own process, so this does not leak into other tests.
+isolateGitConfig();
 process.env.GIT_CEILING_DIRECTORIES = tmpdir();
 
 function git(cwd, ...args) {
