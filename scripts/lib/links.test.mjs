@@ -14,11 +14,17 @@ import { isolateGitConfig } from "./test-support.mjs";
 isolateGitConfig();
 process.env.GIT_CEILING_DIRECTORIES = tmpdir();
 
+// With no config, git guesses an identity from the user and host names. On a
+// developer's machine the guess works; on a CI runner, whose hostname has no
+// domain, git refuses, and a commit or merge fails before it starts. Every
+// git call in this file gets a fixed one.
+for (const role of ["AUTHOR", "COMMITTER"]) {
+  process.env[`GIT_${role}_NAME`] = "test";
+  process.env[`GIT_${role}_EMAIL`] = "test@example.com";
+}
+
 function git(cwd, ...args) {
-  const r = spawnSync("git", ["-c", "user.name=test", "-c", "user.email=test@example.com", ...args], {
-    cwd,
-    encoding: "utf8",
-  });
+  const r = spawnSync("git", args, { cwd, encoding: "utf8" });
   assert.equal(r.status, 0, `git ${args.join(" ")}: ${r.stderr}`);
 }
 
@@ -143,11 +149,15 @@ test("a conflicted path is listed once, not once per stage", () => {
     git(root, "checkout", "-q", "-");
     write(root, "README.md", "[guide](docs/guide.md) mine\n");
     git(root, "commit", "-q", "-am", "mine");
-    spawnSync("git", ["merge", "-q", "other"], { cwd: root, encoding: "utf8" });
+    const merge = spawnSync("git", ["merge", "-q", "other"], { cwd: root, encoding: "utf8" });
     // A merge that failed for any other reason leaves no stages, and the
     // assertion below would pass without testing anything.
     const stages = spawnSync("git", ["ls-files", "-u", "--", "README.md"], { cwd: root, encoding: "utf8" });
-    assert.equal(stages.stdout.trim().split("\n").length, 3, `README.md is in conflict: ${stages.stdout}`);
+    assert.equal(
+      stages.stdout.trim().split("\n").filter(Boolean).length,
+      3,
+      `README.md is in conflict; git merge exited ${merge.status}: ${merge.stderr}${merge.stdout}`,
+    );
 
     assert.equal(markdownFiles(root).filter((f) => f === "README.md").length, 1);
   });
