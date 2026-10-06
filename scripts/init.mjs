@@ -33,6 +33,7 @@ import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import { fileURLToPath } from "node:url";
 
+import { isMainModule } from "./lib/main-module.mjs";
 import { checkRegistryCredential, failureMessage, userNpmrcPath } from "./lib/registry-token.mjs";
 
 export const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -377,7 +378,7 @@ async function main(argv) {
 }
 
 // Only run when invoked directly, so the test file can import the helpers.
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (isMainModule(import.meta.url)) {
   main(process.argv.slice(2)).then(
     (code) => process.exit(code),
     (error) => {

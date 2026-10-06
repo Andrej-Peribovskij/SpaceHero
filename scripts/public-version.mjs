@@ -34,6 +34,8 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { isMainModule } from "./lib/main-module.mjs";
+
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 /** Where the registry lives, for the sanity check in `set`. */
@@ -291,6 +293,6 @@ function main(argv) {
   return 2;
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (isMainModule(import.meta.url)) {
   process.exit(main(process.argv.slice(2)));
 }

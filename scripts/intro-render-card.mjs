@@ -18,6 +18,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { isMainModule } from "./lib/main-module.mjs";
 import { runPnpm } from "./lib/run.mjs";
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -71,4 +72,4 @@ function main() {
   });
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) process.exit(main());
+if (isMainModule(import.meta.url)) process.exit(main());
