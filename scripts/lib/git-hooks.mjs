@@ -1,8 +1,7 @@
 // The hook registration behind `scripts/git-hooks.mjs`, kept here so a test can
 // import it. The entry point runs it unconditionally: an "am I the main
-// module" guard compares paths, and through a junction, a symlink, a subst
-// drive or an 8.3 short name the comparison fails, `prepare` installs no hooks
-// and says nothing.
+// module" guard compares paths, and through a junction or a symlink the
+// comparison fails, `prepare` installs no hooks and says nothing.
 //
 // It never fails an install. `prepare` runs on every `pnpm install`, and not
 // every install happens inside a git checkout: a deploy template or an image
@@ -34,7 +33,7 @@ export function decide(probe) {
  * Pure, like `decide`.
  * @param {{ error?: unknown, status: number | null, stdout?: string }} readBack
  *   the result of `git config --show-origin --get core.hooksPath`
- * @returns {string | null} a notice, or null when git uses `.githooks`
+ * @returns {string | null} a notice with the fix, or null when git uses `.githooks`
  */
 export function overrideNotice(readBack) {
   if (readBack.error || readBack.status !== 0) return null;
@@ -45,9 +44,11 @@ export function overrideNotice(readBack) {
   const value = tab === -1 ? line : line.slice(tab + 1);
   if (value === ".githooks") return null;
   const from = origin ? ` from ${origin}` : "";
+  const fix = /config\.worktree$/.test(origin) ? "git config --worktree --unset core.hooksPath" : "remove that setting";
+  const hint = `; to run this checkout's hooks: ${fix}`;
   // An empty value is how hooks are usually switched off; say so, not "uses ".
-  if (value === "") return `git:hooks: set core.hooksPath to .githooks, but an empty value${from} overrides it, so the committed hooks do not run`;
-  return `git:hooks: set core.hooksPath to .githooks, but git uses ${value}${from}`;
+  if (value === "") return `git:hooks: set core.hooksPath to .githooks, but an empty value${from} overrides it, so the committed hooks do not run${hint}`;
+  return `git:hooks: set core.hooksPath to .githooks, but git uses ${value}${from}${hint}`;
 }
 
 /**

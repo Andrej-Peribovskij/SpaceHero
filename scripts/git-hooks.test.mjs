@@ -56,11 +56,15 @@ test("says nothing more when git reads back .githooks", () => {
 test("names the value and where it comes from when another scope wins", () => {
   const notice = overrideNotice({ status: 0, stdout: "file:.git/config.worktree\tC:\\checkout\\.githooks\n" });
   assert.match(notice, /git uses C:\\checkout\\\.githooks from file:\.git\/config\.worktree/);
+  assert.match(notice, /: git config --worktree --unset core\.hooksPath$/);
 });
 
 test("says hooks are off when the winning value is empty, rather than naming nothing", () => {
   const notice = overrideNotice({ status: 0, stdout: "command line:\t\n" });
-  assert.equal(notice, "git:hooks: set core.hooksPath to .githooks, but an empty value from command line: overrides it, so the committed hooks do not run");
+  assert.equal(
+    notice,
+    "git:hooks: set core.hooksPath to .githooks, but an empty value from command line: overrides it, so the committed hooks do not run; to run this checkout's hooks: remove that setting",
+  );
 });
 
 test("says nothing when the read-back itself fails", () => {
