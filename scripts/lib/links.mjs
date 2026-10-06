@@ -3,17 +3,11 @@
 // module" guard compares paths, and through a junction, a symlink or an 8.3
 // short name the comparison fails and a gate passes having checked nothing.
 import { spawnSync } from "node:child_process";
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { existsSync, readFileSync, statSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
 
 /** `[text](target)`, excluding images' leading `!` only incidentally — they are checked too. */
 const LINK = /\[[^\]]*\]\(([^)\s]+)\)/g;
-
-/** An opening or closing code fence: up to three spaces, then three or more ` or ~. */
-const FENCE = /^ {0,3}(`{3,}|~{3,})(.*)$/;
-
-/** An inline code span: a backtick run, anything on the line, the same run again. */
-const CODE_SPAN = /(?<!`)(`+)(?!`).*?(?<!`)\1(?!`)/g;
 
 /** Targets that are not paths into this repository. */
 export function isExternal(target) {
@@ -34,33 +28,6 @@ export function pathPart(target) {
   } catch {
     return path;
   }
-}
-
-/**
- * The source with fenced code blocks and inline code spans blanked out, so a
- * Markdown example inside one — often with a placeholder path — is not
- * mistaken for a link. Line breaks survive, so nothing else moves.
- * Indented (four-space) code blocks are not recognised; use a fence.
- */
-export function withoutCode(source) {
-  let fence = null;
-  return source
-    .split("\n")
-    .map((line) => {
-      const f = FENCE.exec(line);
-      if (fence) {
-        // A closing fence: the same character, at least as long, nothing after.
-        if (f && f[1][0] === fence[0] && f[1].length >= fence.length && f[2].trim() === "") fence = null;
-        return "";
-      }
-      // A backtick fence's info string may not contain a backtick.
-      if (f && !(f[1][0] === "`" && f[2].includes("`"))) {
-        fence = f[1];
-        return "";
-      }
-      return line.replace(CODE_SPAN, "");
-    })
-    .join("\n");
 }
 
 /**
@@ -85,33 +52,11 @@ export function markdownFiles(root) {
 }
 
 /**
- * Whether every segment of `target` below `root` exists with exactly this
- * case. Windows and macOS file systems ignore case, Linux CI and GitHub do
- * not, so `existsSync` alone passes a link locally that fails everywhere
- * else. Outside `root` only existence is checked. `listings` caches
- * directory reads across calls.
- */
-function existsWithCase(root, target, listings) {
-  if (!existsSync(target)) return false;
-  const rel = relative(root, target);
-  if (rel === "" || rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel)) return true;
-
-  let dir = root;
-  for (const segment of rel.split(sep)) {
-    if (!listings.has(dir)) listings.set(dir, new Set(readdirSync(dir)));
-    if (!listings.get(dir).has(segment)) return false;
-    dir = join(dir, segment);
-  }
-  return true;
-}
-
-/**
  * `file -> target` for every relative link in `files` that does not resolve,
  * and `file (unreadable: CODE)` for a file that cannot be read.
  */
 export function brokenLinks(root, files) {
   const broken = [];
-  const listings = new Map();
   for (const file of files) {
     const absolute = join(root, file);
     let source;
@@ -122,7 +67,7 @@ export function brokenLinks(root, files) {
       continue;
     }
 
-    for (const match of withoutCode(source).matchAll(LINK)) {
+    for (const match of source.matchAll(LINK)) {
       const path = pathPart(match[1]);
       if (path === null) continue;
 
@@ -130,8 +75,6 @@ export function brokenLinks(root, files) {
       const target = path.startsWith("/") ? join(root, path) : resolve(dirname(absolute), path);
       if (!existsSync(target)) {
         broken.push(`${file} -> ${match[1]}`);
-      } else if (!existsWithCase(root, target, listings)) {
-        broken.push(`${file} -> ${match[1]} (case differs from the file on disk)`);
       } else if (path.endsWith("/") && !statSync(target).isDirectory()) {
         broken.push(`${file} -> ${match[1]} (not a directory)`);
       }

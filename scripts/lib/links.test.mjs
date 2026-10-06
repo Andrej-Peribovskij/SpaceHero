@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, renameSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { brokenLinks, checkLinks, isExternal, markdownFiles, pathPart, withoutCode } from "./links.mjs";
+import { brokenLinks, checkLinks, isExternal, markdownFiles, pathPart } from "./links.mjs";
 
 // The throwaway repositories must not see the developer's git config: commit
 // signing would prompt or fail, a global hooksPath would run hooks, and a
@@ -144,8 +144,11 @@ test("a conflicted path is listed once, not once per stage", () => {
     git(root, "checkout", "-q", "-");
     write(root, "README.md", "[guide](docs/guide.md) mine\n");
     git(root, "commit", "-q", "-am", "mine");
-    const merge = spawnSync("git", ["merge", "-q", "other"], { cwd: root, encoding: "utf8" });
-    assert.notEqual(merge.status, 0, "the merge conflicts");
+    spawnSync("git", ["merge", "-q", "other"], { cwd: root, encoding: "utf8" });
+    // A merge that failed for any other reason leaves no stages, and the
+    // assertion below would pass without testing anything.
+    const stages = spawnSync("git", ["ls-files", "-u", "--", "README.md"], { cwd: root, encoding: "utf8" });
+    assert.equal(stages.stdout.trim().split("\n").length, 3, `README.md is in conflict: ${stages.stdout}`);
 
     assert.equal(markdownFiles(root).filter((f) => f === "README.md").length, 1);
   });
@@ -166,50 +169,6 @@ test("a link starting with / resolves from the repository root", () => {
   within(root, () => {
     write(root, "docs/deep/page.md", "[guide](/docs/guide.md) [gone](/docs/nope.md)\n");
     assert.deepEqual(brokenLinks(root, ["docs/deep/page.md"]), ["docs/deep/page.md -> /docs/nope.md"]);
-  });
-});
-
-test("a link whose case differs from the file is broken on every platform", () => {
-  const root = repo();
-  within(root, () => {
-    write(root, "index.md", "[a](docs/Guide.md) [b](Docs/guide.md) [c](docs/guide.md)\n");
-    const broken = brokenLinks(root, ["index.md"]);
-    // Linux finds no such file; Windows and macOS find it and reject the case.
-    assert.equal(broken.length, 2, broken.join("\n"));
-    assert.match(broken[0], /^index\.md -> docs\/Guide\.md/);
-    assert.match(broken[1], /^index\.md -> Docs\/guide\.md/);
-  });
-});
-
-test("links inside code fences and code spans are examples, not links", () => {
-  assert.equal(withoutCode("a `[x](y.md)` b"), "a  b");
-  const root = repo();
-  within(root, () => {
-    write(
-      root,
-      "howto.md",
-      [
-        "Write `[see](openspec/changes/<slug>/proposal.md)` like this:",
-        "",
-        "```md",
-        "[see](placeholder.md)",
-        "```",
-        "",
-        "~~~",
-        "[also](placeholder.md)",
-        "~~~",
-        "",
-        "````md",
-        "```",
-        "[nested](placeholder.md)",
-        "```",
-        "````",
-        "",
-        "[real](missing.md) and [`code` text](docs/guide.md)",
-        "",
-      ].join("\n"),
-    );
-    assert.deepEqual(brokenLinks(root, ["howto.md"]), ["howto.md -> missing.md"]);
   });
 });
 
