@@ -51,7 +51,8 @@
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { pathToFileURL } from "node:url";
+import { isMainModule } from "./main-module.mjs";
 
 /** Answers larger than this are written compact: pretty-printed, they are mostly whitespace. */
 export const COMPACT_ABOVE_BYTES = 100_000;
@@ -207,7 +208,7 @@ export async function captureFixtures({ plan, api, out, version = null, env = pr
     return index;
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (isMainModule(import.meta.url)) {
     (async () => {
         const args = parseCaptureArgs(process.argv.slice(2));
         const plan = await import(pathToFileURL(path.resolve(args.plan)).href);

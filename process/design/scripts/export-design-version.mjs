@@ -72,7 +72,7 @@ import {
     statSync,
     writeFileSync,
 } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { isMainModule } from "./main-module.mjs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -1817,7 +1817,7 @@ export function runExport(args, opts) {
     return args.mode === "production" ? runProductionExport(args, opts) : runDesignExport(args, opts);
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (isMainModule(import.meta.url)) {
     try {
         runExport(parseArgs(process.argv.slice(2)));
     } catch (err) {

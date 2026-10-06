@@ -50,7 +50,8 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { pathToFileURL } from "node:url";
+import { isMainModule } from "./main-module.mjs";
 
 import { COMPACT_ABOVE_BYTES, RECORDED_NUMBERS_FILE, fixtureName, numbersIn, writeRecordedNumbers } from "./capture-fixtures.mjs";
 
@@ -196,7 +197,7 @@ export function curateFixtures({ dir, edits, log = console.log }) {
     return { written, notes };
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (isMainModule(import.meta.url)) {
     (async () => {
         const args = parseCurateArgs(process.argv.slice(2));
         const mod = await import(pathToFileURL(path.resolve(args.edits)).href);
