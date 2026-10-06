@@ -47,8 +47,9 @@ test("a failing native realpath does not warn about a module that was only impor
 });
 
 test("a no that neither realpath could check is said, not swallowed", (t) => {
-  // A path through a file, as if it were a directory: both realpaths throw
-  // ENOTDIR, so only path.resolve answers, and its "no" is a guess.
+  // The mock supplies the failure. The entry, a path through a file, only
+  // makes sure no realpath can resolve it either (ENOENT on Windows, ENOTDIR
+  // on POSIX, both ignored), so path.resolve answers and its "no" is a guess.
   nativeRealpathFails(t);
   const warn = t.mock.method(console, "warn", () => {});
   assert.equal(isMainModule(pathToFileURL(self).href, join(self, "entry.mjs")), false);
