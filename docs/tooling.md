@@ -100,16 +100,18 @@ Three consequences worth knowing when editing them:
   routed around pnpm entirely. `scripts/test-e2e.mjs` invokes Playwright's CLI
   with `node` for exactly that reason.
 - **"Was I run directly?" is not a path comparison.** Node resolves a module
-  to its realpath and leaves `process.argv[1]` as typed, so through a junction,
-  a symlink, a subst drive or an 8.3 short name `import.meta.url` and argv[1]
-  differ, and a script guarded by comparing them exits 0 having done nothing.
+  to its realpath and leaves `process.argv[1]` as typed, so through a junction
+  or a symlink `import.meta.url` and argv[1] differ, and a script guarded by
+  comparing them exits 0 having done nothing. (An 8.3 short name does not break
+  the comparison: Node keeps it on both sides.)
   A script with nothing to import from it runs its entry point unconditionally
   (`git-hooks.mjs`, with its logic in `scripts/lib/`). One whose test imports
   it guards with `isMainModule(import.meta.url)` from
-  `scripts/lib/main-module.mjs`; `process/design/scripts/` keeps its own copy.
+  `scripts/lib/main-module.mjs`; `process/design/scripts/` keeps its own copy
+  ([tech debt](tech-debt/duplicated-main-module-helper.md)).
   Not `import.meta.main`: some CI jobs run on the runner's default Node.
   `scripts/lib/main-module.test.mjs` rejects the bare comparison in any
-  tracked script, on one line or split through a variable; a comment or a
+  script, committed or not, on one line or split through a variable; a comment or a
   fresh disguise gets past it, so it is a tripwire, not a proof.
 
 pnpm's `shellEmulator` setting would make `VAR=value cmd` work on Windows with

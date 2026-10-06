@@ -1,12 +1,12 @@
 // "Was this file run directly, or imported?" for a script whose test imports
 // it. Comparing `import.meta.url` with `process.argv[1]` is not enough: Node
 // resolves the module to its realpath and leaves argv[1] as typed, so through
-// a junction, a symlink, a subst drive or an 8.3 short name the two differ, the
-// script skips its main and exits 0 having done nothing.
+// a junction or a symlink the two differ, the script skips its main and exits
+// 0 having done nothing. (An 8.3 short name does not break the comparison:
+// Node keeps it on both sides.)
 //
-// Both sides go through `realpathSync.native`, which resolves all four. The
-// JavaScript `realpathSync` follows links but keeps an 8.3 name as it is.
-// `realpathSync.native` fails on some virtual volumes (RAM disks, cloud-sync
+// Both sides go through `realpathSync.native`, which resolves links and also
+// normalises 8.3 names and subst drives. `realpathSync.native` fails on some virtual volumes (RAM disks, cloud-sync
 // drives); then the JavaScript one is tried, then `path.resolve`, and a
 // failure that still leaves the answer "no" is printed, not swallowed.
 // `import.meta.main` would do this too, but not on every Node CI runs.

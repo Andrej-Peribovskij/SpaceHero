@@ -77,7 +77,8 @@ test("no script compares import.meta.url with process.argv[1] directly", () => {
   // That comparison is false through a link, and a script guarded by it exits 0
   // having done nothing. Use isMainModule, or an unconditional entry point.
   // -z, or a non-ASCII path comes back quoted and cannot be read.
-  const listed = spawnSync("git", ["ls-files", "-z", "--", "*.mjs", "*.cjs", "*.js", "*.mts", "*.ts", "*.tsx"], {
+  // --others: a new script fails here before it is committed, not after.
+  const listed = spawnSync("git", ["ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", "*.mjs", "*.cjs", "*.js", "*.mts", "*.ts", "*.tsx"], {
     cwd: repoRoot,
     encoding: "utf8",
   });
@@ -98,13 +99,13 @@ test("no script compares import.meta.url with process.argv[1] directly", () => {
 
 /**
  * `line: code` for each comparison against `process.argv[1]` in a file that
- * reads `import.meta.url`, on one line or split across several — directly, or
- * through a variable assigned from it. Comment lines are skipped: a comment
- * explaining the comparison is not one.
+ * reads its own path (`import.meta.url` or `import.meta.filename`), on one
+ * line or split across several — directly, or through a variable assigned from
+ * it. Comment lines are skipped: a comment explaining the comparison is not one.
  */
 function bareGuards(text) {
   const code = text.split("\n").map((line) => (/^\s*(\/\/|\/?\*)/.test(line) ? "" : line));
-  if (!code.some((line) => /import\.meta\.url/.test(line))) return [];
+  if (!code.some((line) => /import\.meta\.(url|filename)/.test(line))) return [];
 
   const aliases = [];
   for (const line of code) {
@@ -129,6 +130,7 @@ test("the guard scan catches the comparison however it is written", () => {
   assert.equal(bareGuards(`if (${ARGV} === fileURLToPath(${URL})) main();\n`).length, 1);
   assert.equal(bareGuards(`${self}if (${ARGV} === self) main();\n`).length, 1);
   assert.equal(bareGuards(`${self}const entry = ${ARGV};\nif (entry !== self) process.exit(0);\n`).length, 1);
+  assert.equal(bareGuards(`if (${"import.meta" + ".filename"} === ${ARGV}) main();\n`).length, 1);
   // Not a guard: no comparison, a comment, or a file that never reads its own URL.
   assert.deepEqual(bareGuards(`${self}const entry = ${ARGV};\n`), []);
   assert.deepEqual(bareGuards(`${self}// ${ARGV} === self is wrong through a link\n`), []);

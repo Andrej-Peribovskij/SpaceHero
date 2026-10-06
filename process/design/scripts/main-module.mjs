@@ -3,14 +3,16 @@
  * tests import them.
  *
  * `path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)` is not enough: Node
- * resolves the module to its realpath and leaves argv[1] as typed, so through a junction, a
- * symlink, a subst drive or an 8.3 short name the two differ and the script exits 0 having done
- * nothing. Both sides go through `realpathSync.native`, which resolves all four. It fails on
+ * resolves the module to its realpath and leaves argv[1] as typed, so through a junction or a
+ * symlink the two differ and the script exits 0 having done nothing. (An 8.3 short name does
+ * not break the comparison: Node keeps it on both sides.) Both sides go through
+ * `realpathSync.native`, which resolves links. It fails on
  * some virtual volumes (RAM disks, cloud-sync drives); then the JavaScript `realpathSync` is
  * tried, then `path.resolve`, and a failure that still leaves the answer "no" is printed.
  *
  * A copy of the repository's `scripts/lib/main-module.mjs`, kept here because `process/design/`
- * imports nothing from outside itself. Change both together.
+ * imports nothing from outside itself. Change both together; see
+ * `docs/tech-debt/duplicated-main-module-helper.md`.
  */
 
 import { realpathSync } from "node:fs";

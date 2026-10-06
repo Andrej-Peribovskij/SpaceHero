@@ -72,9 +72,10 @@ import {
     statSync,
     writeFileSync,
 } from "node:fs";
-import { isMainModule } from "./main-module.mjs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+
+import { isMainModule } from "./main-module.mjs";
 
 // ── argument parsing ────────────────────────────────────────────────────────
 
