@@ -12,7 +12,7 @@
 // Prints the flags, and appends them to $GITHUB_OUTPUT when that is set.
 import { spawnSync } from "node:child_process";
 import { appendFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { isMainModule } from "./lib/main-module.mjs";
 
 /**
  * Paths that cannot affect a build, a test or an image.
@@ -60,7 +60,7 @@ export function changedFiles(baseRef, run = spawnSync) {
 }
 
 // Only run when invoked directly, so the test file can import the classifier.
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (isMainModule(import.meta.url)) {
   const baseRef = process.argv[2] ?? "origin/main";
   const files = changedFiles(baseRef);
   const flags = files === null ? { code: true, docs: true } : classify(files);

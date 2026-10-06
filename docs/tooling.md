@@ -86,7 +86,7 @@ five problems at once: the executable bit (which Windows checkouts drop), CRLF
 in a shebang, the Git Bash dependency, cmd.exe, and PowerShell. The reasoning is
 [ADR-0001](adr/ADR-0001-compose-is-the-contract-and-orchestration-is-node.md).
 
-Two consequences worth knowing when editing them:
+Three consequences worth knowing when editing them:
 
 - **pnpm is not an ordinary executable on Windows.** It is a `.cmd` shim.
   `spawn` does not apply PATHEXT, so it must be named in full, and Node refuses
@@ -99,6 +99,17 @@ Two consequences worth knowing when editing them:
   double quote at all — so anything a developer types on the command line is
   routed around pnpm entirely. `scripts/test-e2e.mjs` invokes Playwright's CLI
   with `node` for exactly that reason.
+- **"Was I run directly?" is not a path comparison.** Node resolves a module
+  to its realpath and leaves `process.argv[1]` as typed, so through a junction,
+  a symlink, a subst drive or an 8.3 short name `import.meta.url` and argv[1]
+  differ, and a script guarded by comparing them exits 0 having done nothing.
+  A script with nothing to import from it runs its entry point unconditionally
+  (`git-hooks.mjs`, with its logic in `scripts/lib/`). One whose test imports
+  it guards with `isMainModule(import.meta.url)` from
+  `scripts/lib/main-module.mjs`; `process/design/scripts/` keeps its own copy.
+  Not `import.meta.main`: some CI jobs run on the runner's default Node.
+  `scripts/lib/main-module.test.mjs` rejects the bare comparison anywhere in
+  the repository.
 
 pnpm's `shellEmulator` setting would make `VAR=value cmd` work on Windows with
 no new dependency, and is deliberately **not** enabled. It is a repo-wide
