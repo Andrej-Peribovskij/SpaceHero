@@ -38,12 +38,16 @@ export function decide(probe) {
  */
 export function overrideNotice(readBack) {
   if (readBack.error || readBack.status !== 0) return null;
-  const line = String(readBack.stdout ?? "").trim();
+  // Only the line ending: trim() would also eat the tab before an empty value.
+  const line = String(readBack.stdout ?? "").replace(/\r?\n$/, "");
   const tab = line.indexOf("\t");
   const origin = tab === -1 ? "" : line.slice(0, tab);
   const value = tab === -1 ? line : line.slice(tab + 1);
   if (value === ".githooks") return null;
-  return `git:hooks: set core.hooksPath to .githooks, but git uses ${value}${origin ? ` from ${origin}` : ""}`;
+  const from = origin ? ` from ${origin}` : "";
+  // An empty value is how hooks are usually switched off; say so, not "uses ".
+  if (value === "") return `git:hooks: set core.hooksPath to .githooks, but an empty value${from} overrides it, so the committed hooks do not run`;
+  return `git:hooks: set core.hooksPath to .githooks, but git uses ${value}${from}`;
 }
 
 /**

@@ -58,6 +58,11 @@ test("names the value and where it comes from when another scope wins", () => {
   assert.match(notice, /git uses C:\\checkout\\\.githooks from file:\.git\/config\.worktree/);
 });
 
+test("says hooks are off when the winning value is empty, rather than naming nothing", () => {
+  const notice = overrideNotice({ status: 0, stdout: "command line:\t\n" });
+  assert.equal(notice, "git:hooks: set core.hooksPath to .githooks, but an empty value from command line: overrides it, so the committed hooks do not run");
+});
+
 test("says nothing when the read-back itself fails", () => {
   assert.equal(overrideNotice({ error: new Error("spawn git ENOENT"), status: null }), null);
   assert.equal(overrideNotice({ status: 1, stdout: "" }), null);
@@ -109,6 +114,16 @@ test("the script says so when a more specific setting overrides the one it wrote
     assert.equal(result.status, 0, result.stdout + result.stderr);
     assert.match(result.stdout, /set core\.hooksPath to \.githooks, but git uses elsewhere/);
     assert.equal(hooksPath(tree), ".githooks");
+  });
+});
+
+test("the script says hooks are off when an empty value overrides the one it wrote", () => {
+  withCopyOfScripts({ prefix: "git-hooks-", files: SCRIPTS, repository: true }, (root) => {
+    const tree = join(root, "tree");
+    const env = { ...outsideAnyRepository, GIT_CONFIG_COUNT: "1", GIT_CONFIG_KEY_0: "core.hooksPath", GIT_CONFIG_VALUE_0: "" };
+    const result = run(tree, join(tree, "scripts/git-hooks.mjs"), env);
+    assert.equal(result.status, 0, result.stdout + result.stderr);
+    assert.match(result.stdout, /but an empty value from command line: overrides it, so the committed hooks do not run/);
   });
 });
 
