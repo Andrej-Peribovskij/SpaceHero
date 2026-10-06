@@ -37,10 +37,21 @@ test("a failing native realpath falls back rather than answering no", (t) => {
   assert.equal(warn.mock.callCount(), 0);
 });
 
-test("a failing native realpath that still leaves no is said, not swallowed", (t) => {
+test("a failing native realpath does not warn about a module that was only imported", (t) => {
+  // The JavaScript realpath resolves both and says "imported": that is an
+  // answer, not a failure, and every test importing a script would repeat it.
   nativeRealpathFails(t);
   const warn = t.mock.method(console, "warn", () => {});
   assert.equal(isMainModule(pathToFileURL(self).href, join(import.meta.dirname, "main-module.test.mjs")), false);
+  assert.equal(warn.mock.callCount(), 0);
+});
+
+test("a no that neither realpath could check is said, not swallowed", (t) => {
+  // A path through a file, as if it were a directory: both realpaths throw
+  // ENOTDIR, so only path.resolve answers, and its "no" is a guess.
+  nativeRealpathFails(t);
+  const warn = t.mock.method(console, "warn", () => {});
+  assert.equal(isMainModule(pathToFileURL(self).href, join(self, "entry.mjs")), false);
   assert.equal(warn.mock.callCount(), 1);
   assert.match(warn.mock.calls[0].arguments[0], /could not resolve .*EISDIR.*main was skipped/);
 });
@@ -112,10 +123,17 @@ function bareGuards(text) {
     const m = /\b(?:const|let|var)\s+(\w+)\s*=.*process\.argv\[1\]/.exec(line);
     if (m) aliases.push(m[1]);
   }
-  const entry = new RegExp(`process\\.argv\\[1\\]${aliases.map((a) => `|\\b${a}\\b`).join("")}`);
+  // process.argv[1] itself counts anywhere on a comparing line: the guards this
+  // replaced wrap it (`pathToFileURL(process.argv[1]).href`). A variable holding
+  // it counts only as a side of the comparison, bare or inside one call, or any
+  // comparison on a line that merely mentions it would be flagged.
+  const operand = (name) => `(?:[\\w.]+\\()?\\b${name}\\b\\)?(?:\\.href)?`;
+  const asOperand = aliases.map((a) => new RegExp(`${operand(a)}\\s*[=!]==?|[=!]==?\\s*${operand(a)}`));
   const offences = [];
   code.forEach((line, i) => {
-    if (/[=!]==?/.test(line.replace(/\b(?:const|let|var)\s+\w+\s*=/, "")) && entry.test(line)) {
+    const comparing = line.replace(/\b(?:const|let|var)\s+\w+\s*=/, "");
+    if (!/[=!]==?/.test(comparing)) return;
+    if (/process\.argv\[1\]/.test(comparing) || asOperand.some((re) => re.test(comparing))) {
       offences.push(`${i + 1}: ${line.trim()}`);
     }
   });
@@ -131,6 +149,10 @@ test("the guard scan catches the comparison however it is written", () => {
   assert.equal(bareGuards(`${self}if (${ARGV} === self) main();\n`).length, 1);
   assert.equal(bareGuards(`${self}const entry = ${ARGV};\nif (entry !== self) process.exit(0);\n`).length, 1);
   assert.equal(bareGuards(`if (${"import.meta" + ".filename"} === ${ARGV}) main();\n`).length, 1);
+  assert.equal(bareGuards(`${self}const entry = ${ARGV};\nif (resolve(entry) === self) main();\n`).length, 1);
+  assert.equal(bareGuards(`if (${URL} === pathToFileURL(${ARGV}).href) main();\n`).length, 1);
+  // A variable holding argv[1] on a line that compares something else.
+  assert.deepEqual(bareGuards(`${self}const script = ${ARGV};\nif (args.length === 0) usage(script);\n`), []);
   // Not a guard: no comparison, a comment, or a file that never reads its own URL.
   assert.deepEqual(bareGuards(`${self}const entry = ${ARGV};\n`), []);
   assert.deepEqual(bareGuards(`${self}// ${ARGV} === self is wrong through a link\n`), []);
