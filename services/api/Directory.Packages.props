@@ -62,9 +62,9 @@
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
 
     <!-- Testing: xUnit + the .NET test SDK. Apache-2.0 / MIT. -->
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.1" />
     <!--
       FakeTimeProvider: the platform's own test double for TimeProvider, which is what this
       template injects instead of a hand-rolled IClock. Advances on demand and virtualises timers,
