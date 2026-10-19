@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <!-- Authentication: validate JWT bearer tokens at the HTTP boundary. MIT. -->
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.13" />
     <!--
       Sign access tokens (JsonWebTokenHandler). MIT. Test-only today: the integration
       suite mints a bearer token for the capability-gated endpoints. An identity module
@@ -33,8 +33,8 @@
     <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.19.2" />
 
     <!-- OpenAPI: runtime document + build-time snapshot generation. MIT. -->
-    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
-    <PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.13" />
     <!--
       Transitive pin: Microsoft.OpenApi 2.0.0 (pulled by AspNetCore.OpenApi) carries a
       high-severity advisory (GHSA-v5pm-xwqc-g5wc). Hold the latest patched 2.x, which
@@ -57,8 +57,8 @@
       it takes a major, EF Core waits for it. dotnet-ef in .config/dotnet-tools.json is
       the same version by necessity and moves in the same pull request.
     -->
-    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.13" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
 
     <!-- Testing: xUnit + the .NET test SDK. Apache-2.0 / MIT. -->
@@ -72,10 +72,10 @@
       on the .NET 10 release train, no native asset: the pre-approved tier in
       docs/dependencies.md, so no licence review. Test-only; never reaches the runtime image.
     -->
-    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.11.0" />
 
     <!-- Integration tests host the app in-process. MIT. -->
-    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.13" />
   </ItemGroup>
 
 </Project>
